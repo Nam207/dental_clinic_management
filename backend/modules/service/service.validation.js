@@ -5,10 +5,11 @@ const serviceSchema = Joi.object({
   name: Joi.string().required(),
   time: Joi.number().integer().required(),
   price: Joi.number().required(),
-  note: Joi.string(),
+  note: Joi.string().allow(null, ''),
   status: Joi.boolean(),
-  consumable: Joi.array().items(Joi.object()),
-  prescription: Joi.array().items(Joi.object()),
+  consumable: Joi.any(),
+  prescription: Joi.any(),
+  imageUrl: Joi.string(),
 });
 
 module.exports = serviceSchema

@@ -20,7 +20,7 @@ const createRole = async () => {
 }
 
 const getRole = async (req, res) => {
-    const roles = await RoleModel.find({});
+    const roles = await RoleModel.find({name: {$nin: ["Admin"]}});
     res.send({ success: 1, data: roles });
 }
 

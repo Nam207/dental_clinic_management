@@ -30,6 +30,7 @@ const ProfileSchema = new mongoose.Schema({
     },
     userId: {
         type: mongoose.Types.ObjectId,
+        ref: 'User',
         require: true,
     },
     status: {

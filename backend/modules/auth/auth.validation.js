@@ -1,8 +1,7 @@
 const Joi = require('joi');
 
-const registerSchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().alphanum().min(8).required(),
+const forgotSchema = Joi.object({
+  email: Joi.string().email().required(),
 });
 
 const loginSchema = Joi.object({
@@ -11,6 +10,6 @@ const loginSchema = Joi.object({
 });
 
 module.exports = {
-  registerSchema,
+  forgotSchema,
   loginSchema
 }

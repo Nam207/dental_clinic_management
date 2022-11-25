@@ -4,7 +4,7 @@ const SystemicMedicalHistoryModel = require('./systemic_medical_history');
 const createSystemicMedicalHistory = async () => {
     try {
         if (await SystemicMedicalHistoryModel.find().count() > 0) return;
-
+        await SystemicMedicalHistoryModel.create({name: "Khác"});
         const systemicMedicalHistory = [
             { name: "Gan" },
             { name: "Tiểu đường" },
@@ -15,7 +15,6 @@ const createSystemicMedicalHistory = async () => {
             { name: "Hô hấp" },
             { name: "Tim mạch" },
             { name: "Thận" },
-            { name: "Khác" },
         ];
 
         await SystemicMedicalHistoryModel.create(systemicMedicalHistory);
