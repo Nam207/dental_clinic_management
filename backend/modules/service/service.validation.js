@@ -1,10 +1,11 @@
-const { object } = require('joi');
-const Joi = require('joi');
+const { object } = require("joi");
+const Joi = require("joi");
 
 const serviceSchema = Joi.object({
   name: Joi.string().required(),
   time: Joi.number().integer().required(),
   price: Joi.number().required(),
+
   note: Joi.string().allow(null, ''),
   status: Joi.boolean(),
   consumable: Joi.any(),
@@ -12,4 +13,4 @@ const serviceSchema = Joi.object({
   imageUrl: Joi.string(),
 });
 
-module.exports = serviceSchema
+module.exports = serviceSchema;

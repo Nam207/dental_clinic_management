@@ -386,7 +386,7 @@ const UpdateCustomerModal = ({ closeModal, isVisible, cusId, loadData }) => {
 
                 <Form.Label column sm={2}>
                   Tổng tiền nợ
-                </Form.Label>   
+                </Form.Label>
                 <Col sm={4}>
                   <Form.Control
                     disabled

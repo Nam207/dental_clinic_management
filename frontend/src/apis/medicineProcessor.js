@@ -75,11 +75,13 @@ medProcessor.getAllObj = async () => {
 //   return result.data.data;
 // };
 
-medProcessor.getMedicineDetailObj = (id) => {
+medProcessor.getMedicineDetailObj = (id, setExDay) => {
+  // const { id } = props;
   const response = axios
     .get(`api/medicine/${id}`)
     .then((response) => {
       store.dispatch(getMedDetailSuccess(response.data));
+      // setExDay(new Date(response.data.expiredDay).toISOString().split("T")[0]);
     })
     .catch((err) => {
       console.log("Err: ", err);
@@ -103,10 +105,11 @@ medProcessor.updateMedcine = async (med, id) => {
 
 medProcessor.changeStatus = async (id, state, navigate) => {
   const result = await axios.put(`api/medicine/${id}/${state}`);
-  if (result.data.success !== 1) {
+  console.log(result);
+  if (result.success !== 1) {
     Swal.fire("Thất bại", `Cập nhật thất bại tại id=${id}`, "failed");
   }
-  return result.data;
+  return result;
 };
 
 export default medProcessor;

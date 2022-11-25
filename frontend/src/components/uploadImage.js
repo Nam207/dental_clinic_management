@@ -11,7 +11,7 @@ const UploadAndDisplayImage = ({ value = [], onChange = () => {} }) => {
 
   useEffect(() => {
     onChange(files);
-    console.log(files);
+    // console.log(files);
   }, [files]);
 
   return (

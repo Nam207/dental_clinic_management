@@ -12,6 +12,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import UploadAndDisplayImage from "../../components/uploadImage";
+import axios from "../../apis/api";
 
 const MedicineModal = (prop) => {
   const { loadData } = prop;
@@ -25,8 +26,6 @@ const MedicineModal = (prop) => {
 
   const navigate = useNavigate();
 
-  const [exDay, setExDay] = useState(new Date().toLocaleDateString("en-US"));
-
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -36,29 +35,47 @@ const MedicineModal = (prop) => {
       purchasePrice: 0,
       unit: "",
       usage: "",
-      // expiredDay: new Date().toLocaleDateString("en-US"),
-      // expiredDay: new Date(),
+      expiredDay: new Date().toISOString().split("T")[0],
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
       name: Yup.string()
-        .required("Required")
-        .min(4, "Must be 4 characters or more"),
+        .required("Bắt buộc")
+        .min(4, "Must be 4 characters or more")
+        .test(
+          "Tên độc nhất",
+          "Tên đang được sử dụng", // <- key, message
+          function (value) {
+            return new Promise((resolve, reject) => {
+              axios
+                .get(`/api/medicine/checkName/${value}`)
+                .then((res) => {
+                  if (res.success === 1) resolve(true);
+                  else resolve(false);
+                })
+                .catch((error) => {
+                  if (error.response.data.content === "Tên đã bị lấy") {
+                    resolve(false);
+                  }
+                });
+            });
+          }
+        ),
       imageUrl: Yup.mixed().required("Bắt buộc"),
       quantity: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .integer("Phải là số tự nhiên"),
       price: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .moreThan(Yup.ref("purchasePrice"), "Giá bán phải lớn hơn giá nhập"),
       purchasePrice: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .lessThan(Yup.ref("price"), "Giá nhập phải nhỏ hơn giá bán "),
-      unit: Yup.string().required("Required"),
-      usage: Yup.string().required("Required"),
+      unit: Yup.string().required("Bắt buộc"),
+      usage: Yup.string().required("Bắt buộc"),
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
@@ -69,9 +86,8 @@ const MedicineModal = (prop) => {
       formData.append("purchasePrice", values.purchasePrice);
       formData.append("unit", values.unit);
       formData.append("usage", values.usage);
-      // formData.append("expiredDay", values.expiredDay);
       console.log(values.imageUrl);
-      formData.append("expiredDay", exDay);
+      formData.append("expiredDay", values.expiredDay);
       handleClose();
       values.name = "";
       values.imageUrl = "";
@@ -80,8 +96,6 @@ const MedicineModal = (prop) => {
       values.purchasePrice = 0;
       values.unit = "";
       values.usage = "";
-      // values.expiredDay = new Date().toLocaleDateString("en-US");
-      setExDay(new Date().toLocaleDateString("en-US"));
       await addMed(formData, navigate);
       loadData();
     },
@@ -112,7 +126,17 @@ const MedicineModal = (prop) => {
                   controlId="formGroupPassword"
                 >
                   <Form.Label column sm={12}>
-                    Tên thuốc
+                    Tên thuốc{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="name"
@@ -131,7 +155,17 @@ const MedicineModal = (prop) => {
                 </Form.Group>
                 <Form.Group as={Col}>
                   <Form.Label column sm={12}>
-                    Hình ảnh
+                    Hình ảnh{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <UploadAndDisplayImage
                     value={formik.values.imageUrl ? formik.values.imageUrl : []}
@@ -149,7 +183,17 @@ const MedicineModal = (prop) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Lượng/SP
+                    Lượng/SP{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="quantity"
@@ -165,7 +209,17 @@ const MedicineModal = (prop) => {
 
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Giá bán
+                    Giá bán{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
 
                   <Row className="mb-3">
@@ -186,7 +240,17 @@ const MedicineModal = (prop) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Đơn vị
+                    Đơn vị{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="unit"
@@ -200,7 +264,17 @@ const MedicineModal = (prop) => {
                 </Form.Group>
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Giá nhập
+                    Giá nhập{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Row className="mb-3">
                     <Form.Group className="mb-3" as={Col}>
@@ -222,7 +296,17 @@ const MedicineModal = (prop) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Cách sử dụng
+                    Cách sử dụng{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="usage"
@@ -239,20 +323,13 @@ const MedicineModal = (prop) => {
                   <Form.Label column sm={12}>
                     Ngày hết hạn
                   </Form.Label>
-
-                  <DatePicker
-                    selected={
-                      // formik.values.expiredDay === ""
-                      //   ? new Date()
-                      //   : new Date(formik.values.expiredDay)
-                      // formik.values.expiredDay
-                      new Date(exDay)
-                    }
-                    dateFormat="MM/dd/yyyy"
-                    onChange={(e) => {
-                      setExDay(e);
-                    }}
-                  ></DatePicker>
+                  <Form.Control
+                    type="date"
+                    value={formik.values.expiredDay}
+                    min={formik.values.expiredDay}
+                    id="expiredDay"
+                    onChange={formik.handleChange}
+                  />
                 </Form.Group>
               </Row>
               <Button

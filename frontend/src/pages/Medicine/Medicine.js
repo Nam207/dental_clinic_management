@@ -11,7 +11,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import { FaRedoAlt, FaEdit } from "react-icons/fa";
 import MedicineModal from "./MedicineModal";
-import Table from "react-bootstrap/Table";
+// import Table from "react-bootstrap/Table";
 import medicineProcessor from "../../apis/medicineProcessor";
 import UpdateMedicineModal from "./UpdateMedicineModal";
 import ReactPaginate from "react-paginate";
@@ -20,7 +20,7 @@ import { store } from "../../redux/store";
 import CustomToast from "../../components/CustomToast";
 import CustomTable from "../../components/CustomTable";
 import axios from "../../apis/api";
-import { Pagination } from "antd";
+import { Pagination, Table } from "antd";
 // import "antd/dist/antd.css";
 
 const Medicine = ({ itemsPerPage }) => {
@@ -69,13 +69,6 @@ const Medicine = ({ itemsPerPage }) => {
     setLimit(pageSize);
   };
 
-  const onShowSizeChange = (current, size) => {
-    // console.log(current + " " + size);
-    setLimit(size);
-    setOffset(current);
-    onChangePage(current, size);
-  };
-
   const openUpdateModal = (id) => {
     setMedID(id);
     setIsShowUpdate(true);
@@ -88,7 +81,6 @@ const Medicine = ({ itemsPerPage }) => {
 
   const handleSearch = (e) => {
     setSearchMeds(e.target.value);
-    console.log(e.target.value);
   };
 
   const showToast = (content, isSuccess) => {
@@ -100,129 +92,109 @@ const Medicine = ({ itemsPerPage }) => {
     });
   };
 
-  const refreshData = (e, med, index) => {
-    let tempMeds = [...meds];
-    let tempMed = tempMeds.find((item) => item._id === med._id);
-    tempMed = { ...tempMed, status: e.target.checked };
-    tempMeds[index] = tempMed;
-    store.dispatch(getMedicineSuccess(tempMeds));
-  };
-
-  const title = [
+  const columns = [
     {
-      dataKey: "_id",
-      displayName: "Mã thuốc",
+      title: "Mã thuốc",
+      dataIndex: "_id",
+      align: "center",
+      // defaultSortOrder: "descend",
+      sorter: (a, b) => a._id.localeCompare(b._id),
     },
     {
-      dataKey: "imageUrl",
-      displayName: "Ảnh",
-      custom: (value) => {
-        return (
-          <img src={value} style={{ height: "100px", width: "100px" }} alt="" />
-        );
-      },
+      title: "Ảnh",
+      dataIndex: "imageUrl",
+      align: "center",
     },
     {
-      dataKey: "name",
-      displayName: "Tên thuốc",
+      title: "Tên thuốc",
+      dataIndex: "name",
+      align: "center",
+      // defaultSortOrder: "descend",
+      sorter: (a, b) => a.name.length - b.name.length,
     },
     {
-      dataKey: "usage",
-      displayName: "Cách sử dụng",
+      title: "Cách sử dụng",
+      dataIndex: "usage",
+      align: "center",
+      width: "380px",
+      // tableLayout: "fixed",
+      // wordWrap: "break-word",
+      ellipsis: true,
     },
     {
-      dataKey: "status",
-      displayName: "Trạng thái",
-      custom: (value, data) => {
-        return value ? (
-          <AiOutlineCheck color="#009432" size={25} />
-        ) : (
-          <AiOutlineCloseCircle color="#EA2027" size={25} />
-        );
-      },
+      title: "Trạng thái",
+      dataIndex: "status",
+      align: "center",
+      filters: [
+        {
+          text: "Hoạt động",
+          value: `AiOutlineCheck`,
+        },
+        {
+          text: "Không hoạt động",
+          value: `AiOutlineCloseCircle`,
+        },
+      ],
+      onFilter: (value, record) => record.status.type.name === value,
     },
     {
-      dataKey: "",
-      displayName: "",
-      fixedWidth: 500,
-      custom: (value, data) => {
-        return (
-          <>
-            <FaEdit
-              className="mx-2"
-              color="#2980b9"
-              cursor={"pointer"}
-              size={25}
-              onClick={() => {
-                openUpdateModal(data._id);
-              }}
-            />
-            <Form.Check
-              type="switch"
-              checked={data.status}
-              style={{ display: "inline", marginLeft: "10px" }}
-              onChange={async (e) => {
-                // refreshData(e, med, index);
-                const result = await medicineProcessor.changeStatus(
-                  data._id,
-                  e.target.checked
-                );
-                if (result.success === 1) {
-                  showToast(`Cập nhật id: ${data._id} thành công`, true);
-                  // setTimeout(() => {
-                  //   loadData();
-                  // },1);
-                  await loadData();
-                }
-              }}
-            />
-          </>
-        );
-      },
+      title: " ",
+      dataIndex: "action",
+      align: "center",
     },
   ];
 
-  function MedTable() {
-    return (
-      <>
-        <div
-          style={{
-            position: "fixed",
-            right: "10px",
-            bottom: "20px",
-            zIndex: "3",
-          }}
-        >
-          <CustomToast
-            value={isToast.value}
-            content={isToast.content}
-            isSuccess={isToast.isSuccess}
-            onClose={() => {
-              setIsToast({ ...isToast, value: false });
+  const data = meds.map((med) => {
+    return {
+      key: med._id,
+      _id: med._id,
+      imageUrl: (
+        <img
+          src={med.imageUrl}
+          style={{ height: "100px", width: "100px" }}
+          alt=""
+        />
+      ),
+      name: med.name,
+      usage: med.usage,
+      status: med.status ? (
+        <AiOutlineCheck color="#009432" size={25} />
+      ) : (
+        // "true"
+        <AiOutlineCloseCircle color="#EA2027" size={25} />
+      ),
+      // "false"
+      action: (
+        <>
+          <FaEdit
+            className="mx-2"
+            color="#2980b9"
+            cursor={"pointer"}
+            size={25}
+            onClick={() => {
+              openUpdateModal(med._id);
             }}
           />
-        </div>
-        <Tabs id="uncontrolled-tab-example" className="mb-3">
-          <Tab eventKey="profile" title="Tất cả">
-            <div style={{ marginLeft: "100px", marginRight: "100px" }}>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Control
-                    placeholder="Tìm kiếm"
-                    autoFocus
-                    value={searchMeds}
-                    onChange={handleSearch}
-                  />
-                </Form.Group>
-              </Form>
-
-              <CustomTable data={meds} title={title} />
-            </div>
-          </Tab>
-        </Tabs>
-      </>
-    );
-  }
+          <Form.Check
+            type="switch"
+            checked={med.status}
+            style={{ display: "inline", marginLeft: "10px" }}
+            onChange={async (e) => {
+              // refreshData(e, med, index);
+              const result = await medicineProcessor.changeStatus(
+                med._id,
+                e.target.checked
+              );
+              if (result.success === 1) {
+                showToast(`Cập nhật id: ${med._id} thành công`, true);
+                await loadData();
+              }
+            }}
+          />
+        </>
+      ),
+    };
+  });
 
   return (
     <>
@@ -258,8 +230,39 @@ const Medicine = ({ itemsPerPage }) => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+      {/* <MedTable /> */}
+      <div
+        style={{
+          position: "fixed",
+          right: "10px",
+          bottom: "20px",
+          zIndex: "3",
+        }}
+      >
+        <CustomToast
+          value={isToast.value}
+          content={isToast.content}
+          isSuccess={isToast.isSuccess}
+          onClose={() => {
+            setIsToast({ ...isToast, value: false });
+          }}
+        />
+      </div>
+      <div style={{ marginLeft: "100px", marginRight: "100px" }}>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Control
+              style={{ marginTop: "20px" }}
+              placeholder="Tìm kiếm"
+              autoFocus
+              value={searchMeds}
+              onChange={handleSearch}
+            />
+          </Form.Group>
+        </Form>
+        <Table columns={columns} dataSource={data} pagination={false} />
+      </div>
 
-      <MedTable />
       <div id="pagin">
         <Pagination
           showSizeChanger

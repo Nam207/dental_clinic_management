@@ -19,7 +19,7 @@ import medicineProcessor from "../../apis/medicineProcessor";
 import Nav from "react-bootstrap/Nav";
 import UploadAndDisplayImage from "../../components/uploadImage";
 import Pagination from "react-bootstrap/Pagination";
-
+import axios from "../../apis/api";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
@@ -27,14 +27,34 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
   const dispatch = useDispatch();
 
   const newMedicine = useSelector((state) => state.med.medDetail);
+  const [exDay, setExDay] = useState("");
+  // const [newMedicine, setNewMedicine] = useState({});
 
   useEffect(() => {
+    console.log(medID);
     medID && medicineProcessor.getMedicineDetailObj(medID);
+    if (medID) {
+      getNewMedicine();
+    }
   }, [medID]);
 
-  const navigate = useNavigate();
+  const getNewMedicine = () => {
+    const response = axios
+      .get(`api/medicine/${medID}`)
+      .then((response) => {
+        // store.dispatch(getMedDetailSuccess(response.data));
+        // console.log(response.data);
+        // setNewMedicine(response.data);
+        setExDay(
+          new Date(response.data.expiredDay).toISOString().split("T")[0]
+        );
+      })
+      .catch((err) => {
+        console.log("Err: ", err);
+      });
+  };
 
-  const [exDay, setExDay] = useState("");
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -45,8 +65,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
       purchasePrice: newMedicine.purchasePrice.$numberDecimal,
       unit: newMedicine.unit,
       usage: newMedicine.usage,
-      // expiredDay: new Date().toLocaleDateString("en-US"),
-      // expiredDay: new Date(),
+      expiredDay: exDay,
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
@@ -81,51 +100,14 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
       formData.append("unit", values.unit);
       formData.append("usage", values.usage);
       // formData.append("expiredDay", values.expiredDay);
-      formData.append("expiredDay", exDay);
+      formData.append("expiredDay", values.expiredDay);
       closeModal();
       console.log(typeof values.imageUrl[0]);
-      // values.expiredDay = new Date().toLocaleDateString("en-US");
       setExDay(new Date().toLocaleDateString("en-US"));
-      // await addMed(formData, navigate);
       await medicineProcessor.updateMedcine(formData, medID);
       loadData();
     },
   });
-
-  // const handleUpdateMedicine = (e) => {
-  //   e.preventDefault();
-  //   new Promise((resolve) => {
-  //     resolve();
-  //   })
-  //     .then(() => {
-  //       let formData = new FormData();
-  //       formData.append("name", newMedicine.name);
-  //       formData.append("imageUrl", newMedicine.imageUrl[0]);
-  //       formData.append("quantity", newMedicine.quantity);
-  //       formData.append("price", newMedicine.price);
-  //       formData.append("purchasePrice", newMedicine.purchasePrice);
-  //       formData.append("unit", newMedicine.unit);
-  //       formData.append("usage", newMedicine.usage);
-  //       formData.append("expiredDay", newMedicine.expiredDay);
-
-  //       console.log("name: " + newMedicine.imageUrl[0]);
-  //       medicineProcessor.updateMedcine(
-  //         {
-  //           ...newMedicine,
-  //           // formData,
-  //           price: newMedicine.price?.$numberDecimal,
-  //           purchasePrice: newMedicine.purchasePrice?.$numberDecimal,
-  //         },
-  //         navigate
-  //       );
-  //       closeModal();
-  //     })
-  //     .then(() => {
-  //       setTimeout(() => {
-  //         loadData();
-  //       }, 100);
-  //     });
-  // };
 
   return (
     <>
@@ -152,6 +134,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                     Tên thuốc
                   </Form.Label>
                   <Form.Control
+                    disabled
                     id="name"
                     value={formik.values.name}
                     // onChange={(e) => {
@@ -169,6 +152,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group as={Col}>
                   <Form.Label column sm={12}>
                     Hình ảnh
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <UploadAndDisplayImage
                     value={formik.values.imageUrl ? formik.values.imageUrl : []}
@@ -176,7 +169,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                       if (value && value.length > 0) {
                         formik.values.imageUrl = value;
                       }
-                      console.log(value);
+                      // console.log(value);
                     }}
                   />
                   {formik.errors.imageUrl && (
@@ -188,6 +181,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Lượng/SP
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="quantity"
@@ -204,6 +207,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Giá bán
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
 
                   <Row className="mb-3">
@@ -226,6 +239,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Đơn vị
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="unit"
@@ -240,6 +263,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Giá nhập
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Row className="mb-3">
                     <Form.Group className="mb-3" as={Col}>
@@ -262,6 +295,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Cách sử dụng
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
                     id="usage"
@@ -277,6 +320,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
                     Ngày hết hạn
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
 
                   {/* <DatePicker
@@ -295,7 +348,6 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   <Form.Control
                     type="date"
                     value={formik.values.expiredDay}
-                    // value="2018-06-22"
                     min={formik.values.expiredDay}
                     id="expiredDay"
                     onChange={formik.handleChange}

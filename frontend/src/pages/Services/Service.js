@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import { getMedicineSuccess } from "../../redux/reducer/medicineSlice";
 import ReactPaginate from "react-paginate";
 import axios from "../../apis/api";
-
+import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
@@ -19,13 +18,14 @@ import Tabs from "react-bootstrap/Tabs";
 import CloseButton from "react-bootstrap/CloseButton";
 import { FaPlusCircle } from "react-icons/fa";
 import { FaRedoAlt, FaEdit } from "react-icons/fa";
-import Table from "react-bootstrap/Table";
+// import Table from "react-bootstrap/Table";
 import Col from "react-bootstrap/Col";
 import ServiceModal from "./ServiceModal";
 import serviceProcessor from "../../apis/serviceProcessor";
 import { AiOutlineCheck, AiOutlineCloseCircle } from "react-icons/ai";
 import CustomToast from "../../components/CustomToast";
 import UpdateServiceModal from "./UpdateServiceModal";
+import { Pagination, Table } from "antd";
 
 const Service = ({ itemsPerPage }) => {
   const [key, setKey] = useState("profile");
@@ -36,8 +36,9 @@ const Service = ({ itemsPerPage }) => {
 
   const [services, setServices] = useState([]);
 
-  const openUpdateModal = () => {
+  const openUpdateModal = (id) => {
     setIsShowUpdate(true);
+    setServiceId(id);
   };
 
   const closeUpdateModal = () => {
@@ -48,24 +49,34 @@ const Service = ({ itemsPerPage }) => {
     setSearchSers(e.target.value);
   };
 
-  const loadData = async () => {
-    console.log("service");
+  // const [searchMeds, setSearchMeds] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
 
+  const loadData = async () => {
     await axios
-      .get("/api/service")
+      .get(`/api/service?keyword=${searchSers}&offset=${offset}&limit=${limit}`)
       .then((response) => {
-        setServices(response.data);
+        setServices(response.data.data);
+        setTotal(response.data.total);
       })
       .catch((err) => {
-        console.log("Err: ", err);
+        // console.log("Err: ", err);
+        Swal.fire("Thất bại", `Kết nối với server thất bại`, "failed");
       });
-    // setServices(response.data);
-    // console.log(response.data);
+  };
+
+  const onChangePage = (current, pageSize) => {
+    // console.log(current, pageSize);
+    setOffset(current - 1);
+    setLimit(pageSize);
   };
 
   useEffect(() => {
+    // console.log("chay vao day");
     loadData();
-  }, [services.length]);
+  }, [offset, searchSers, limit]);
 
   const [isToast, setIsToast] = useState({
     value: false,
@@ -82,159 +93,109 @@ const Service = ({ itemsPerPage }) => {
     });
   };
 
-  //PAGINATION
-  // We start with an empty list of items.
-  const [currentItems, setCurrentItems] = useState([]);
-  const [pageCount, setPageCount] = useState(0);
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
-  const [itemOffset, setItemOffset] = useState(0);
+  const columns = [
+    {
+      title: "Mã thủ thuật",
+      dataIndex: "_id",
+      align: "center",
+      // defaultSortOrder: "descend",
+      sorter: (a, b) => a._id.localeCompare(b._id),
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "imageUrl",
+      align: "center",
+    },
+    {
+      title: "Tên thủ thuật",
+      dataIndex: "name",
+      align: "center",
+      sorter: (a, b) => a.name.length - b.name.length,
+    },
+    {
+      title: "Giá",
+      dataIndex: "price",
+      align: "center",
+      width: "180px",
+      sorter: (a, b) => a.price - b.price,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      align: "center",
+      filters: [
+        {
+          text: "Hoạt động",
+          value: `AiOutlineCheck`,
+        },
+        {
+          text: "Không hoạt động",
+          value: `AiOutlineCloseCircle`,
+        },
+      ],
+      onFilter: (value, record) => record.status.type.name === value,
+    },
+    {
+      title: " ",
+      dataIndex: "action",
+      align: "center",
+    },
+  ];
 
-  useEffect(() => {
-    // Fetch items from another resources.
-    if (services.length > 0) {
-      let temps = services.filter(
-        (item) =>
-          item._id?.includes(searchSers) || item.name?.includes(searchSers)
-      );
-      // console.log(searchSers);
-      const endOffset = itemOffset + itemsPerPage;
-      setCurrentItems(temps.slice(itemOffset, endOffset));
-      setPageCount(Math.ceil(temps.length / itemsPerPage));
-    } else {
-      loadData();
-    }
-  }, [itemOffset, itemsPerPage, searchSers, services]);
-
-  // Invoke when user click to request another page.
-  const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % services.length;
-    // console.log(
-    //   `User requested page number ${event.selected}, which is offset ${newOffset}`
-    // );
-    setItemOffset(newOffset);
-  };
-
-  const ServiceTable = ({ currentItems }) => {
-    return (
-      <>
-        <div
-          style={{
-            position: "fixed",
-            right: "10px",
-            bottom: "20px",
-            zIndex: "3",
-          }}
-        >
-          <CustomToast
-            value={isToast.value}
-            content={isToast.content}
-            isSuccess={isToast.isSuccess}
-            onClose={() => {
-              setIsToast({ ...isToast, value: false });
+  const data = services.map((med) => {
+    return {
+      key: med._id,
+      _id: med._id,
+      imageUrl: (
+        <img
+          src={med.imageUrl}
+          style={{ height: "100px", width: "100px" }}
+          alt=""
+        />
+      ),
+      name: med.name,
+      price: new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "VND",
+      }).format(med.price.$numberDecimal),
+      status: med.status ? (
+        <AiOutlineCheck color="#009432" size={25} />
+      ) : (
+        // "true"
+        <AiOutlineCloseCircle color="#EA2027" size={25} />
+      ),
+      // "false"
+      action: (
+        <>
+          <FaEdit
+            className="mx-2"
+            color="#2980b9"
+            cursor={"pointer"}
+            size={25}
+            onClick={() => {
+              openUpdateModal(med._id);
             }}
           />
-        </div>
-        <Tabs id="uncontrolled-tab-example" className="mb-3">
-          <Tab eventKey="profile" title="Tất cả">
-            <div style={{ marginLeft: "100px", marginRight: "100px" }}>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Control
-                    placeholder="Tìm kiếm"
-                    autoFocus
-                    value={searchSers}
-                    onChange={handleSearch}
-                  />
-                </Form.Group>
-              </Form>
-              <Table striped bordered hover>
-                <thead>
-                  <tr
-                    style={{
-                      textAlign: "center",
-                    }}
-                  >
-                    <th>Mã thủ thuật</th>
-                    <th>Ảnh</th>
-                    <th>Tên thủ thuật</th>
-                    <th>Giá</th>
-                    <th>Status</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentItems.map((service, index) => {
-                    return (
-                      <tr
-                        key={index}
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <td>{service._id}</td>
-                        <td>
-                          <img
-                            style={{ height: "50px", width: "50px" }}
-                            src={service.imageUrl}
-                            alt=""
-                          />
-                        </td>
-                        <td>{service.name}</td>
-                        <td>{service.price?.$numberDecimal}</td>
-                        <td>
-                          {service.status ? (
-                            <AiOutlineCheck color="#009432" size={25} />
-                          ) : (
-                            <AiOutlineCloseCircle color="#EA2027" size={25} />
-                          )}
-                        </td>
-                        <td>
-                          <FaEdit
-                            className="mx-2"
-                            color="#2980b9"
-                            cursor={"pointer"}
-                            size={25}
-                            onClick={() => {
-                              setServiceId(service._id);
-                              openUpdateModal();
-                            }}
-                          />
-                          <Form.Check
-                            type="switch"
-                            checked={service.status}
-                            style={{ display: "inline", marginLeft: "10px" }}
-                            onChange={async (e) => {
-                              // refreshData(e, med, index);
-                              const result =
-                                await serviceProcessor.changeStatus(
-                                  service._id,
-                                  e.target.checked
-                                );
-                              if (result.success === 1) {
-                                showToast(
-                                  `Cập nhật id: ${service._id} thành công`,
-                                  true
-                                );
-                                // setTimeout(() => {
-                                //   loadData();
-                                // },1);
-                                await loadData();
-                              }
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
-            </div>
-          </Tab>
-        </Tabs>
-      </>
-    );
-  };
+          <Form.Check
+            type="switch"
+            checked={med.status}
+            style={{ display: "inline", marginLeft: "10px" }}
+            onChange={async (e) => {
+              // refreshData(e, med, index);
+              const result = await serviceProcessor.changeStatus(
+                med._id,
+                e.target.checked
+              );
+              if (result.success === 1) {
+                showToast(`Cập nhật id: ${med._id} thành công`, true);
+                await loadData();
+              }
+            }}
+          />
+        </>
+      ),
+    };
+  });
 
   return (
     <>
@@ -273,27 +234,50 @@ const Service = ({ itemsPerPage }) => {
         </Container>
       </Navbar>
 
-      <ServiceTable currentItems={currentItems} />
-      <ReactPaginate
-        nextLabel="next >"
-        onPageChange={handlePageClick}
-        pageRangeDisplayed={3}
-        marginPagesDisplayed={2}
-        pageCount={pageCount}
-        previousLabel="< previous"
-        pageClassName="page-item"
-        pageLinkClassName="page-link"
-        previousClassName="page-item"
-        previousLinkClassName="page-link"
-        nextClassName="page-item"
-        nextLinkClassName="page-link"
-        breakLabel="..."
-        breakClassName="page-item"
-        breakLinkClassName="page-link"
-        containerClassName="pagination"
-        activeClassName="active"
-        renderOnZeroPageCount={null}
-      />
+      <div
+        style={{
+          position: "fixed",
+          right: "10px",
+          bottom: "20px",
+          zIndex: "3",
+        }}
+      >
+        <CustomToast
+          value={isToast.value}
+          content={isToast.content}
+          isSuccess={isToast.isSuccess}
+          onClose={() => {
+            setIsToast({ ...isToast, value: false });
+          }}
+        />
+      </div>
+
+      <div style={{ marginLeft: "100px", marginRight: "100px" }}>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Control
+              placeholder="Tìm kiếm"
+              autoFocus
+              value={searchSers}
+              onChange={handleSearch}
+              style={{ marginTop: "20px" }}
+            />
+          </Form.Group>
+        </Form>
+        {/* <ServiceTable currentItems={services} /> */}
+        <Table columns={columns} dataSource={data} pagination={false} />
+      </div>
+
+      <div id="pagin">
+        <Pagination
+          showSizeChanger
+          current={offset + 1}
+          total={total}
+          onChange={onChangePage}
+          defaultPageSize={5}
+          pageSizeOptions={[5, 10, 20, 50]}
+        />
+      </div>
     </>
   );
 };

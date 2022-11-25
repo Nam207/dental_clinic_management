@@ -10,7 +10,6 @@ import { Link } from "react-router-dom";
 // import ModalD from "../Modal/Modal";
 
 const Navbarr = () => {
-
   const logout = () => {
     localStorage.removeItem("token");
   };
@@ -37,12 +36,12 @@ const Navbarr = () => {
             <Nav.Link href="/MedicalPaper">Phiếu khám</Nav.Link>
             <Nav.Link href="/Customer">Khách hàng</Nav.Link>
 
-            <NavDropdown title="Quản lý" id="basic-nav-dropdown">
+            {/* <NavDropdown title="Quản lý" id="basic-nav-dropdown">
               <NavDropdown.Item href="/services">Phiếu khám</NavDropdown.Item>
               <NavDropdown.Item href="/bocrangsu">
                 Phiếu khám tổng quát
               </NavDropdown.Item>
-            </NavDropdown>
+            </NavDropdown> */}
 
             <NavDropdown title="Thiết lập" id="basic-nav-dropdown">
               <NavDropdown.Item href="/medicine">
@@ -81,7 +80,7 @@ const Navbarr = () => {
                 Chăm sóc khách hàng
               </NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item href="/login" onClick = {logout}>
+              <NavDropdown.Item href="/login" onClick={logout}>
                 Đăng xuất
               </NavDropdown.Item>
               {/* <Link onCLick>Đăng xuất</Link> */}

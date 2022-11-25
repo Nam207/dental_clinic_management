@@ -49,7 +49,6 @@ const CustomerModal = ({
       });
     setSystemMed(response.data);
     // setSystemMed((systemMed) => [...systemMed, response.data]);
-    // console.log(response.data);
   };
 
   const loadDentalMed = async () => {
@@ -58,8 +57,7 @@ const CustomerModal = ({
       .catch((err) => {
         console.log(err);
       });
-    setDentalMed([...dentalMed, ...response.data]);
-    // console.log(dentalMed);
+    setDentalMed(response.data);
   };
 
   useEffect(() => {
@@ -93,7 +91,7 @@ const CustomerModal = ({
           function (value) {
             return new Promise((resolve, reject) => {
               axios
-                .get(`http://localhost:8080/api/customer/checkPhone/${value}`)
+                .get(`/api/customer/checkPhone/${value}`)
                 .then((res) => {
                   if (res.success === 1) resolve(true);
                   else resolve(false);
@@ -340,7 +338,7 @@ const CustomerModal = ({
               <Row className="mb-3">
                 {systemMed.map((sys, inde) => {
                   return (
-                    <Col>
+                    <Col sm={2}>
                       <Form.Check
                         inline
                         name="systemicMedicalHistory"

@@ -35,14 +35,6 @@ const MedicalPaperModal = () => {
     axios
       .get("/api/customer")
       .then((response) => {
-        // response.success === 1 && setCustomerId(response.data);
-        // console.log(response.data);
-        // response.data.map((cus) => {
-        //   var ID = cus._id;
-        //   // setCustomerId([...customerId,`${ID}`]);
-        //   customerId.push(ID)
-        //   // console.log(ID);
-        // });
         setCustomerId([
           ...customerId,
           ...response.data.map((item) => item._id),

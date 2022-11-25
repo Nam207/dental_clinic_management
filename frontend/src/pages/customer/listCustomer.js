@@ -7,7 +7,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import { FaRedoAlt, FaEdit } from "react-icons/fa";
-import Table from "react-bootstrap/Table";
+// import Table from "react-bootstrap/Table";
 import { AiFillDelete } from "react-icons/ai";
 import CustomerModal from "./CustomerModal";
 import CustomTable from "../../components/CustomTable";
@@ -16,15 +16,31 @@ import CustomToast from "../../components/CustomToast";
 import UpdateCustomerModal from "./UpdateCustomerModal";
 import customerProcessor from "../../apis/customerProcessor";
 import axios from "../../apis/api";
+import { Pagination, Table } from "antd";
+
+import { Pagination } from "antd";
 
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
 
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+  const [searchMeds, setSearchMeds] = useState("");
+
   const loadData = () => {
     axios
-      .get("/api/customer")
+      .get(
+        `/api/customer?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
+      )
       .then((response) => {
-        response.success === 1 && setCustomers(response.data);
+        // response.success === 1 && setCustomers(response.data);
+        if (response.success === 1) {
+
+          setCustomers(response.data.data);
+
+          setTotal(response.data.total);
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -36,7 +52,13 @@ const Customer = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [offset, total, searchMeds, limit]);
+
+  const onChangePage = (current, pageSize) => {
+    // console.log(current, pageSize);
+    setOffset(current - 1);
+    setLimit(pageSize);
+  };
 
   // useEffect(() => {
   //   loadData();
@@ -69,115 +91,106 @@ const Customer = () => {
     });
   };
 
-  const title = [
+  const handleSearch = (e) => {
+    setSearchMeds(e.target.value);
+  };
+
+  const columns = [
     {
-      dataKey: "_id",
-      displayName: "Mã khách hàng",
+      title: "Mã khách hàng",
+      dataIndex: "_id",
+      align: "center",
+      // defaultSortOrder: "descend",
+      sorter: (a, b) => a._id.localeCompare(b._id),
     },
     {
-      dataKey: "fullname",
-      displayName: "Tên khách hàng",
+      title: "Tên khách hàng",
+      dataIndex: "fullname",
+      align: "center",
+      sorter: (a, b) => a.fullname.length - b.fullname.length,
     },
     {
-      dataKey: "phone",
-      displayName: "Điện thoại",
+      title: "Điện thoại",
+      dataIndex: "phone",
+      align: "center",
+      width: "180px",
+      sorter: (a, b) => a.phone.localeCompare(b.phone),
     },
     {
-      dataKey: "address",
-      displayName: "Địa chỉ",
+      title: "Địa chỉ",
+      dataIndex: "address",
+      align: "center",
+      // width: "180px",
+      // sorter: (a, b) => a.price - b.price,
     },
     {
-      dataKey: "status",
-      displayName: "Trạng thái",
-      custom: (value, data) => {
-        return value ? (
-          <AiOutlineCheck color="#009432" size={25} />
-        ) : (
-          <AiOutlineCloseCircle color="#EA2027" size={25} />
-        );
-      },
+      title: "Trạng thái",
+      dataIndex: "status",
+      align: "center",
+      filters: [
+        {
+          text: "Hoạt động",
+          value: `AiOutlineCheck`,
+        },
+        {
+          text: "Không hoạt động",
+          value: `AiOutlineCloseCircle`,
+        },
+      ],
+      onFilter: (value, record) => record.status.type.name === value,
     },
     {
-      dataKey: "",
-      displayName: "",
-      fixedWidth: 500,
-      custom: (value, data) => {
-        return (
-          <>
-            <FaEdit
-              className="mx-2"
-              color="#2980b9"
-              cursor={"pointer"}
-              size={25}
-              onClick={() => {
-                openUpdateModal(data._id);
-              }}
-            />
-            <Form.Check
-              type="switch"
-              checked={data.status}
-              style={{ display: "inline", marginLeft: "10px" }}
-              onChange={async (e) => {
-                // refreshData(e, med, index);
-                const result = await customerProcessor.changeStatus(
-                  data._id,
-                  e.target.checked
-                );
-                if (result.success === 1) {
-                  showToast(`Cập nhật id: ${data._id} thành công`, true);
-                  // setTimeout(() => {
-                  //   loadData();
-                  // },1);
-                  loadData();
-                }
-              }}
-            />
-          </>
-        );
-      },
+      title: " ",
+      dataIndex: "action",
+      align: "center",
     },
   ];
-  function CustomerTable() {
-    return (
-      <>
-        <div
-          style={{
-            position: "fixed",
-            right: "10px",
-            bottom: "20px",
-            zIndex: "3",
-          }}
-        >
-          <CustomToast
-            value={isToast.value}
-            content={isToast.content}
-            isSuccess={isToast.isSuccess}
-            onClose={() => {
-              setIsToast({ ...isToast, value: false });
+
+  const data = customers.map((med) => {
+    return {
+      key: med._id,
+      _id: med._id,
+      fullname: med.fullname,
+      phone: med.phone,
+      address: med.address,
+      status: med.status ? (
+        <AiOutlineCheck color="#009432" size={25} />
+      ) : (
+        // "true"
+        <AiOutlineCloseCircle color="#EA2027" size={25} />
+      ),
+      // "false"
+      action: (
+        <>
+          <FaEdit
+            className="mx-2"
+            color="#2980b9"
+            cursor={"pointer"}
+            size={25}
+            onClick={() => {
+              openUpdateModal(med._id);
             }}
           />
-        </div>
-
-        <Tabs id="uncontrolled-tab-example" className="mb-3">
-          {/* <Tab eventKey="http://localhost:3000/pathological1" title="Home">
-          asd
-        </Tab> */}
-
-          <Tab eventKey="profile" title="Tất cả">
-            <div style={{ marginLeft: "100px", marginRight: "100px" }}>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Control placeholder="Tìm kiếm" />
-                </Form.Group>
-              </Form>
-
-              <CustomTable data={customers} title={title} />
-            </div>
-          </Tab>
-        </Tabs>
-      </>
-    );
-  }
+          <Form.Check
+            type="switch"
+            checked={med.status}
+            style={{ display: "inline", marginLeft: "10px" }}
+            onChange={async (e) => {
+              // refreshData(e, med, index);
+              const result = await customerProcessor.changeStatus(
+                med._id,
+                e.target.checked
+              );
+              if (result.success === 1) {
+                showToast(`Cập nhật id: ${med._id} thành công`, true);
+                await loadData();
+              }
+            }}
+          />
+        </>
+      ),
+    };
+  });
 
   return (
     <>
@@ -219,7 +232,53 @@ const Customer = () => {
         </Container>
       </Navbar>
 
-      <CustomerTable />
+
+      {/* <CustomerTable /> */}
+      <div
+        style={{
+          position: "fixed",
+          right: "10px",
+          bottom: "20px",
+          zIndex: "3",
+        }}
+      >
+        <CustomToast
+          value={isToast.value}
+          content={isToast.content}
+          isSuccess={isToast.isSuccess}
+          onClose={() => {
+            setIsToast({ ...isToast, value: false });
+          }}
+        />
+      </div>
+
+      <div style={{ marginLeft: "100px", marginRight: "100px" }}>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Control
+              placeholder="Tìm kiếm"
+              autoFocus
+              value={searchMeds}
+              onChange={handleSearch}
+              style={{ marginTop: "20px" }}
+            />
+          </Form.Group>
+        </Form>
+        {/* <ServiceTable currentItems={services} /> */}
+        <Table columns={columns} dataSource={data} pagination={false} />
+      </div>
+
+
+      <div id="pagin">
+        <Pagination
+          showSizeChanger
+          current={offset + 1}
+          total={total}
+          onChange={onChangePage}
+          defaultPageSize={5}
+          pageSizeOptions={[5, 10, 20, 50]}
+        />
+      </div>
     </>
   );
 };
