@@ -18,27 +18,48 @@ import CustomerModal from "../customer/CustomerModal";
 import { FaTrashAlt } from "react-icons/fa";
 
 // import "antd/dist/antd.css";
-// import { Select } from "antd";
+import { Select, Pagination, Table as TableAntd, Form as FormAntd } from "antd";
 // import "react-bootstrap-typeahead/css/Typeahead.css";
 import { Typeahead } from "react-bootstrap-typeahead";
+import AdCusSearch from "./AdCusSearch";
+import MedListPaper from "./MedListPaper";
 const MedicalPaperModal = () => {
   // const options = [];
   const [customerId, setCustomerId] = useState([]);
 
   // const [options, setOptions] = useState(["jack", "lucy", "david"]);
   const [singleSelections, setSingleSelections] = useState([]);
+  const [singleSelectionsDoc, setSingleSelectionsDoc] = useState([]);
+  const [singleSelectionsStatus, setSingleSelectionsStatus] = useState([]);
+  const [singleSelectionsKTV, setSingleSelectionsKTV] = useState([]);
+
   const [systemMed, setSystemMed] = useState([]);
   const [dentalMed, setDentalMed] = useState([]);
   const [opac, setOpac] = useState(1);
 
   const loadCustomerData = () => {
     axios
-      .get("/api/customer")
+      .get("/api/customer/allCustomer")
       .then((response) => {
+        console.log(response.data);
         setCustomerId([
-          ...customerId,
-          ...response.data.map((item) => item._id),
+          // ...customerId,
+          ...response.data.map((item) => ({
+            name: item.fullname,
+            id: item._id,
+          })),
         ]);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const loadCurProfile = () => {
+    axios
+      .get("/api/profile/curProfile")
+      .then((response) => {
+        console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -65,25 +86,43 @@ const MedicalPaperModal = () => {
   };
   const [services, setServices] = useState([]);
 
+  const [searchMeds, setSearchMeds] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+
   useEffect(() => {
     // console.log(options);
     loadServiceTable();
     loadSystemMed();
     loadDentalMed();
     loadCustomerData();
+    loadCurProfile();
     // setTimeout(() => {
     //   console.log(customerId);
     // }, 1000);
-  }, []);
+  }, [offset, total, searchMeds, limit]);
+
+  const onChangePage = (current, pageSize) => {
+    // console.log(current, pageSize);
+    setOffset(current - 1);
+    setLimit(pageSize);
+  };
 
   const loadServiceTable = async () => {
     await axios
-      .get("/api/service")
+      .get(
+        `/api/service/activeService?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
+      )
       .then((response) => {
         // setServices(response.data);
         //get service which status = true;
-        var temp = response.data.filter((item) => item.status === true);
-        setServices(temp);
+        // var temp = response.data.data.filter((item) => item.status === true);
+        // setServices(temp);
+        if (response.success === 1) {
+          setServices(response.data.data);
+          setTotal(response.data.total);
+        }
       })
       .catch((err) => {
         console.log("Err: ", err);
@@ -108,7 +147,8 @@ const MedicalPaperModal = () => {
       .catch((err) => {
         console.log(err);
       });
-    setDentalMed([...dentalMed, ...response.data]);
+    // setDentalMed([...dentalMed, ...response.data]);
+    setDentalMed(response.data);
   };
 
   const onChangeSelect = (value) => {
@@ -123,62 +163,37 @@ const MedicalPaperModal = () => {
 
   //PAGINATION
   // We start with an empty list of items.
-  const [searchMeds, setSearchMeds] = useState("");
 
-  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentItems, setCurrentItems] = useState([]);
-  const [pageCount, setPageCount] = useState(0);
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
-  const [itemOffset, setItemOffset] = useState(0);
-
-  useEffect(() => {
-    // Fetch items from another resources.
-    if (services.length > 0) {
-      let tempMeds = services.filter(
-        (item) =>
-          item._id?.includes(searchMeds) || item.name?.includes(searchMeds)
-      );
-      const endOffset = itemOffset + itemsPerPage;
-      setCurrentItems(tempMeds.slice(itemOffset, endOffset));
-      setPageCount(Math.ceil(tempMeds.length / itemsPerPage));
-    } else {
-      loadServiceTable();
-    }
-  }, [itemOffset, itemsPerPage, searchMeds, services]);
-
-  // Invoke when user click to request another page.
-  const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % services.length;
-    // console.log(
-    //   `User requested page number ${event.selected}, which is offset ${newOffset}`
-    // );
-    setItemOffset(newOffset);
-  };
 
   const [selectedCus, setSelectedCus] = useState({});
 
-  //fill Data from chonsen SingleSelection
+  //fill Data from chonsen SingleSelection - chưa xoá được
   const fillCusDataByName = async (e) => {
-    console.log("Name: " + e);
-    setSingleSelections(e);
-    const response = await axios.get(`api/customer/${e}`);
+    // console.log(e[0].name);
+    // setSingleSelections(e);
+    const response = await axios.get(`api/customer/${e[0].id}`);
 
+    console.log(response.data);
     //fill Data
     setSelectedCus(response.data);
-    console.log(response.data);
   };
 
   const [currentItemList, setCurrentItemList] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+
   // Add currentItems/Service
+  const [curDate, setCurDate] = useState(new Date());
   const addCurrentItems = (id, name, price) => {
-    console.log(typeof price);
+    // console.log(typeof price);
+    // console.log(new Date().toISOString().split("T")[0]);
+    let curDate = new Date().toLocaleDateString("en-US");
     setTotalPrice(totalPrice + Number(price));
-    setCurrentItemList([...currentItemList, [id, name, "Bac sy o day", price]]);
+    setCurrentItemList([...currentItemList, [curDate, name, price, "", ""]]);
   };
 
   const deleteCurrentItems = (rowIndex, price) => {
+    console.log(price);
     let temp = currentItemList;
     temp.splice(rowIndex, 1);
     setCurrentItemList([...temp]);
@@ -209,63 +224,90 @@ const MedicalPaperModal = () => {
         style={{ opacity: `${opac}` }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Thông tin Phiếu khám</Modal.Title>
+          <Modal.Title style={{ marginRight: "30px" }}>
+            Thêm thông tin Phiếu khám
+          </Modal.Title>
+          {/* Ngày tạo */}
+          <Modal.Title>
+            {/* <Form.Control
+              style={{ width: "50%" }}
+              type="text"
+              value={new Date().toLocaleDateString("en-US")}
+              // readOnly
+              disabled
+            ></Form.Control> */}
+            Ngày tạo: <span>{new Date().toLocaleDateString("en-US")}</span>
+          </Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
-          <div id="serviceLeft">
-            <Form.Group className="mb-3">
-              <Form.Control
-                placeholder="Tìm kiếm"
-                autoFocus
-                value={searchMeds}
-                onChange={(e) => {
-                  setSearchMeds(e.target.value);
-                }}
-              />
-            </Form.Group>
-            <Table striped bordered hover>
-              <tbody>
-                {currentItems.map((ser) => {
-                  return (
-                    <tr
-                      onClick={() => {
-                        addCurrentItems(
-                          ser._id,
-                          ser.name,
-                          ser.price.$numberDecimal
-                        );
-                      }}
-                    >
-                      <td
-                        style={{
-                          border: "1px solid #dee2e6",
-                          borderRight: "0px",
+          <FormAntd name="basic">
+            <div id="serviceLeft">
+              <Form.Group className="mb-3">
+                <Form.Control
+                  placeholder="Tìm kiếm"
+                  autoFocus
+                  value={searchMeds}
+                  onChange={(e) => {
+                    setSearchMeds(e.target.value);
+                  }}
+                />
+              </Form.Group>
+              <Table striped bordered hover>
+                <tbody>
+                  {services.map((ser) => {
+                    return (
+                      <tr
+                        onClick={() => {
+                          addCurrentItems(
+                            ser._id,
+                            ser.name,
+                            ser.price.$numberDecimal
+                          );
                         }}
                       >
-                        <img src={ser.imageUrl} width="90px" alt="true" />
-                      </td>
-                      <td
-                        style={{
-                          border: "1px solid #dee2e6",
-                          borderLeft: "0px",
-                        }}
-                      >
-                        <span style={{ padding: "0px", display: "block" }}>
-                          {ser._id}
-                        </span>
-                        <span style={{ padding: "0px", display: "block" }}>
-                          {ser.name}
-                        </span>
-                        <span style={{ padding: "0px", display: "block" }}>
-                          Giá: {ser.price.$numberDecimal}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-            <ReactPaginate
+                        <td
+                          style={{
+                            border: "1px solid #dee2e6",
+                            borderRight: "0px",
+                          }}
+                        >
+                          <img src={ser.imageUrl} width="90px" alt="true" />
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #dee2e6",
+                            borderLeft: "0px",
+                          }}
+                        >
+                          <span style={{ padding: "0px", display: "block" }}>
+                            {ser._id}
+                          </span>
+                          <span style={{ padding: "0px", display: "block" }}>
+                            {ser.name}
+                          </span>
+                          <span style={{ padding: "0px", display: "block" }}>
+                            Giá: {ser.price.$numberDecimal}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <div id="pagin">
+                <Pagination
+                  size="small"
+                  showSizeChanger={false}
+                  current={offset + 1}
+                  total={total}
+                  onChange={onChangePage}
+                  defaultPageSize={5}
+                  // pageSizeOptions={[5, 10, 20, 50]}
+                />
+              </div>
+
+              {/* <ReactPaginate
               id="Paginate"
               nextLabel=">"
               onPageChange={handlePageClick}
@@ -285,67 +327,45 @@ const MedicalPaperModal = () => {
               containerClassName="pagination"
               activeClassName="active"
               renderOnZeroPageCount={null}
-            />
-          </div>
-
-          <div id="serviceRight" style={{ border: "1px solid #dee2e6" }}>
-            <div style={{ backgroundColor: "#0984e3" }}>
-              <h4
-                style={{
-                  margin: "0px",
-                  color: "white",
-                  padding: "10px",
-                  fontFamily: "Times New Roman",
-                }}
-              >
-                Phiếu khám
-              </h4>
+            /> */}
             </div>
-            {/* <div>
-              <h6
-                style={{
-                  margin: "0px",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                Tổng tiền:
-              </h6>
-              <h6
-                style={{
-                  // marginLeft:"110px",
-                  float: "right",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                {totalPrice}
-              </h6>
-            </div> */}
-            <Row>
-              <Form.Label column style={{ marginLeft: "5px" }}>
-                <b>Tổng tiền</b>
-              </Form.Label>
-              <Col>
-                <Form.Control
-                  plaintext
-                  readOnly
-                  // style={{ marginLeft: "14px" }}
-                  id="phone"
-                  type="number"
-                  placeholder={totalPrice.toLocaleString("en-US")}
 
-                  // onChange={formik.handleChange}
-                />
-              </Col>
-            </Row>
+            <div id="serviceRight" style={{ border: "1px solid #dee2e6" }}>
+              <div style={{ backgroundColor: "#0984e3" }}>
+                <h4
+                  style={{
+                    margin: "0px",
+                    color: "white",
+                    padding: "10px",
+                    fontFamily: "Times New Roman",
+                  }}
+                >
+                  Phiếu khám
+                </h4>
+              </div>
 
-            {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
-            <Row>
-              {/* <div> */}
-              {/* <h6
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Tổng tiền</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    plaintext
+                    readOnly
+                    // style={{ marginLeft: "14px" }}
+                    id="phone"
+                    type="number"
+                    placeholder={totalPrice.toLocaleString("en-US")}
+
+                    // onChange={formik.handleChange}
+                  />
+                </Col>
+              </Row>
+
+              {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
+              <Row>
+                {/* <div> */}
+                {/* <h6
                   style={{
                     margin: "0px",
                     padding: "5px",
@@ -355,7 +375,7 @@ const MedicalPaperModal = () => {
                 >
                   Tiền khách trả:
                 </h6> */}
-              {/* <h6
+                {/* <h6
                 style={{
                   // marginLeft:"110px",
                   float: "right",
@@ -366,28 +386,28 @@ const MedicalPaperModal = () => {
               >
                 2,000
               </h6> */}
-              <Form.Label column style={{ marginLeft: "5px" }}>
-                <b>Tiền khách trả</b>
-              </Form.Label>
-              <Col>
-                <Form.Control
-                  style={{ backgroundColor: "#ecf0f1" }}
-                  plaintext
-                  // id="phone"
-                  type="number"
-                  // value = {payment.toLocaleString("en-US")}
-                  placeholder="Nhập số tiền"
-                  onChange={(e) => {
-                    calPayment(e.target.value);
-                    // setPayment(e.target.value)
-                    // console.log(payment.toLocaleString("en-US"));
-                  }}
-                />
-              </Col>
-              {/* </div> */}
-            </Row>
-            {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
-            {/* <div>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Tiền khách trả</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    style={{ backgroundColor: "#ecf0f1" }}
+                    plaintext
+                    // id="phone"
+                    type="number"
+                    // value = {payment.toLocaleString("en-US")}
+                    placeholder="Nhập số tiền"
+                    onChange={(e) => {
+                      calPayment(e.target.value);
+                      // setPayment(e.target.value)
+                      // console.log(payment.toLocaleString("en-US"));
+                    }}
+                  />
+                </Col>
+                {/* </div> */}
+              </Row>
+              {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
+              {/* <div>
               <h6
                 style={{
                   margin: "0px",
@@ -410,38 +430,84 @@ const MedicalPaperModal = () => {
                 2,000
               </h6>
             </div> */}
-            <Row>
-              <Form.Label column style={{ marginLeft: "5px" }}>
-                <b>Tiền thừa</b>
-              </Form.Label>
-              <Col>
-                <Form.Control
-                  plaintext
-                  readOnly
-                  id="phone"
-                  type="number"
-                  placeholder={changeMoney.toLocaleString("en-US")}
-                />
-              </Col>
-            </Row>
-            <hr style={{ marginTop: "8px", marginBottom: "4px" }} />
-            <div style={{ textAlign: "center" }}>
-              <Button
-                variant="primary"
-                // onClick={handleShow}
-                style={{ marginBottom: "8px" }}
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Tiền thừa</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    plaintext
+                    readOnly
+                    id="phone"
+                    type="number"
+                    placeholder={changeMoney.toLocaleString("en-US")}
+                  />
+                </Col>
+              </Row>
+              <hr style={{ marginTop: "8px", marginBottom: "4px" }} />
+              <div
+                style={{
+                  // textAlign: "center",
+                  display: "flex",
+                  // marginRight: "15px",
+                  // width: "auto",
+                  // height: "auto",
+                  // alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                Lưu lại
-              </Button>
-            </div>
-          </div>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  // onClick={handleShow}
+                  style={{
+                    marginBottom: "8px",
+                    display: "inline",
+                    marginLeft: "auto",
+                    // marginRight: "auto",
+                  }}
+                >
+                  Lưu lại
+                </Button>
+                <Button
+                  variant="primary"
+                  // onClick={handleShow}
+                  style={{
+                    marginBottom: "8px",
+                    display: "inline",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                >
+                  In
+                </Button>
 
-          <div id="serviceMiddle">
-            <Form
+                <Button
+                  variant="primary"
+                  // onClick={handleShow}
+                  style={{
+                    marginBottom: "8px",
+                    display: "inline",
+                    // marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                >
+                  Thanh toán
+                </Button>
+              </div>
+            </div>
+
+            <div id="serviceMiddle">
+              {/* <Form
               // onSubmit={formik.handleSubmit}
               style={{ border: "1px solid #dee2e6" }}
-            >
-              <Row className="mb-3" style={{ margin: "5px" }}>
+            > */}
+              <Row
+                className="mb-3"
+                style={{
+                  margin: "5px",
+                }}
+              >
                 <Form.Label column sm={4}>
                   Nhân viên
                   <span
@@ -459,12 +525,63 @@ const MedicalPaperModal = () => {
                   <Form.Control
                     id="phone"
                     type="text"
-                    placeholder="0"
+                    placeholder="Tên - Mã nhân viên"
+                    disabled
                     // onChange={formik.handleChange}
                   />
                   {/* {formik.errors.phone && (
                     <p className="errorMsg"> {formik.errors.phone} </p>
                   )} */}
+                </Col>
+              </Row>
+              <Row
+                className="mb-3"
+                style={{ margin: "5px", marginTop: "39px" }}
+              >
+                <Form.Label column sm={4}>
+                  Tên Bác sỹ
+                  <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
+                </Form.Label>
+                <Col sm={8}>
+                  <FormAntd.Item
+                    name="BS"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nhập tên bác sỹ",
+                      },
+                    ]}
+                  >
+                    <Typeahead
+                      id="basic-typeahead-single"
+                      labelKey="name"
+                      onChange={(e) => {
+                        // fillCusDataByName(e);
+                        // console.log(e);
+                        setSingleSelectionsDoc(e);
+                      }}
+                      options={customerId}
+                      placeholder="Chọn tên bác sỹ..."
+                      selected={singleSelectionsDoc}
+                      renderMenuItemChildren={(option) => (
+                        <div>
+                          {option.name}
+                          <div>
+                            <small>ID: {option.id}</small>
+                          </div>
+                        </div>
+                      )}
+                    />
+                  </FormAntd.Item>
                 </Col>
               </Row>
               <Row className="mb-3" style={{ margin: "5px" }}>
@@ -481,62 +598,61 @@ const MedicalPaperModal = () => {
                     *
                   </span>
                 </Form.Label>
-                <Col>
-                  {/* <Form.Control
-                    id="phone"
-                    type="text"
-                    placeholder="0"
-                    onChange={formik.handleChange}
-                  /> */}
-                  {/* {formik.errors.phone && (
-                    <p className="errorMsg"> {formik.errors.phone} </p>
-                  )} */}
-
-                  <Typeahead
-                    id="basic-typeahead-single"
-                    labelKey="name"
-                    onChange={(e) => {
-                      fillCusDataByName(e);
-                    }}
-                    options={customerId}
-                    placeholder="Chọn ID khách hàng..."
-                    selected={singleSelections}
-                  />
-
-                  {/* <Select
-                    showSearch
-                    placeholder="Chọn 1 khách hàng"
-                    // optionFilterProp="children"
-                    onChange={onChangeSelect}
-                    onSearch={onSearch}
-                    allowClear
-                    onClick={onClickSelect}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    options={[
+                <Col sm={8}>
+                  <FormAntd.Item
+                    name="KH"
+                    rules={[
                       {
-                        value: "jack",
-                        label: "Jack",
-                      },
-                      {
-                        value: "lucy",
-                        label: "Lucy",
-                      },
-                      {
-                        value: "tom",
-                        label: "Tom",
+                        required: true,
+                        message: "Nhập tên khách hàng",
                       },
                     ]}
-                  /> */}
+                  >
+                    <Typeahead
+                      id="basic-typeahead-single"
+                      labelKey="name"
+                      onChange={(e) => {
+                        console.log(e);
+                        fillCusDataByName(e);
+                        setSingleSelections(e);
+                      }}
+                      options={customerId}
+                      placeholder="Chọn tên khách hàng..."
+                      selected={singleSelections}
+                    />
+                  </FormAntd.Item>
                 </Col>
-                <Col sm={3}>
+              </Row>
+              <Row className="mb-3" style={{ margin: "5px" }}>
+                <Col sm={4}>
+                  {/* Advenced Customer Search */}
+                  {/* <CustomerModal
+                    lbl={"Thêm KH"}
+                    // loadData={loadData}
+                    widthh="200px"
+                    closeMedPaper={closeMedpaper}
+                    openMedPaper={openMedPaper}
+                  /> */}
+
+                  <AdCusSearch
+                    closeMedPaper={closeMedpaper}
+                    openMedPaper={openMedPaper}
+                    setSingleSelections={setSingleSelections}
+                    fillCusDataByName={fillCusDataByName}
+                  />
+                </Col>
+                <Col sm={4}>
                   <CustomerModal
                     lbl={"Thêm KH"}
                     // loadData={loadData}
                     widthh="200px"
+                    closeMedPaper={closeMedpaper}
+                    openMedPaper={openMedPaper}
+                  />
+                </Col>
+                <Col sm={4}>
+                  {/* Đơn thuốc */}
+                  <MedListPaper
                     closeMedPaper={closeMedpaper}
                     openMedPaper={openMedPaper}
                   />
@@ -548,16 +664,19 @@ const MedicalPaperModal = () => {
                 <thead>
                   <tr>
                     <th>
-                      <b>ID</b>
+                      <b>Ngày chuẩn đoán</b>
                     </th>
                     <th>
                       <b>Thủ thuật</b>
                     </th>
                     <th>
-                      <b>Bác sỹ</b>
+                      <b>Đơn giá</b>
                     </th>
                     <th>
-                      <b>Đơn giá</b>
+                      <b>Kĩ thuật viên</b>
+                    </th>
+                    <th>
+                      <b>Trạng thái</b>
                     </th>
                     <th>
                       <b></b>
@@ -572,9 +691,80 @@ const MedicalPaperModal = () => {
                           <td>{row[0]}</td>
                           <td>{row[1]}</td>
                           <td>{row[2]}</td>
-                          <td>{row[3]}</td>
+                          <td style={{ textAlign: "center" }}>
+                            <FormAntd.Item
+                              name={`KTV${rowIndex}`}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Nhập kĩ thuật viên",
+                                },
+                              ]}
+                            >
+                              <Typeahead
+                                style={{ width: "155px", margin: "auto" }}
+                                id="basic-typeahead-single"
+                                labelKey="name"
+                                onChange={(e) => {
+                                  // fillCusDataByName(e);
+                                  console.log(e);
+
+                                  let tempSelect = singleSelectionsKTV;
+                                  tempSelect[rowIndex] = e;
+                                  setSingleSelectionsKTV([...tempSelect]);
+                                }}
+                                options={customerId}
+                                placeholder="Chọn kĩ thuật viên"
+                                selected={singleSelectionsKTV[rowIndex]}
+                                renderMenuItemChildren={(option) => (
+                                  <div>
+                                    {option.name}
+                                    <div>
+                                      <small>ID: {option.id}</small>
+                                    </div>
+                                  </div>
+                                )}
+                              />
+                            </FormAntd.Item>
+                          </td>
+                          <td>
+                            <FormAntd.Item
+                              name={`TT${rowIndex}`}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Nhập trạng thái",
+                                },
+                              ]}
+                            >
+                              <Typeahead
+                                style={{ width: "155px", margin: "auto" }}
+                                id="basic-typeahead-single"
+                                onChange={(e) => {
+                                  // fillCusDataByName(e);
+                                  let tempSelect = singleSelectionsStatus;
+                                  tempSelect[rowIndex] = e;
+                                  setSingleSelectionsStatus([...tempSelect]);
+                                }}
+                                options={[
+                                  { id: 0, label: "Chưa thực hiện" },
+                                  { id: 1, label: "Đang thực hiện" },
+                                  { id: 2, label: "Hoàn thành" },
+                                ]}
+                                placeholder="  Chọn Trạng thái"
+                                selected={singleSelectionsStatus[rowIndex]}
+                                // defaultSelected={[
+                                //   {
+                                //     id: 0,
+                                //     label: "Chưa thực hiện",
+                                //   },
+                                // ]}
+                              />
+                            </FormAntd.Item>
+                          </td>
+
                           <td
-                            onClick={() => deleteCurrentItems(rowIndex, row[3])}
+                            onClick={() => deleteCurrentItems(rowIndex, row[2])}
                           >
                             <FaTrashAlt cursor="pointer" color="#e74c3c" />
                           </td>
@@ -686,14 +876,15 @@ const MedicalPaperModal = () => {
                           setSelectedCus({ ...tempCus });
                         }}
                         // onChange={formik.handleChange}
-                        style={{ width: "160px" }}
+                        style={{ width: "162px" }}
                       />
                     </Col>
                   );
                 })}
               </Row>
-            </Form>
-          </div>
+              {/* </Form> */}
+            </div>
+          </FormAntd>
         </Modal.Body>
       </Modal>
     </>

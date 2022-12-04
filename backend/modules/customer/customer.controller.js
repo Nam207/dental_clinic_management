@@ -19,23 +19,28 @@ const getCustomer = async (req, res) => {
     CustomerModel.find(filter)
       .skip(offsetNumber * limitNumber)
       .limit(limitNumber),
-      CustomerModel.countDocuments(filter),
+    CustomerModel.countDocuments(filter),
   ]);
 
   res.send({ success: 1, data: { data: customers, total: totalCustomers } });
 };
 
+const getAllCustomer = async (req, res) => {
+  const allCustomer = await CustomerModel.find();
+  res.send({ success: 1, data: allCustomer });
+};
+
 const checkPhone = async (req, res) => {
   const { phone } = req.params;
   const customers = await CustomerModel.findOne({ phone: phone });
-  if (customers != null) res.send({ success: 0, data: customers })
+  if (customers != null) res.send({ success: 0, data: customers });
   res.send({ success: 1, data: customers });
 };
 
 const checkEmail = async (req, res) => {
   const { email } = req.params;
   const customers = await CustomerModel.findOne({ email: email });
-  if (customers != null) res.send({ success: 0, data: customers })
+  if (customers != null) res.send({ success: 0, data: customers });
   res.send({ success: 1, data: customers });
 };
 
@@ -96,7 +101,7 @@ const updateCustomer = async (req, res) => {
     dentalMedicalHistory,
   } = req.body;
 
-  const existCustomer = await CustomerModel.findOne({ '_id': customerId });
+  const existCustomer = await CustomerModel.findOne({ _id: customerId });
   if (!existCustomer) {
     throw new HTTPError(400, "Not found customer");
   }
@@ -177,4 +182,5 @@ module.exports = {
   getActiveCustomer,
   checkPhone,
   checkEmail,
+  getAllCustomer,
 };

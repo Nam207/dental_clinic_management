@@ -55,6 +55,15 @@
   max-width: 100%;
 }
 
+#AdCus{
+  max-width: 100%;
+  width: 40%;
+
+}
+.rbt-aux{
+display: inline;
+}
+
 #serviceLeft {
   // background-color: #3498db;
   width: 20%;
@@ -72,6 +81,7 @@
   // display:inline-block;
   // margin-left: 14px;
   margin: auto;
+  border: 1px solid rgb(197, 197, 197);
 }
 
 #serviceRight {

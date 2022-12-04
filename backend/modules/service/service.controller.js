@@ -29,8 +29,26 @@ const getService = async (req, res, next) => {
 };
 
 const getActiveService = async (req, res, next) => {
-  const service = await ServiceModel.find({ status: true });
-  res.send({ success: 1, data: service });
+  const { keyword, offset, limit } = req.query;
+
+  const offsetNumber = offset && Number(offset) ? Number(offset) : 0;
+  const limitNumber = limit && Number(limit) ? Number(limit) : 5;
+
+  let filter = {};
+  filter.status = "true";
+  if (keyword) {
+    const regex = new RegExp(`${keyword}`, "i");
+    const regexCond = { $regex: regex };
+
+    filter["$or"] = [{ _id: regexCond }, { name: regexCond }];
+  }
+  const [service, totalService] = await Promise.all([
+    ServiceModel.find(filter)
+      .skip(offsetNumber * limitNumber)
+      .limit(limitNumber),
+    ServiceModel.countDocuments(filter),
+  ]);
+  res.send({ success: 1, data: { data: service, total: totalService } });
 };
 
 const createService = async (req, res) => {

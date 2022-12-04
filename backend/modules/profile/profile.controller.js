@@ -36,6 +36,7 @@ const createAdmin = async (req, res) => {
   }
 };
 
+
 const checkPhone = async (req, res) => {
   const { phone } = req.params;
   const customers = await ProfileModel.findOne({ phone: phone });
@@ -338,8 +339,8 @@ const updateStatus = async (req, res) => {
     },
     { new: true }
   );
-
   res.send({ success: 1, data: updatedStaff });
+
 };
 
 const getNext = async () => {

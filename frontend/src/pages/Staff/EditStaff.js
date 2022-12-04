@@ -202,9 +202,7 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
   };
 
   return (
-    <>
-      
-      
+    <>      
       <Modal
         title="Sửa Nhân Viên"
         open={isVisible}

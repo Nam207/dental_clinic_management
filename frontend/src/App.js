@@ -62,7 +62,7 @@ function App() {
     localStorage.removeItem("token");
     setUserInfo({ status: "success", data: null });
   };
-  
+
   React.useEffect(() => {
     verifyUserInfo();
   }, []);
