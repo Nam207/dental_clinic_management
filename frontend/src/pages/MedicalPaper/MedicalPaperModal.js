@@ -41,7 +41,7 @@ const MedicalPaperModal = () => {
     axios
       .get("/api/customer/allCustomer")
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setCustomerId([
           // ...customerId,
           ...response.data.map((item) => ({
@@ -55,11 +55,13 @@ const MedicalPaperModal = () => {
       });
   };
 
+  const [curUser, setCurUser] = useState({});
   const loadCurProfile = () => {
     axios
       .get("/api/profile/curProfile")
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
+        setCurUser(response.data[0]);
       })
       .catch((error) => {
         console.error(error);
@@ -527,6 +529,7 @@ const MedicalPaperModal = () => {
                     type="text"
                     placeholder="Tên - Mã nhân viên"
                     disabled
+                    value={`${curUser.fullname} - ${curUser._id}`}
                     // onChange={formik.handleChange}
                   />
                   {/* {formik.errors.phone && (
@@ -626,14 +629,6 @@ const MedicalPaperModal = () => {
               <Row className="mb-3" style={{ margin: "5px" }}>
                 <Col sm={4}>
                   {/* Advenced Customer Search */}
-                  {/* <CustomerModal
-                    lbl={"Thêm KH"}
-                    // loadData={loadData}
-                    widthh="200px"
-                    closeMedPaper={closeMedpaper}
-                    openMedPaper={openMedPaper}
-                  /> */}
-
                   <AdCusSearch
                     closeMedPaper={closeMedpaper}
                     openMedPaper={openMedPaper}
@@ -655,11 +650,11 @@ const MedicalPaperModal = () => {
                   <MedListPaper
                     closeMedPaper={closeMedpaper}
                     openMedPaper={openMedPaper}
+                    singleSelectionsDoc={singleSelectionsDoc}
                   />
                 </Col>
               </Row>
               <hr style={{ marginTop: "8px", marginBottom: "4px" }} />
-
               <Table striped hover style={{ textAlign: "center" }}>
                 <thead>
                   <tr>
@@ -775,7 +770,6 @@ const MedicalPaperModal = () => {
                 )}
               </Table>
               {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
-
               <Row className="mb-3" style={{ margin: "5px" }}>
                 <Col>
                   <Form.Label>
@@ -783,7 +777,6 @@ const MedicalPaperModal = () => {
                   </Form.Label>
                 </Col>
               </Row>
-
               <Row className="mb-3" style={{ margin: "5px" }}>
                 {systemMed.map((sys, inde) => {
                   return (
@@ -829,7 +822,6 @@ const MedicalPaperModal = () => {
                   );
                 })}
               </Row>
-
               <Row className="mb-3" style={{ margin: "5px" }}>
                 <Col>
                   <Form.Label>
@@ -837,7 +829,6 @@ const MedicalPaperModal = () => {
                   </Form.Label>
                 </Col>
               </Row>
-
               <Row className="mb-3" style={{ margin: "5px" }}>
                 {dentalMed.map((den, index) => {
                   return (
@@ -882,6 +873,20 @@ const MedicalPaperModal = () => {
                   );
                 })}
               </Row>
+              <Row
+                className="mb-3"
+                style={{
+                  margin: "5px",
+                }}
+              >
+                <Form.Label column sm={2}>
+                  <b>Ghi chú</b>
+                </Form.Label>
+                <Col sm={10}>
+                  <Form.Control id="gc" type="text" as="textarea" rows={3} />
+                </Col>
+              </Row>
+
               {/* </Form> */}
             </div>
           </FormAntd>

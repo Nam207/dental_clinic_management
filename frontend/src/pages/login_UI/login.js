@@ -58,11 +58,10 @@ function Login() {
           alert("sai passs")
         }
       } catch (err) {
-        console.log(err)
+        console.log(err);
         // render(
-        // <SwalCard text='Kết nối với máy chủ thất bại'></SwalCard>
+        // <SwalCard text='Tên đăng nhập hoặc mật khẩu sai'></SwalCard>
         // )
-        alert("aaaa")
       }
     },
   });
