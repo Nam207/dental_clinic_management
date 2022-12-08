@@ -8,8 +8,10 @@ import { Space, TimePicker } from "antd";
 import { Checkbox } from "antd";
 import dayjs from "dayjs";
 import { FaRedoAlt, FaEdit } from "react-icons/fa";
+
 import Swal from "sweetalert2";
 import moment from "moment";
+
 const { TextArea } = Input;
 function Editstaff({ empId, isVisible, closeModal, loadData }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -190,12 +192,10 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
       phone: Yup.string()
         .required("Không được trống")
         .typeError("Không phải là dạng số")
-
         .matches(
           /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/,
           "Số điện thoại phải chữ số và có 10 số"
         )
-
         .test(
           "Số điện thoại độc nhất",
           "Số điện thoại đang được sử dụng", // <- key, message
@@ -218,6 +218,7 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
             });
           }
         ),
+
       competence: Yup.array()
         .required("Không được trống")
         .min(1, "Không được trống"),

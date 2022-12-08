@@ -5,6 +5,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require("cors");
 
+const clinicRouter = require('./modules/clinic/clinic.router');
+const clinicController = require('./modules/clinic/clinic.controller');
 
 const medicineRouter = require('./modules/medicine/medicine.router');
 
@@ -25,6 +27,8 @@ const dentalMedicalHistoryRouter = require('./modules/dental_medical_history/den
 
 const customerRouter = require('./modules/customer/customer.router');
 
+const medicalPaperRouter = require('./modules/medical_paper/medical_paper.router');
+
 mongoose.connect(process.env.MONGODB_URL, err => {
     if (err) {
         return console.log('Err connnect mongodb', err);
@@ -36,6 +40,7 @@ mongoose.connect(process.env.MONGODB_URL, err => {
         systemicMedicalHistoryController.createSystemicMedicalHistory();
         dentalMedicalHistoryController.createDentalMedicalHistory();
         profileController.createAdmin();
+        clinicController.createClinic();
     } catch (err) {
         return console.log('Err insert role', err);
     }
@@ -57,6 +62,8 @@ app.use('/api/profile', profileRouter);
 app.use('/api/systemicMedicalHistory', systemicMedicalHistoryRouter);
 app.use('/api/dentalMedicalHistory', dentalMedicalHistoryRouter);
 app.use('/api/customer', customerRouter);
+app.use('/api/clinic', clinicRouter);
+app.use('api/medicalPaper', medicalPaperRouter)
 
 app.use('*', (req, res, next) => {
     res.status(404).send({ message: '404 not found' })

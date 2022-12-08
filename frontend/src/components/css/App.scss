@@ -50,9 +50,22 @@
   max-width: 100%;
 }
 
+#MedListPaper {
+  width: 50%;
+  max-width: 100%;
+}
+
 #medPaperModal {
   width: 90%;
   max-width: 100%;
+}
+
+#AdCus {
+  max-width: 100%;
+  width: 40%;
+}
+.rbt-aux {
+  display: inline;
 }
 
 #serviceLeft {
@@ -72,6 +85,7 @@
   // display:inline-block;
   // margin-left: 14px;
   margin: auto;
+  border: 1px solid rgb(197, 197, 197);
 }
 
 #serviceRight {
@@ -85,6 +99,10 @@
 //     display: inline;
 //     margin-bottom: 0px;
 // }
+
+input::placeholder {
+  font: 13px sans-serif;
+}
 
 #medCodeContainer {
   position: absolute;

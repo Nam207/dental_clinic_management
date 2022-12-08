@@ -1,8 +1,8 @@
-const ServiceModel = require('./service');
-const ConsumableModel = require('../consumable/consumable');
-const PrescriptionModel = require('../prescription/prescription');
-const HTTPError = require('../../common/httpError');
-const MedicineModel = require('../medicine/medicine');
+const ServiceModel = require("./service");
+const ConsumableModel = require("../consumable/consumable");
+const PrescriptionModel = require("../prescription/prescription");
+const HTTPError = require("../../common/httpError");
+const MedicineModel = require("../medicine/medicine");
 
 const getService = async (req, res, next) => {
   const { keyword, offset, limit } = req.query;
@@ -29,8 +29,26 @@ const getService = async (req, res, next) => {
 };
 
 const getActiveService = async (req, res, next) => {
-  const service = await ServiceModel.find({ status: true });
-  res.send({ success: 1, data: service });
+  const { keyword, offset, limit } = req.query;
+
+  const offsetNumber = offset && Number(offset) ? Number(offset) : 0;
+  const limitNumber = limit && Number(limit) ? Number(limit) : 5;
+
+  let filter = {};
+  filter.status = "true";
+  if (keyword) {
+    const regex = new RegExp(`${keyword}`, "i");
+    const regexCond = { $regex: regex };
+
+    filter["$or"] = [{ _id: regexCond }, { name: regexCond }];
+  }
+  const [service, totalService] = await Promise.all([
+    ServiceModel.find(filter)
+      .skip(offsetNumber * limitNumber)
+      .limit(limitNumber),
+    ServiceModel.countDocuments(filter),
+  ]);
+  res.send({ success: 1, data: { data: service, total: totalService } });
 };
 
 const createService = async (req, res) => {
@@ -45,7 +63,7 @@ const createService = async (req, res) => {
     consumable,
     prescription,
   } = req.body;
-  //   console.log(typeof consumable[0]);
+
   const _id = await getNext();
   const imgUrl = req.file.path;
   const newService = await ServiceModel.create({
@@ -148,7 +166,6 @@ const updateService = async (req, res) => {
       { new: true }
     );
   }
-
   await ConsumableModel.deleteMany({ serviceId: serviceId });
   var consumableArray;
   if (consumable != null) {
@@ -157,7 +174,7 @@ const updateService = async (req, res) => {
       const temp = JSON.parse(element);
 
       await ConsumableModel.create({
-        serviceId: _id,
+        serviceId: serviceId,
         medicineId: temp.medicineId,
         numberOfUses: temp.numberOfUses,
         createBy: senderUser._id,
@@ -172,7 +189,7 @@ const updateService = async (req, res) => {
       const temp = JSON.parse(element);
 
       await PrescriptionModel.create({
-        serviceId: _id,
+        serviceId: serviceId,
         medicineId: temp.medicineId,
         quantity: temp.quantity,
         usage: temp.usage,
@@ -197,7 +214,6 @@ const getServiceById = async (req, res) => {
   const prescription = await PrescriptionModel.find({ serviceId: serviceId });
   let consumableArray = JSON.parse(JSON.stringify(consumable));
   let prescriptionArray = JSON.parse(JSON.stringify(prescription));
-
   if (consumableArray.length > 0) {
     await Promise.all(
       consumableArray.map(async (element, index) => {

@@ -23,7 +23,7 @@ import axios from "../../apis/api";
 import { Pagination, Table } from "antd";
 // import "antd/dist/antd.css";
 
-const Medicine = ({ itemsPerPage }) => {
+const Medicine = () => {
   const [medId, setMedID] = useState("");
   const [isShowUpdate, setIsShowUpdate] = useState(false);
   const [searchMeds, setSearchMeds] = useState("");

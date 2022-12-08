@@ -41,7 +41,7 @@ const MedicineModal = (prop) => {
     validationSchema: Yup.object({
       name: Yup.string()
         .required("Bắt buộc")
-        .min(4, "Must be 4 characters or more")
+        .min(4, "Tên phải lớn hơn 4 kí tự")
         .test(
           "Tên độc nhất",
           "Tên đang được sử dụng", // <- key, message

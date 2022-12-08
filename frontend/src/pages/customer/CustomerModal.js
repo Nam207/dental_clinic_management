@@ -129,7 +129,6 @@ const CustomerModal = ({
         ),
     }),
     onSubmit: async (values) => {
-      handleClose();
       await customerProcessor.addCustomer(values);
       values.fullname = "";
       values.job = "";
@@ -143,6 +142,7 @@ const CustomerModal = ({
       values.systemicMedicalHistory = [];
       values.dentalMedicalHistory = [];
       loadData();
+      handleClose();
     },
   });
 

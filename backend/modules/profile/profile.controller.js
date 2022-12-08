@@ -57,6 +57,25 @@ const curProfile = async (req, res) => {
   res.send({ success: 1, data: fullProfile });
 };
 
+};
+
+const getDoctor = async (req, res) => {
+  const role = await RoleModel.findOne({ name: "Bác sĩ" });
+  const userId = await UserRoleModel.find({ roleId: role._id });
+  const userIdArray = userId.map((u) => u.userId);
+  const doctor = await ProfileModel.find({ userId: { $in: userIdArray } });
+  res.send({ success: 1, data: doctor });
+};
+
+const getTechStaff = async (req, res) => {
+  const role = await RoleModel.findOne({ name: "Kỹ thuật viên" });
+
+  const userId = await UserRoleModel.find({ roleId: role._id });
+  const userIdArray = userId.map((u) => u.userId);
+  const techStaff = await ProfileModel.find({ userId: { $in: userIdArray } });
+  res.send({ success: 1, data: techStaff });
+};
+
 const checkPhone = async (req, res) => {
   const { phone } = req.params;
   const customers = await ProfileModel.findOne({ phone: phone });
@@ -352,6 +371,7 @@ const getProfileById = async (req, res) => {
   const schedule = await Promise.all(scheduleId.map(
     async (id) => await ScheduleModel.findById(id.scheduleId)
   ));
+
   const scheduleArray = JSON.parse(JSON.stringify(schedule));
   const fullProfile = { ...profile._doc, roleArray, scheduleArray };
   res.send({ success: 1, data: fullProfile });
@@ -391,7 +411,10 @@ const getNext = async () => {
   const count = await ProfileModel.find().count();
   if (count <= 1) return "NV_0000000001";
 
-  const lastService = await ProfileModel.find({_id: {$nin: ["admin"]}}).sort({ _id: -1 }).limit(1);
+  const lastService = await ProfileModel.find({ _id: { $nin: ["admin"] } })
+    .sort({ _id: -1 })
+    .limit(1);
+    
   const nextId = lastService[0]._id;
   const idNumber = parseInt(nextId.split("_")[1]) + 1 + "";
   var temp = "";
@@ -444,4 +467,6 @@ module.exports = {
   checkPhone,
   curProfile,
   editProfileByUser
+  getDoctor,
+  getTechStaff,
 };

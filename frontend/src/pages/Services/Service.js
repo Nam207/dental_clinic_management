@@ -27,7 +27,7 @@ import CustomToast from "../../components/CustomToast";
 import UpdateServiceModal from "./UpdateServiceModal";
 import { Pagination, Table } from "antd";
 
-const Service = ({ itemsPerPage }) => {
+const Service = () => {
   const [key, setKey] = useState("profile");
   const [searchSers, setSearchSers] = useState("");
 

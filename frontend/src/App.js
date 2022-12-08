@@ -20,6 +20,7 @@ import Forgotpassword from "./pages/login_UI/forgotpassword";
 import Customer from "./pages/customer/listCustomer";
 import PrivateRoute from "./components/Route/PrivateRoute";
 import GuestRoute from "./components/Route/GuestRoute";
+import Clinic from "./pages/Clinic/Clinic";
 import axios from "../src/apis/api";
 import React from "react";
 import Staff from "./pages/Staff/Staff";
@@ -61,7 +62,7 @@ function App() {
     localStorage.removeItem("token");
     setUserInfo({ status: "success", data: null });
   };
-  
+
   React.useEffect(() => {
     verifyUserInfo();
   }, []);
@@ -101,7 +102,6 @@ function App() {
             <Route path="/Staff" element={<Staff />}></Route>
           </Route>
         </Routes>
-
 
         </Router>
       </AuthContext.Provider>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import { AiOutlineClose } from "react-icons/ai";
 
-const UploadAndDisplayImage = ({ value = [], onChange = () => {} }) => {
+const UploadAndDisplayImage = ({ value = [], onChange = () => { } }) => {
   let [files, setFiles] = useState([]);
 
   const openFileDialog = () => {
@@ -11,7 +11,6 @@ const UploadAndDisplayImage = ({ value = [], onChange = () => {} }) => {
 
   useEffect(() => {
     onChange(files);
-    // console.log(files);
   }, [files]);
 
   return (
@@ -34,12 +33,12 @@ const UploadAndDisplayImage = ({ value = [], onChange = () => {} }) => {
       {(files.length > 0 || typeof value === "string") && (
         <div className="image-container">
           <AiOutlineClose
-            onClick={() => setFiles([])}
+            onClick={() => { setFiles([]);}}
             id="image-close"
             size={30}
           />
           <img
-            alt="not found"
+            alt="Không tìm thấy"
             width={"100%"}
             height={"auto"}
             src={files.length > 0 ? URL.createObjectURL(files[0]) : value}

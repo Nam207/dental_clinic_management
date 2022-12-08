@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const profileController = require('./profile.controller');
 const validateInput = require('../../middlewares/validateInput');
@@ -7,23 +7,23 @@ const needAuthenticated = require('../../middlewares/needAuthenticated');
 
 router.get("/curProfile", needAuthenticated, profileController.curProfile);
 
+router.get("/", needAuthenticated, profileController.getProfile);
+
+router.get("/getTechStaff", needAuthenticated, profileController.getTechStaff);
+
+router.get("/", needAuthenticated, profileController.getProfile);
+
 router.get(
-  '/',
-  //needAuthenticated,
-  profileController.getProfile
+  "/checkPhone/:phone",
+  needAuthenticated,
+  profileController.checkPhone
 );
 
 router.get(
-  '/checkPhone/:phone', 
-  //needAuthenticated,
-  profileController.checkPhone
-)
-
-router.get(
-  '/checkEmail/:email', 
-  //needAuthenticated,
+  "/checkEmail/:email",
+  needAuthenticated,
   profileController.checkEmail
-)
+);
 
 router.post(
   '/', 
@@ -49,9 +49,11 @@ router.put(
   profileController.updateProfile
 );
 
+router.get("/getDoctor", needAuthenticated, profileController.getDoctor);
+
 router.get(
   '/:profileId', 
-  //needAuthenticated, 
+  needAuthenticated, 
   //isRole, 
   profileController.getProfileById
 );

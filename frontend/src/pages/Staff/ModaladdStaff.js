@@ -11,6 +11,7 @@ import { FaRedoAlt, FaEdit } from "react-icons/fa";
 import moment from "moment"
 import Swal from "sweetalert2";
 const { TextArea } = Input;
+
 function ModaladdStaff({loadData}) {
   const [form] = Form.useForm();
 
@@ -127,7 +128,6 @@ function ModaladdStaff({loadData}) {
     setDisabled7(false)
     setDisabledcn(false);
     setValuecn([]);
-    
   };
   const a="Bắt Đầu";
   const b="Kết Thúc"
@@ -177,12 +177,9 @@ function ModaladdStaff({loadData}) {
             });
           }
         ),
-      //     openTime: yup.date().required(validateMessage.required),
-      // closeTime: yup.date().min(yup.ref('openTime'), 'Giờ đóng max phải lớn hơn giờ mở').required(validateMessage.required),
       competence: Yup.array()
         .required("Không được trống")
         .min(1, "Không được trống"),
-      
       address: Yup.string().trim(),
       email: Yup.string()
         .trim()
@@ -221,6 +218,7 @@ function ModaladdStaff({loadData}) {
         .positive("Phải là số dương")
         .integer("Phải là số nguyên dương"),
     }),
+ 
 
     onSubmit: async (values) => {
       const {
@@ -363,8 +361,7 @@ function ModaladdStaff({loadData}) {
           color: "white",
           borderRadius:"5px",
           width:"180px",
-          height:"38px"
-          
+          height:"38px"        
         }}
       >
         <FaPlusCircle></FaPlusCircle> Thêm nhân viên
@@ -723,7 +720,6 @@ function ModaladdStaff({loadData}) {
               </div>
             </div>
             <div className="footer" style={{ marginBottom: "20px" }}>
-             
             </div>
           </div>
         </Form>

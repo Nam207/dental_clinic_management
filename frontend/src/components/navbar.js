@@ -23,7 +23,7 @@ const Navbarr = ({ user }) => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <NavDropdown title="Đặt lịch hẹn" id="basic-nav-dropdown">
+            {/* <NavDropdown title="Đặt lịch hẹn" id="basic-nav-dropdown">
               <NavDropdown.Item href="/team">Đặt lịch hẹn</NavDropdown.Item>
               <NavDropdown.Item href="/team">
                 Danh sách lịch hẹn
@@ -32,7 +32,7 @@ const Navbarr = ({ user }) => {
               <NavDropdown.Item href="/quytrinh">
                 Danh sách tái khám
               </NavDropdown.Item>
-            </NavDropdown>
+            </NavDropdown> */}
 
             {/* <Nav.Link href="/asdsad">Khám tổng quát</Nav.Link> */}
             <Nav.Link href="/MedicalPaper">Phiếu khám</Nav.Link>
@@ -55,6 +55,10 @@ const Navbarr = ({ user }) => {
               <NavDropdown.Divider />
               <NavDropdown.Item href="/staff">
                 Quản lý nhân viên
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="/clinic">
+                Thông tin phòng khám
               </NavDropdown.Item>
 
               {/* <NavDropdown.Divider />

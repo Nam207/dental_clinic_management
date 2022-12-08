@@ -159,11 +159,7 @@ const UpdateCustomerModal = ({ closeModal, isVisible, cusId, loadData }) => {
                   />
                 </Col>
               </Row>
-              <Form.Group
-                className="mb-3"
-                as={Row}
-                controlId="formGroupPassword"
-              >
+              <Form.Group className="mb-3" as={Row}>
                 <Form.Label column sm={2}>
                   Tên khách hàng
                   <span
@@ -501,7 +497,6 @@ const UpdateCustomerModal = ({ closeModal, isVisible, cusId, loadData }) => {
                   );
                 })}
               </Row>
-
               <Button
                 type="submit"
                 variant="primary"

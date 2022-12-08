@@ -44,7 +44,6 @@ function Login() {
             password,
           },
         });
-        console.log(res)
         if (res.success === 1) {
           login({
             _id: res.data._id,
@@ -58,11 +57,7 @@ function Login() {
           alert("sai passs")
         }
       } catch (err) {
-        console.log(err)
-        // render(
-        // <SwalCard text='Kết nối với máy chủ thất bại'></SwalCard>
-        // )
-        alert("aaaa")
+        render(<SwalCard text="Tên đăng nhập hoặc mật khẩu sai"></SwalCard>);
       }
     },
   });

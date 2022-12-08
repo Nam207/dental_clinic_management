@@ -21,3 +21,4 @@ const ProfileInforSchema = Joi.object({
 });
 
 module.exports = {ProfileSchema, ProfileInforSchema}
+
