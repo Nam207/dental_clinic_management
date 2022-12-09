@@ -25,15 +25,15 @@ const MedicineSchema = new mongoose.Schema({
         type: mongoose.Types.Decimal128,
         require: true,
     },
-    unit: {
+    effect: {
         type: String,
         require: true,
     },
     usage: {
         type: String,
     },
-    expiredDay: {
-        type: Date,
+    contraindication: {
+        type: String,
         require: true,
     },
     status: {

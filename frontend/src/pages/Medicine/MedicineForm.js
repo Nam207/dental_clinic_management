@@ -94,7 +94,7 @@ const MedicineForm = () => {
         </Row>
         <Row className="mb-3">
           <Form.Group className="mb-3" as={Col}>
-            <Form.Label>Đơn vị</Form.Label>
+            <Form.Label>Công dụng</Form.Label>
             <Form.Control
               onChange={(e) => {
                 setNewMedicine({ ...newMedicine, unit: e.target.value });
@@ -133,16 +133,15 @@ const MedicineForm = () => {
             />
           </Form.Group>
           <Form.Group className="mb-3" as={Col}>
-            <Form.Label>Ngày hết hạn</Form.Label>
+            <Form.Label>Chống chỉ định</Form.Label>
           
-            <DatePicker 
-              selected={datee}
-              dateFormat="dd/MM/yyyy"
+            <Form.Control
               onChange={(e) => {
-                // setNewMedicine({ ...newMedicine, expireDay: e });
-                setDatee(e);
+                setNewMedicine({ ...newMedicine, contraindication: e.target.value });
               }}
-            ></DatePicker>
+              as="textarea"
+              rows={3}
+            />
           </Form.Group>
         </Row>
       </Form>

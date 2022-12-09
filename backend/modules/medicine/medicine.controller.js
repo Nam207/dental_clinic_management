@@ -31,9 +31,9 @@ const getActiveMedicine = async (req, res) => {
 };
 
 const checkName = async (req, res) => {
-  const {name} = req.params;
-  const medicine = await MedicineModel.findOne({name: name});
-  if(medicine != null) res.send({success: 0, data: medicine})
+  const { name } = req.params;
+  const medicine = await MedicineModel.findOne({ name: name });
+  if (medicine != null) res.send({ success: 0, data: medicine })
   res.send({ success: 1, data: medicine });
 };
 
@@ -46,16 +46,16 @@ const createMedicine = async (req, res) => {
     quantity,
     price,
     purchasePrice,
-    unit,
+    effect,
     usage,
-    expiredDay,
+    contraindication,
   } = req.body;
 
   const existMedicine = await MedicineModel.findOne({ 'name': name });
   if (existMedicine) {
     throw new HTTPError(400, "Medicine had exist");
   }
-  
+
   const medID = await getNext();
   const newMedicine = await MedicineModel.create({
     _id: medID,
@@ -64,9 +64,9 @@ const createMedicine = async (req, res) => {
     quantity,
     price,
     purchasePrice,
-    unit,
+    effect,
     usage,
-    expiredDay,
+    contraindication,
     createBy: senderUser._id,
   });
   res.send({ success: 1, data: newMedicine });
@@ -81,9 +81,9 @@ const updateMedicine = async (req, res) => {
     quantity,
     price,
     purchasePrice,
-    unit,
+    effect,
     usage,
-    expiredDay,
+    contraindication,
     status,
   } = req.body;
 
@@ -102,9 +102,9 @@ const updateMedicine = async (req, res) => {
         quantity,
         price,
         purchasePrice,
-        unit,
+        effect,
         usage,
-        expiredDay,
+        contraindication,
         status,
         modifyBy: senderUser._id,
       },
@@ -120,9 +120,9 @@ const updateMedicine = async (req, res) => {
         quantity,
         price,
         purchasePrice,
-        unit,
+        effect,
         usage,
-        expiredDay,
+        contraindication,
         status,
         modifyBy: senderUser._id,
       },

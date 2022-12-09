@@ -27,7 +27,6 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
   const dispatch = useDispatch();
 
   const newMedicine = useSelector((state) => state.med.medDetail);
-  const [exDay, setExDay] = useState("");
   // const [newMedicine, setNewMedicine] = useState({});
 
   useEffect(() => {
@@ -45,9 +44,6 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
         // store.dispatch(getMedDetailSuccess(response.data));
         // console.log(response.data);
         // setNewMedicine(response.data);
-        setExDay(
-          new Date(response.data.expiredDay).toISOString().split("T")[0]
-        );
       })
       .catch((err) => {
         console.log("Err: ", err);
@@ -63,30 +59,31 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
       quantity: newMedicine.quantity,
       price: newMedicine.price.$numberDecimal,
       purchasePrice: newMedicine.purchasePrice.$numberDecimal,
-      unit: newMedicine.unit,
+      effect: newMedicine.effect,
       usage: newMedicine.usage,
-      expiredDay: exDay,
+      contraindication: newMedicine.contraindication,
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
       name: Yup.string()
-        .required("Required")
-        .min(4, "Must be 4 characters or more"),
+        .required("Bắt buộc")
+        .min(4, "Tên phải lớn hơn 4 kí tự"),
       imageUrl: Yup.mixed().required("Bắt buộc"),
       quantity: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .integer("Phải là số tự nhiên"),
       price: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .moreThan(Yup.ref("purchasePrice"), "Giá bán phải lớn hơn giá nhập"),
       purchasePrice: Yup.number()
-        .required("Required")
+        .required("Bắt buộc")
         .positive("Phải là số dương")
         .lessThan(Yup.ref("price"), "Giá nhập phải nhỏ hơn giá bán "),
-      unit: Yup.string().required("Required"),
-      usage: Yup.string().required("Required"),
+      effect: Yup.string().required("Bắt buộc"),
+      usage: Yup.string().required("Bắt buộc"),
+      contraindication: Yup.string().required("Bắt buộc"),
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
@@ -97,13 +94,10 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
       formData.append("quantity", values.quantity);
       formData.append("price", values.price);
       formData.append("purchasePrice", values.purchasePrice);
-      formData.append("unit", values.unit);
+      formData.append("effect", values.effect);
       formData.append("usage", values.usage);
-      // formData.append("expiredDay", values.expiredDay);
-      formData.append("expiredDay", values.expiredDay);
+      formData.append("contraindication", values.contraindication);
       closeModal();
-      console.log(typeof values.imageUrl[0]);
-      setExDay(new Date().toLocaleDateString("en-US"));
       await medicineProcessor.updateMedcine(formData, medID);
       loadData();
     },
@@ -238,7 +232,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Đơn vị
+                    Công dụng
                     <span
                       style={{
                         display: "inline",
@@ -251,13 +245,13 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                     </span>
                   </Form.Label>
                   <Form.Control
-                    id="unit"
+                    id="effect"
                     type="text"
-                    value={formik.values.unit}
+                    value={formik.values.effect}
                     onChange={formik.handleChange}
                   />
-                  {formik.errors.unit && (
-                    <p className="errorMsg"> {formik.errors.unit} </p>
+                  {formik.errors.effect && (
+                    <p className="errorMsg"> {formik.errors.effect} </p>
                   )}
                 </Form.Group>
                 <Form.Group className="mb-3" as={Col}>
@@ -319,7 +313,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                 </Form.Group>
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Ngày hết hạn
+                    Chống chỉ định
                     <span
                       style={{
                         display: "inline",
@@ -331,27 +325,16 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                       *
                     </span>
                   </Form.Label>
-
-                  {/* <DatePicker
-                    selected={
-                      // formik.values.expiredDay === ""
-                      //   ? new Date()
-                      //   : new Date(formik.values.expiredDay)
-                      // formik.values.expiredDay
-                      new Date(exDay)
-                    }
-                    dateFormat="MM/dd/yyyy"
-                    onChange={(e) => {
-                      setExDay(e);
-                    }}
-                  ></DatePicker> */}
                   <Form.Control
-                    type="date"
-                    value={formik.values.expiredDay}
-                    min={formik.values.expiredDay}
-                    id="expiredDay"
+                    id="contraindication"
+                    value={formik.values.contraindication}
                     onChange={formik.handleChange}
+                    as="textarea"
+                    rows={3}
                   />
+                  {formik.errors.contraindication && (
+                    <p className="errorMsg">{formik.errors.contraindication}</p>
+                  )}
                 </Form.Group>
               </Row>
 

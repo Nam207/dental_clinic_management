@@ -44,6 +44,7 @@ const createMedicalPaper = async (req, res) => {
     doctorId,
     reExamination,
     status,
+    note,
     medicalService,
   } = req.body;
   const medicalId = await getNext();
@@ -70,6 +71,7 @@ const createMedicalPaper = async (req, res) => {
     customerId,
     doctorId,
     reExamination,
+    note,
     status,
     createBy: profile._id,
   });

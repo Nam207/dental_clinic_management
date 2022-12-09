@@ -120,6 +120,33 @@ const login = async (req, res) => {
     });
 }
 
+const changePassword = async (req, res) => {
+    const senderUser = req.user;
+    const {password, newPassword} = req.body;
+
+    const existUser = await UserModel.findById(senderUser._id);
+    if (!existUser) {
+        throw new HTTPError(400, 'Bạn k có quyền');
+    }
+
+    const matchPassword = await bcrypt.compare(password, existUser.password);
+
+    if (!matchPassword) {
+        throw new HTTPError(400, 'Username or Password incorrect');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+
+    await UserModel.findByIdAndUpdate(existUser._id, {password: hashPassword});
+
+    res.send({
+        success: 1, data: {
+            _id: existUser._id,
+        }
+    });
+}
+
 const verify = async (req, res) => {
     const { user } = req;
 

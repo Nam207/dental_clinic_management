@@ -46,25 +46,19 @@ const Medicine = () => {
         `/api/medicine?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
       )
       .then((response) => {
-        // response.success === 1 &&
-        //   setMeds(response.data.data) &&
-        // setTotal(response.data.total);
 
         if (response.success === 1) {
           setMeds(response.data.data);
           setTotal(response.data.total);
         }
-        // console.log(response.data.total);
       });
   };
 
   useEffect(() => {
     loadData();
-    // console.log(total);
   }, [offset, total, searchMeds, limit]);
 
   const onChangePage = (current, pageSize) => {
-    // console.log(current, pageSize);
     setOffset(current - 1);
     setLimit(pageSize);
   };
@@ -113,12 +107,10 @@ const Medicine = () => {
       sorter: (a, b) => a.name.length - b.name.length,
     },
     {
-      title: "Cách sử dụng",
-      dataIndex: "usage",
+      title: "Tác dụng",
+      dataIndex: "effect",
       align: "center",
       width: "380px",
-      // tableLayout: "fixed",
-      // wordWrap: "break-word",
       ellipsis: true,
     },
     {
@@ -156,7 +148,7 @@ const Medicine = () => {
         />
       ),
       name: med.name,
-      usage: med.usage,
+      effect: med.effect,
       status: med.status ? (
         <AiOutlineCheck color="#009432" size={25} />
       ) : (

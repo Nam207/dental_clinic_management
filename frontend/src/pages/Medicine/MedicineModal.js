@@ -21,7 +21,6 @@ const MedicineModal = (prop) => {
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setShow(true);
-    // console.log(formik.values.expiredDay);
   };
 
   const navigate = useNavigate();
@@ -33,9 +32,9 @@ const MedicineModal = (prop) => {
       quantity: 0,
       price: 0,
       purchasePrice: 0,
-      unit: "",
+      effect: "",
       usage: "",
-      expiredDay: new Date().toISOString().split("T")[0],
+      contraindication: "",
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
@@ -74,8 +73,9 @@ const MedicineModal = (prop) => {
         .required("Bắt buộc")
         .positive("Phải là số dương")
         .lessThan(Yup.ref("price"), "Giá nhập phải nhỏ hơn giá bán "),
-      unit: Yup.string().required("Bắt buộc"),
+      effect: Yup.string().required("Bắt buộc"),
       usage: Yup.string().required("Bắt buộc"),
+      contraindication: Yup.string().required("Bắt buộc"),
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
@@ -84,18 +84,18 @@ const MedicineModal = (prop) => {
       formData.append("quantity", values.quantity);
       formData.append("price", values.price);
       formData.append("purchasePrice", values.purchasePrice);
-      formData.append("unit", values.unit);
+      formData.append("effect", values.effect);
       formData.append("usage", values.usage);
-      console.log(values.imageUrl);
-      formData.append("expiredDay", values.expiredDay);
+      formData.append("contraindication", values.contraindication);
       handleClose();
       values.name = "";
       values.imageUrl = "";
       values.quantity = 0;
       values.price = 0;
       values.purchasePrice = 0;
-      values.unit = "";
+      values.effect = "";
       values.usage = "";
+      values.contraindication = "";
       await addMed(formData, navigate);
       loadData();
     },
@@ -240,7 +240,7 @@ const MedicineModal = (prop) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Đơn vị{" "}
+                    Công dụng{" "}
                     <span
                       style={{
                         display: "inline",
@@ -253,13 +253,13 @@ const MedicineModal = (prop) => {
                     </span>
                   </Form.Label>
                   <Form.Control
-                    id="unit"
+                    id="effect"
                     type="text"
                     placeholder=""
                     onChange={formik.handleChange}
                   />
-                  {formik.errors.unit && (
-                    <p className="errorMsg"> {formik.errors.unit} </p>
+                  {formik.errors.effect && (
+                    <p className="errorMsg"> {formik.errors.effect} </p>
                   )}
                 </Form.Group>
                 <Form.Group className="mb-3" as={Col}>
@@ -321,15 +321,28 @@ const MedicineModal = (prop) => {
                 </Form.Group>
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Ngày hết hạn
+                    Chống chỉ định{" "}
+                    <span
+                      style={{
+                        display: "inline",
+                        marginBottom: "0px",
+                        color: "red",
+                      }}
+                    >
+                      {" "}
+                      *
+                    </span>
                   </Form.Label>
                   <Form.Control
-                    type="date"
-                    value={formik.values.expiredDay}
-                    min={formik.values.expiredDay}
-                    id="expiredDay"
+                    id="contraindication"
+                    value={formik.values.contraindication}
                     onChange={formik.handleChange}
+                    as="textarea"
+                    rows={3}
                   />
+                  {formik.errors.contraindication && (
+                    <p className="errorMsg">{formik.errors.contraindication}</p>
+                  )}
                 </Form.Group>
               </Row>
               <Button

@@ -17,7 +17,10 @@ const MedicalPaperSchema = new mongoose.Schema({
     },
     reExamination: {
         type: Date,
-    }, 
+    },
+    note:{
+        type: String,
+    },
     status: {
         type: mongoose.Types.Decimal128,
         default: 0,
