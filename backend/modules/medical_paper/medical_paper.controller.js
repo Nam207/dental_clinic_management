@@ -3,6 +3,27 @@ const HTTPError = require("../../common/httpError");
 const ProfileModel = require("../profile/profile");
 const MedicalServiceModel = require("../medical_service/medical_service");
 
+const getReExamination = async (req, res) => {
+  const { offset, limit, startDate, endDate } = req.query;
+
+  const offsetNumber = offset && Number(offset) ? Number(offset) : 0;
+  const limitNumber = limit && Number(limit) ? Number(limit) : 5;
+
+  let filter = {};
+  if(startDate && endDate){
+    filter.reExamination = {$gte: [startDate], $lt: [endDate]}
+  }
+
+  const [medicalPaper, totalMedicalPaper] = await Promise.all([
+    MedicalPaperModel.find(filter)
+      .skip(offsetNumber * limitNumber)
+      .limit(limitNumber),
+      MedicalPaperModel.countDocuments(filter),
+  ]);
+
+  res.send({ success: 1, data: { data: medicalPaper, total: totalMedicalPaper } });
+};
+
 const getMedicalPaper = async (req, res) => {
   const { keyword, offset, limit, startDate, endDate } = req.query;
 
@@ -109,4 +130,5 @@ module.exports = {
   getMedicalPaper,
   getMedicalPaperById,
   createMedicalPaper,
+  getReExamination,
 };

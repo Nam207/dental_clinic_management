@@ -182,11 +182,24 @@ const Service = () => {
             style={{ display: "inline", marginLeft: "10px" }}
             onChange={async (e) => {
               // refreshData(e, med, index);
-              const result = await serviceProcessor.changeStatus(
-                med._id,
-                e.target.checked
-              );
-              if (result.success === 1) {
+              let resul;
+              let temp = e.target.checked;
+              // console.log(e.target.checked);
+              await Swal.fire({
+                title: "Bạn có chắc chắn muốn đổi",
+                showDenyButton: true,
+                confirmButtonText: "Đổi",
+                denyButtonText: `Huỷ`,
+              }).then(async (result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                  console.log(temp);
+                  resul = await serviceProcessor.changeStatus(med._id, temp);
+                } else if (result.isDenied) {
+                }
+              });
+
+              if (resul.success === 1) {
                 showToast(`Cập nhật id: ${med._id} thành công`, true);
                 await loadData();
               }

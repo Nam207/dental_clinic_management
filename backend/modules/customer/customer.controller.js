@@ -1,5 +1,36 @@
 const CustomerModel = require("./customer");
 const HTTPError = require("../../common/httpError");
+const moment = require('moment');
+
+const getBirthday = async (req, res) => {
+  const { offset, limit } = req.query;
+
+  const offsetNumber = offset && Number(offset) ? Number(offset) : 0;
+  const limitNumber = limit && Number(limit) ? Number(limit) : 5;
+
+  const [customer, totalCustomer] = await Promise.all([
+    CustomerModel.find({
+      "$expr": {
+        "$and": [
+          { "$eq": [{ "$dayOfMonth": "$dateOfBirth" }, { "$dayOfMonth": new Date() }] },
+          { "$eq": [{ "$month": "$dateOfBirth" }, { "$month": new Date() }] }
+        ]
+      }
+    })
+      .skip(offsetNumber * limitNumber)
+      .limit(limitNumber),
+    CustomerModel.countDocuments({
+      "$expr": {
+        "$and": [
+          { "$eq": [{ "$dayOfMonth": "$dateOfBirth" }, { "$dayOfMonth": new Date() }] },
+          { "$eq": [{ "$month": "$dateOfBirth" }, { "$month": new Date() }] }
+        ]
+      }
+    }),
+  ]);
+
+  res.send({ success: 1, data: { data: customer, total: totalCustomer } });
+};
 
 const getCustomer = async (req, res) => {
   const { keyword, offset, limit } = req.query;
@@ -129,6 +160,32 @@ const updateCustomer = async (req, res) => {
   res.send({ success: 1, data: updatedCustomer });
 };
 
+const updateCustomerWithMedical = async (req, res) => {
+  const senderUser = req.user;
+  const {
+    customerId,
+    systemicMedicalHistory,
+    dentalMedicalHistory,
+  } = req.body;
+
+  const existCustomer = await CustomerModel.findOne({ _id: customerId });
+  if (!existCustomer) {
+    throw new HTTPError(400, "Not found customer");
+  }
+
+  const updatedCustomer = await CustomerModel.findByIdAndUpdate(
+    customerId,
+    {
+      modifyBy: senderUser._id,
+      systemicMedicalHistory,
+      dentalMedicalHistory,
+    },
+    { new: true }
+  );
+
+  res.send({ success: 1, data: updatedCustomer });
+}
+
 const getCustomerById = async (req, res) => {
   const { customerId } = req.params;
 
@@ -183,4 +240,6 @@ module.exports = {
   checkPhone,
   checkEmail,
   getAllCustomer,
+  updateCustomerWithMedical,
+  getBirthday,
 };

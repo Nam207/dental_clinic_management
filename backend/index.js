@@ -29,6 +29,8 @@ const customerRouter = require('./modules/customer/customer.router');
 
 const medicalPaperRouter = require('./modules/medical_paper/medical_paper.router');
 
+const invoicePdfRouter = require('./common/invoicePdf/invoicePdf.router');
+
 mongoose.connect(process.env.MONGODB_URL, err => {
     if (err) {
         return console.log('Err connnect mongodb', err);
@@ -63,7 +65,8 @@ app.use('/api/systemicMedicalHistory', systemicMedicalHistoryRouter);
 app.use('/api/dentalMedicalHistory', dentalMedicalHistoryRouter);
 app.use('/api/customer', customerRouter);
 app.use('/api/clinic', clinicRouter);
-app.use('api/medicalPaper', medicalPaperRouter)
+app.use('/api/medicalPaper', medicalPaperRouter)
+app.use('/api/invoice', invoicePdfRouter);
 
 app.use('*', (req, res, next) => {
     res.status(404).send({ message: '404 not found' })

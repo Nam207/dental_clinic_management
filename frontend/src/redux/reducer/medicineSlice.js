@@ -10,9 +10,9 @@ const medicineSlice = createSlice({
       quantity: -1,
       price: -1,
       purchasePrice: -1,
-      unit: -1,
+      effect: "",
       usage: "",
-      expiredDay: new Date().toLocaleDateString('en-US'),
+      contraindication: "",
     },
   },
   reducers: {
@@ -38,7 +38,7 @@ const medicineSlice = createSlice({
       //     med.quantity = action.payload.quantity;
       //     med.price = action.payload.price;
       //     med.purchasePrice = action.payload.purchasePrice;
-      //     med.unit = action.payload.unit;
+      //     med.effect = action.payload.effect;
       //     med.usage = action.payload.usage;
       //     med.expiredDay = action.payload.expiredDay;
       //   }
@@ -50,9 +50,9 @@ const medicineSlice = createSlice({
         state.medDetail.quantity = action.payload.quantity;
         state.medDetail.price = action.payload.price;
         state.medDetail.purchasePrice = action.payload.purchasePrice;
-        state.medDetail.unit = action.payload.unit;
+        state.medDetail.effect = action.payload.effect;
         state.medDetail.usage = action.payload.usage;
-        state.medDetail.expiredDay = action.payload.expiredDay;
+        state.medDetail.contraindication = action.payload.contraindication;
       }
     },
   },

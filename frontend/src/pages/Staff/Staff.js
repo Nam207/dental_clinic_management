@@ -223,16 +223,29 @@ function Staff() {
             checked={med.status}
             style={{ display: "inline", marginLeft: "10px" }}
             onChange={async (e) => {
-              const result = await axios({
-                url: `/api/profile/${med._id}/${e.target.checked}`,
-                method: "put",
+              let resul;
+              let temp = e.target.checked;
+              // console.log(e.target.checked);
+              await Swal.fire({
+                title: "Bạn có chắc chắn muốn đổi",
+                showDenyButton: true,
+                confirmButtonText: "Đổi",
+                denyButtonText: `Huỷ`,
+              }).then(async (result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                  resul = await axios({
+                    url: `/api/profile/${med._id}/${temp}`,
+                    method: "put",
+                  });
+                } else if (result.isDenied) {
+                }
               });
-              console.log(result);
-              if (result.success === 1) {
+              if (resul.success === 1) {
                 showToast(`Cập nhật id: ${med._id} thành công`, true);
                 await loadData();
               }
-              if (result.success !== 1) {
+              if (resul.success !== 1) {
                 Swal.fire(
                   "Thất bại",
                   `Cập nhật thất bại tại id=${med._id}`,
@@ -263,7 +276,7 @@ function Staff() {
             </Nav>
             <Form className="d-flex">
               <ModaladdStaff loadData={loadData} />
-              <Button type="primary" onClick={loadData} style={{ marginRight: "20px",borderRadius:"5px",width:"100px",height:"38px" }}>
+              <Button type="primary" onClick={loadData} style={{ marginRight: "20px", borderRadius: "5px", width: "100px", height: "38px" }}>
                 <FaRedoAlt /> Tải lại
               </Button>
             </Form>

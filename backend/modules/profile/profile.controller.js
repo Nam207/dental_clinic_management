@@ -57,8 +57,6 @@ const curProfile = async (req, res) => {
   res.send({ success: 1, data: fullProfile });
 };
 
-};
-
 const getDoctor = async (req, res) => {
   const role = await RoleModel.findOne({ name: "Bác sĩ" });
   const userId = await UserRoleModel.find({ roleId: role._id });
@@ -489,7 +487,7 @@ module.exports = {
   checkEmail,
   checkPhone,
   curProfile,
-  editProfileByUser
+  editProfileByUser,
   getDoctor,
   getTechStaff,
 };

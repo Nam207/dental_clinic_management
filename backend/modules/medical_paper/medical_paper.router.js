@@ -13,6 +13,13 @@ router.get(
   medicalPaperController.getMedicalPaper
 );
 
+router.get(
+  "/reExam",
+  needAuthenticated,
+  //isRole,
+  medicalPaperController.getReExamination
+);
+
 router.post(
   "/",
   needAuthenticated,

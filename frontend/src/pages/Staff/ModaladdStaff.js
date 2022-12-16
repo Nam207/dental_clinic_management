@@ -204,7 +204,7 @@ function ModaladdStaff({loadData}) {
             });
           }
         ),
-        schedule: Yup.array()
+      schedule: Yup.array()
         .min(1, "Không được trống"),
       numberOfWorkdays: Yup.number()
         .typeError("Không phải là dạng số")
@@ -300,7 +300,8 @@ function ModaladdStaff({loadData}) {
     } else {
       formik.values.schedule.push(scheduleTemp);
     }
-
+    formik.setFieldValue(formik.values.schedule);
+    
     let startTime = moment();
     startTime.hours(e[0]._d.getHours());
     startTime.minutes(e[0]._d.getMinutes());

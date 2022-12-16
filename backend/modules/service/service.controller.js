@@ -272,13 +272,6 @@ const updateStatus = async (req, res) => {
   res.send({ success: 1, data: updatedService });
 };
 
-const getMedicineByService = async () => {
-  const {serviceId} = req.body;
-
-  const medicine = await PrescriptionModel.find({serviceId: {$in : serviceId}});
-  res.send({ success: 1, data: updatedService });
-}
-
 const getNext = async () => {
   const count = await ServiceModel.find().count();
   if (count <= 0) return "DV_0000000001";

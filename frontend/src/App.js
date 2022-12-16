@@ -6,6 +6,7 @@ import {
   Redirect,
   Navigate,
 } from "react-router-dom";
+import ReactDOM from 'react-dom';
 import Login from "./pages/login_UI/login";
 import Medicine from "./pages/Medicine/Medicine";
 import { useSelector } from "react-redux";
@@ -24,9 +25,10 @@ import Clinic from "./pages/Clinic/Clinic";
 import axios from "../src/apis/api";
 import React from "react";
 import Staff from "./pages/Staff/Staff";
+import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper"
 import Decentralization from "./pages/decentralization/Decentralization";
-
-
+import Receptionist from "./pages/Receptionist/Receptionist";
+import Pdf from "./components/exportPdf";
 
 export const AuthContext = React.createContext();
 function App() {
@@ -77,7 +79,7 @@ function App() {
       <AuthContext.Provider value={{ user: userInfo.data, login, logout }}>
         {/* <LoadingComponent isLoading={isLoading} /> */}
         <Router>
-          {userInfo.data ? <Navbarr user={userInfo.data}/> : <></>}
+          {userInfo.data ? <Navbarr user={userInfo.data} /> : <></>}
 
           <Routes>
             <Route element={<GuestRoute user={userInfo.data} />}>
@@ -86,23 +88,23 @@ function App() {
             </Route>
 
             <Route element={<PrivateRoute user={userInfo.data} />}>
-              {/* <Route path="/" element={<Navbarr />} /> */}
-              <Route
-                path="/medicine"
-                element={<Medicine itemsPerPage={5} />}
-            ></Route>
-             <Route path="/Decentralization" element={<Decentralization />} />
-
-          <Route path="/medicine" element={<Medicine  itemsPerPage={5}/>}></Route>
-            <Route path="/ChangePassword" element={<Changepassword />} />
-            <Route path="/Profile" element={<Profile />} />
-            <Route path="/medicine" element={<Medicine />}></Route>
-            {/* <Route path="/service" element={<Service />}></Route> */}
-            <Route path="/Customer" element={<Customer />}></Route>
-            <Route path="/Staff" element={<Staff />}></Route>
-          </Route>
-        </Routes>
-
+              <Route path="/Decentralization" element={<Decentralization />} />
+              <Route path="/medicine" element={<Medicine itemsPerPage={5} />}></Route>
+              <Route path="/ChangePassword" element={<Changepassword />} />
+              <Route path="/Profile" element={<Profile />} />
+              <Route path="/medicine" element={<Medicine />}></Route>
+              <Route path="/service" element={<Service />}></Route>
+              <Route path="/Customer" element={<Customer />}></Route>
+              <Route path="/Staff" element={<Staff />}></Route>
+              <Route path="/clinic" element={<Clinic />}></Route>
+              <Route path="/MedicalPaper" element={<MedicalPaper />}></Route>
+              <Route path="/Receptionist" element={<Receptionist />}></Route>
+              <Route path="/Invoice" element={<Pdf />}></Route>
+            </Route>
+          </Routes>
+          {/* <PDFViewer>
+            <MyDocument />
+          </PDFViewer> */}
         </Router>
       </AuthContext.Provider>
     </>
