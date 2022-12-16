@@ -6,6 +6,13 @@ const isRole = require("../../middlewares/isRole");
 const customerSchema = require("./customer.validation");
 const validateInput = require("../../middlewares/validateInput");
 
+router.put(
+  "/updateCustomerWithMedical",
+  needAuthenticated,
+  //isRole,
+  customerController.updateCustomerWithMedical
+);
+
 router.get(
   "/allCustomer",
   needAuthenticated,

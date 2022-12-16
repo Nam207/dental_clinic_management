@@ -44,20 +44,20 @@ function Login() {
             password,
           },
         });
+
+
         if (res.success === 1) {
           login({
             _id: res.data._id,
             token: res.data.token,
           });
-        }if(res.success === 0){
-          console.log(1)
-          // render(
-          //   <SwalCard text='Tên đăng nhập hoặc mật khẩu sai'></SwalCard>
-          //   )
-          alert("sai passs")
         }
       } catch (err) {
-        render(<SwalCard text="Tên đăng nhập hoặc mật khẩu sai"></SwalCard>);
+        Swal.fire(
+          "Thất Bại",
+          `Email hoặc mật khẩu sai`,
+          "error"
+        );
       }
     },
   });

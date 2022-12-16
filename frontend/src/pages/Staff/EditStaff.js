@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import moment from "moment";
 
 const { TextArea } = Input;
-function Editstaff({ empId, isVisible, closeModal, loadData }) {
+function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState([]);
@@ -192,10 +192,12 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
       phone: Yup.string()
         .required("Không được trống")
         .typeError("Không phải là dạng số")
+
         .matches(
           /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/,
           "Số điện thoại phải chữ số và có 10 số"
         )
+
         .test(
           "Số điện thoại độc nhất",
           "Số điện thoại đang được sử dụng", // <- key, message
@@ -390,6 +392,28 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
       default:
     }
   };
+  console.log(userAB)
+  const [disabledEdit, setDisabledEdit] = useState(false);
+  var temp = false;
+  for (let i = 0; i < userAB.role.length; i++) {
+    if (
+      userAB.role[i].name.includes("Bác sĩ") ||
+      userAB.role[i].name.includes("Kỹ thuật viên") ||
+      userAB.role[i].name.includes("Lễ tân")
+    ) {
+      var temp = false;
+    }else{
+      var temp = true;
+    }
+  }
+  console.log(temp)
+  const disableInput = (temp) => {
+       if(temp = false){
+        setDisabledEdit(!disabledEdit)
+       }else{
+        setDisabledEdit(disabledEdit)
+       }
+  } 
 
   return (
     <>
@@ -411,6 +435,7 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
           >
             Hủy
           </Button>,
+          
           <Button
             key="submit"
             type="#595959"
@@ -437,12 +462,22 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
                 style={{ marginBottom: "20px" }}
               >
                 <label>Mã nhân viên</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   rows={2}
                   type="text"
                   id="employeeCode"
                   name="employeeCode"
-                  disabled
+                  disabled = "true"
                   value={empId}
                   onChange={formik.handleChange}
                 />
@@ -452,6 +487,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
                 style={{ marginBottom: "20px" }}
               >
                 <label>Tên nhân viên</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   type="text"
                   id="fullname"
@@ -466,6 +511,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
               </div>
               <div className="col-6 form-group">
                 <label>Điện thoại</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   type="text"
                   id="phone"
@@ -480,6 +535,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
               </div>
               <div className="col-6 form-group">
                 <label>Chức vụ</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Select
                   mode="multiple"
                   allowClear
@@ -505,6 +570,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
                 style={{ marginBottom: "20px" }}
               >
                 <label>Email</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   type="text"
                   id="email"
@@ -530,6 +605,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
               </div>
               <div className="col-6 form-group" style={{ marginTop: "20px" }}>
                 <label>Số ngày công</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   type="text"
                   id="numberOfWorkdays"
@@ -547,6 +632,16 @@ function Editstaff({ empId, isVisible, closeModal, loadData }) {
               </div>
               <div className="col-6 form-group" style={{ marginTop: "20px" }}>
                 <label>Lương</label>
+                <span
+                    style={{
+                      display: "inline",
+                      marginBottom: "0px",
+                      color: "red",
+                    }}
+                  >
+                    {" "}
+                    *
+                  </span>
                 <Input
                   type="text"
                   id="salary"

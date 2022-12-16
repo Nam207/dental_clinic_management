@@ -29,6 +29,8 @@ import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper"
 import Decentralization from "./pages/decentralization/Decentralization";
 import Receptionist from "./pages/Receptionist/Receptionist";
 import Pdf from "./components/exportPdf";
+import DashBoard from "./pages/dashBoard/dashBoard";
+import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper";
 
 export const AuthContext = React.createContext();
 function App() {
@@ -77,10 +79,8 @@ function App() {
   return (
     <>
       <AuthContext.Provider value={{ user: userInfo.data, login, logout }}>
-        {/* <LoadingComponent isLoading={isLoading} /> */}
         <Router>
           {userInfo.data ? <Navbarr user={userInfo.data} /> : <></>}
-
           <Routes>
             <Route element={<GuestRoute user={userInfo.data} />}>
               <Route path="/Login" element={<Login />} />
@@ -88,23 +88,26 @@ function App() {
             </Route>
 
             <Route element={<PrivateRoute user={userInfo.data} />}>
+              <Route path="/DashBoard" element={<DashBoard />} />
               <Route path="/Decentralization" element={<Decentralization />} />
-              <Route path="/medicine" element={<Medicine itemsPerPage={5} />}></Route>
+              <Route path="/clinic" element={<Clinic />} />
               <Route path="/ChangePassword" element={<Changepassword />} />
               <Route path="/Profile" element={<Profile />} />
-              <Route path="/medicine" element={<Medicine />}></Route>
-              <Route path="/service" element={<Service />}></Route>
+              <Route path="/Medicine" element={<Medicine />}></Route>
+              <Route path="/Service" element={<Service />}></Route>
               <Route path="/Customer" element={<Customer />}></Route>
-              <Route path="/Staff" element={<Staff />}></Route>
-              <Route path="/clinic" element={<Clinic />}></Route>
-              <Route path="/MedicalPaper" element={<MedicalPaper />}></Route>
               <Route path="/Receptionist" element={<Receptionist />}></Route>
               <Route path="/Invoice" element={<Pdf />}></Route>
+              <Route
+                path="/Staff"
+                element={<Staff user={userInfo.data} />}
+              ></Route>
+              <Route
+                path="/MedicalPaper"
+                element={<MedicalPaper user={userInfo.data} />}
+              ></Route>
             </Route>
           </Routes>
-          {/* <PDFViewer>
-            <MyDocument />
-          </PDFViewer> */}
         </Router>
       </AuthContext.Provider>
     </>

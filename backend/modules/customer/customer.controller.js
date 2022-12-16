@@ -230,6 +230,31 @@ const getNext = async () => {
   return "KH_" + temp;
 };
 
+const updateCustomerWithMedical = async (req, res) => {
+  const senderUser = req.user;
+  const { customerId, systemicMedicalHistory, dentalMedicalHistory } = req.body;
+  console.log(customerId);
+  console.log(systemicMedicalHistory);
+  console.log(dentalMedicalHistory);
+
+  const existCustomer = await CustomerModel.findOne({ _id: customerId });
+  if (!existCustomer) {
+    throw new HTTPError(400, "Not found customer");
+  }
+  const updatedCustomer = await CustomerModel.findByIdAndUpdate(
+    customerId,
+    {
+      modifyBy: senderUser._id,
+      systemicMedicalHistory,
+      dentalMedicalHistory,
+    },
+    { new: true }
+  );
+
+  console.log(updatedCustomer);
+  res.send({ success: 1, data: updatedCustomer });
+};
+
 module.exports = {
   getCustomer,
   createCustomer,

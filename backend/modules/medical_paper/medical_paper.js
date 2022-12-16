@@ -1,19 +1,20 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const MedicalPaperSchema = new mongoose.Schema({
+const MedicalPaperSchema = new mongoose.Schema(
+  {
     _id: {
-        type: String,
-        require: true,
+      type: String,
+      require: true,
     },
     customerId: {
-        type: String,
-        require: true,
-        ref: 'Customer'
+      type: String,
+      require: true,
+      ref: "Customer",
     },
     doctorId: {
-        type: String,
-        require: true,
-        ref: 'Profile'
+      type: String,
+      require: true,
+      ref: "Profile",
     },
     reExamination: {
         type: Date,
@@ -22,20 +23,23 @@ const MedicalPaperSchema = new mongoose.Schema({
         type: String,
     },
     status: {
-        type: mongoose.Types.Decimal128,
-        default: 0,
-        require: true,
+      type: mongoose.Types.Decimal128,
+      default: 0,
+      require: true,
     },
     createBy: {
-        type: mongoose.Types.ObjectId,
+      type: String,
+      require: true,
     },
     modifyBy: {
-        type: mongoose.Types.ObjectId,
-    }
-}, {
-    timestamps: true
-});
+      type: mongoose.Types.ObjectId,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const MedicalPaperModel = mongoose.model('MedicalPaper', MedicalPaperSchema);
+const MedicalPaperModel = mongoose.model("MedicalPaper", MedicalPaperSchema);
 
-module.exports = MedicalPaperModel
+module.exports = MedicalPaperModel;

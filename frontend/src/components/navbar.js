@@ -16,6 +16,7 @@ const Navbarr = ({ user }) => {
     localStorage.removeItem("token");
   };
 
+
   return (
     <Navbar bg="primary" variant="dark">
       <Container>

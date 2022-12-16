@@ -8,11 +8,10 @@ import { Space, TimePicker } from "antd";
 import { Checkbox } from "antd";
 import dayjs from "dayjs";
 import { FaRedoAlt, FaEdit } from "react-icons/fa";
-import moment from "moment"
+import moment from "moment";
 import Swal from "sweetalert2";
 const { TextArea } = Input;
-
-function ModaladdStaff({loadData}) {
+function ModaladdStaff({ userAA, loadData }) {
   const [form] = Form.useForm();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,56 +35,52 @@ function ModaladdStaff({loadData}) {
   const [value7, setValue7] = useState([]);
   const [valuecn, setValuecn] = useState([]);
   const format = "HH:mm";
+  console.log(userAA)
 
   const disPlay = () => {
-    Swal.fire(
-      "Thành Công",
-      `Thêm thành công`,
-      "success"
-    );
-  }
-  
+    Swal.fire("Thành Công", `Thêm thành công`, "success");
+  };
 
   const toggleDisablet2 = () => {
     setDisabled2(!disabled2);
-    if(disabled2){
-      removeSchedule('monday');
+    if (disabled2) {
+      removeSchedule("monday");
     }
   };
   const toggleDisablet3 = () => {
     setDisabled3(!disabled3);
-    if(disabled3){
-      removeSchedule('tuesday');
+    if (disabled3) {
+      removeSchedule("tuesday");
     }
   };
   const toggleDisablet4 = () => {
     setDisabled4(!disabled4);
-    if(disabled4){
-      removeSchedule('wednesday');
+    if (disabled4) {
+      removeSchedule("wednesday");
     }
   };
   const toggleDisablet5 = () => {
     setDisabled5(!disabled5);
-    if(disabled5){
-      removeSchedule('thursday');
+    if (disabled5) {
+      removeSchedule("thursday");
     }
   };
   const toggleDisablet6 = () => {
     setDisabled6(!disabled6);
-    if(disabled6){
-      removeSchedule('friday');
+    if (disabled6) {
+      removeSchedule("friday");
     }
   };
   const toggleDisablet7 = () => {
     setDisabled7(!disabled7);
-    if(disabled7){
-      removeSchedule('saturday');
+    if (disabled7) {
+      removeSchedule("saturday");
     }
   };
   const toggleDisabletcn = () => {
     setDisabledcn(!disabledcn);
-    if(disabledcn){
-      removeSchedule('sunday');
+    if (disabledcn) {
+      removeSchedule("sunday");
     }
   };
 
@@ -123,14 +118,14 @@ function ModaladdStaff({loadData}) {
     setDisabled5(false);
     setValue5([]);
     setDisabled6(false);
-    setValue6([])
+    setValue6([]);
     setValue7([]);
-    setDisabled7(false)
+    setDisabled7(false);
     setDisabledcn(false);
     setValuecn([]);
   };
-  const a="Bắt Đầu";
-  const b="Kết Thúc"
+  const a = "Bắt Đầu";
+  const b = "Kết Thúc";
 
   const formik = useFormik({
     initialValues: {
@@ -177,9 +172,12 @@ function ModaladdStaff({loadData}) {
             });
           }
         ),
+      //     openTime: yup.date().required(validateMessage.required),
+      // closeTime: yup.date().min(yup.ref('openTime'), 'Giờ đóng max phải lớn hơn giờ mở').required(validateMessage.required),
       competence: Yup.array()
         .required("Không được trống")
         .min(1, "Không được trống"),
+
       address: Yup.string().trim(),
       email: Yup.string()
         .trim()
@@ -204,8 +202,7 @@ function ModaladdStaff({loadData}) {
             });
           }
         ),
-      schedule: Yup.array()
-        .min(1, "Không được trống"),
+      schedule: Yup.array().min(1, "Không được trống"),
       numberOfWorkdays: Yup.number()
         .typeError("Không phải là dạng số")
         .required("Không được để trống")
@@ -218,7 +215,6 @@ function ModaladdStaff({loadData}) {
         .positive("Phải là số dương")
         .integer("Phải là số nguyên dương"),
     }),
- 
 
     onSubmit: async (values) => {
       const {
@@ -280,7 +276,7 @@ function ModaladdStaff({loadData}) {
     if (index > -1) {
       formik.values.schedule.splice(index, 1);
     }
-  }
+  };
 
   const pushSchedule = (e, weekday) => {
     let scheduleTemp = {
@@ -310,25 +306,25 @@ function ModaladdStaff({loadData}) {
     endTime.minutes(e[1]._d.getMinutes());
     switch (weekday) {
       case "monday":
-        setValue2([startTime,endTime]);
+        setValue2([startTime, endTime]);
         break;
       case "tuesday":
-        setValue3([startTime,endTime]);
+        setValue3([startTime, endTime]);
         break;
       case "wednesday":
-        setValue4([startTime,endTime]);
+        setValue4([startTime, endTime]);
         break;
       case "thursday":
-        setValue5([startTime,endTime]);
+        setValue5([startTime, endTime]);
         break;
       case "friday":
-        setValue6([startTime,endTime]);
+        setValue6([startTime, endTime]);
         break;
       case "saturday":
-        setValue7([startTime,endTime]);
+        setValue7([startTime, endTime]);
         break;
       case "sunday":
-        setValuecn([startTime,endTime]);
+        setValuecn([startTime, endTime]);
         break;
       default:
     }
@@ -350,10 +346,39 @@ function ModaladdStaff({loadData}) {
   const handleCancel = () => {
     setOpen(false);
   };
+  var temp = false;
+  for (let i = 0; i < userAA.role.length; i++) {
+    if (
+      userAA.role[i].name.includes("Bác sĩ") ||
+      userAA.role[i].name.includes("Kỹ thuật viên") ||
+      userAA.role[i].name.includes("Lễ tân")
+    ) {
+      temp = false;
+    }else{
+      temp = true;
+    }
+  }
+  console.log(temp);
 
   return (
     <>
-      <Button
+      {temp === true ? (
+        <Button
+          variant="success"
+          onClick={showModal}
+          style={{
+            marginRight: "20px",
+            backgroundColor: "#14A44D",
+            color: "white",
+            borderRadius: "5px",
+            width: "180px",
+            height: "38px",
+          }}
+        >
+          <FaPlusCircle></FaPlusCircle> Thêm nhân viên
+        </Button>
+      ) : null}
+      {/* <Button
         variant="success"
         onClick={showModal}
         style={{
@@ -362,11 +387,12 @@ function ModaladdStaff({loadData}) {
           color: "white",
           borderRadius:"5px",
           width:"180px",
-          height:"38px"        
+          height:"38px"
+          
         }}
       >
         <FaPlusCircle></FaPlusCircle> Thêm nhân viên
-      </Button>
+      </Button> */}
 
       <Modal
         title="Thêm nhân viên"
@@ -378,7 +404,12 @@ function ModaladdStaff({loadData}) {
           <Button
             key="back"
             onClick={handleCancel}
-            style={{ backgroundColor: "#808080", borderRadius: "5px",width:"80px",color:"white" }}
+            style={{
+              backgroundColor: "#808080",
+              borderRadius: "5px",
+              width: "80px",
+              color: "white",
+            }}
           >
             Hủy
           </Button>,
@@ -388,7 +419,7 @@ function ModaladdStaff({loadData}) {
             loading={loading}
             onClick={handleOk}
             htmlType="submit"
-            style={{ borderRadius: "5px",width:"120px" }}
+            style={{ borderRadius: "5px", width: "120px" }}
           >
             Lưu lại
           </Button>,
@@ -403,6 +434,16 @@ function ModaladdStaff({loadData}) {
                 style={{ marginBottom: "20px" }}
               >
                 <label>Tên nhân viên</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Input
                   type="text"
                   id="fullname"
@@ -417,6 +458,16 @@ function ModaladdStaff({loadData}) {
               </div>
               <div className="col-6 form-group">
                 <label>Điện thoại</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Input
                   type="text"
                   id="phone"
@@ -431,6 +482,16 @@ function ModaladdStaff({loadData}) {
               </div>
               <div className="col-6 form-group">
                 <label>Chức vụ</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Select
                   mode="multiple"
                   allowClear
@@ -456,6 +517,16 @@ function ModaladdStaff({loadData}) {
                 style={{ marginBottom: "20px" }}
               >
                 <label>Email</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Input
                   type="text"
                   id="email"
@@ -481,6 +552,16 @@ function ModaladdStaff({loadData}) {
               </div>
               <div className="col-6 form-group" style={{ marginTop: "20px" }}>
                 <label>Số ngày công</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Input
                   type="number"
                   id="numberOfWorkdays"
@@ -497,6 +578,16 @@ function ModaladdStaff({loadData}) {
               </div>
               <div className="col-6 form-group" style={{ marginTop: "20px" }}>
                 <label>Lương</label>
+                <span
+                  style={{
+                    display: "inline",
+                    marginBottom: "0px",
+                    color: "red",
+                  }}
+                >
+                  {" "}
+                  *
+                </span>
                 <Input
                   type="number"
                   id="salary"
@@ -537,7 +628,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 2:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet2} checked={disabled2}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet2}
+                    checked={disabled2}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -546,7 +640,7 @@ function ModaladdStaff({loadData}) {
                       TimePicker
                       id="schedule"
                       name="schedule"
-                      value={value2.length < 1 ? [null, null]: value2}
+                      value={value2.length < 1 ? [null, null] : value2}
                       disabled={!disabled2}
                       status="success"
                       format={format}
@@ -564,7 +658,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 3:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet3} checked={disabled3}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet3}
+                    checked={disabled3}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -575,7 +672,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={value3.length < 1 ? [null, null]: value3}
+                      value={value3.length < 1 ? [null, null] : value3}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "tuesday");
@@ -591,7 +688,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 4:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet4} checked={disabled4}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet4}
+                    checked={disabled4}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -602,7 +702,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={value4.length < 1 ? [null, null]: value4}
+                      value={value4.length < 1 ? [null, null] : value4}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "wednesday");
@@ -618,7 +718,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 5:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet5} checked={disabled5}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet5}
+                    checked={disabled5}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -629,7 +732,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={value5.length < 1 ? [null, null]: value5}
+                      value={value5.length < 1 ? [null, null] : value5}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "thursday");
@@ -645,7 +748,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 6:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet6} checked={disabled6}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet6}
+                    checked={disabled6}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -656,7 +762,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={value6.length < 1 ? [null, null]: value6}
+                      value={value6.length < 1 ? [null, null] : value6}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "friday");
@@ -672,7 +778,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Thứ 7:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisablet7} checked={disabled7}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisablet7}
+                    checked={disabled7}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -683,7 +792,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={value7.length < 1 ? [null, null]: value7}
+                      value={value7.length < 1 ? [null, null] : value7}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "saturday");
@@ -699,7 +808,10 @@ function ModaladdStaff({loadData}) {
                   <p className="font-weight-bold">Chủ Nhật:</p>
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
-                  <Checkbox onClick={toggleDisabletcn} checked={disabledcn}></Checkbox>
+                  <Checkbox
+                    onClick={toggleDisabletcn}
+                    checked={disabledcn}
+                  ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
@@ -710,7 +822,7 @@ function ModaladdStaff({loadData}) {
                       id="schedule"
                       name="schedule"
                       TimePicker
-                      value={valuecn.length < 1 ? [null, null]: valuecn}
+                      value={valuecn.length < 1 ? [null, null] : valuecn}
                       format={format}
                       onChange={(e) => {
                         pushSchedule(e, "sunday");
@@ -720,8 +832,7 @@ function ModaladdStaff({loadData}) {
                 </div>
               </div>
             </div>
-            <div className="footer" style={{ marginBottom: "20px" }}>
-            </div>
+            <div className="footer" style={{ marginBottom: "20px" }}></div>
           </div>
         </Form>
       </Modal>

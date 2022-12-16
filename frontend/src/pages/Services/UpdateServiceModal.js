@@ -86,7 +86,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
           console.log(response.data);
           setCurrService(response.data);
           // setCurrService({ ...currService, ...response.data.data });
-          // console.log(response.data.consumableArray);
+          console.log(response.data.consumableArray);
           // setConsumableUiList(response.data.consumableArray);
           setConsumableUiList([
             ...response.data.consumableArray.map((item) => [
@@ -97,6 +97,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
               item.numberOfUses,
             ]),
           ]);
+
           setPrescriptionList([
             ...response.data.prescriptionArray.map((item) => [
               item.medicineId,
@@ -134,7 +135,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
       consumableUiList[rowIndex][0] = searchResult._id;
       // consumableUiList[rowIndex][1] = e[0];
       consumableUiList[rowIndex][2] = searchResult.quantity;
-      consumableUiList[rowIndex][3] = searchResult.unit;
+      consumableUiList[rowIndex][3] = searchResult.effect;
       setConsumableUiList(consumableUiList);
     } else {
       // console.log("4");
@@ -150,7 +151,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
     if (searchResult) {
       prescriptionList[rowIndex][0] = searchResult._id;
       prescriptionList[rowIndex][2] = searchResult.quantity;
-      prescriptionList[rowIndex][3] = searchResult.unit;
+      prescriptionList[rowIndex][3] = searchResult.effect;
       setPrescriptionList(prescriptionList);
     } else {
       prescriptionList[rowIndex][0] = "";
@@ -504,7 +505,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                   <th>Mã thuốc</th>
                   <th>Tên thuốc</th>
                   <th>Lượng</th>
-                  <th>Đơn vị</th>
+                  <th>Công dụng</th>
                   <th>Số lần dùng</th>
                   <th>Cách sử dụng</th>
                   <th></th>
@@ -588,7 +589,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                       </td>
 
                       <td>
-                        <FormAntd.Item
+                        {/* <FormAntd.Item
                           name={`usagePreu${rowIndex}`}
                           rules={[
                             {
@@ -596,23 +597,24 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                               message: "Nhập cách dùng",
                             },
                           ]}
-                          // initialValue={row[5]}
-                        >
-                          <Form.Control
-                            value={row[5]}
-                            // defaultValue={row[5]}
-                            type="text"
-                            onChange={(e) => {
-                              // console.log(row[5]);
-                              row[5] = e.target.value;
+                          initialValue={row[5]}
+                        > */}
+                        <Form.Control
+                          required
+                          value={row[5]}
+                          // defaultValue={row[5]}
+                          type="text"
+                          onChange={(e) => {
+                            // console.log(row[5]);
+                            row[5] = e.target.value;
 
-                              //bước đệm
-                              let tempSelect = singleSelectionsPre;
-                              tempSelect[rowIndex] = e;
-                              setSingleSelectionsPre([...tempSelect]);
-                            }}
-                          />
-                        </FormAntd.Item>
+                            //bước đệm
+                            let tempSelect = singleSelectionsPre;
+                            tempSelect[rowIndex] = e;
+                            setSingleSelectionsPre([...tempSelect]);
+                          }}
+                        />
+                        {/* </FormAntd.Item> */}
                       </td>
                       <td onClick={() => deleteprescriptionList(rowIndex)}>
                         <FaTrashAlt

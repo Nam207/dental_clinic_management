@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const HTTPError = require('../../common/httpError');
 const sendEmail = require('../../common/sendEmail');
 const ProfileModel = require('../profile/profile');
+const UserRoleModel = require('../user_role/user_role');
+const RoleModel = require('../role/role');
 
 const generatePassword = () => {
     const hasNumber = /\d/;
@@ -52,7 +54,6 @@ const login = async (req, res) => {
 
     if (!existUser) {
         throw new HTTPError(400, 'Username or Password incorrect');
-        return
     }
 
     const matchPassword = await bcrypt.compare(password, existUser.password);
@@ -65,6 +66,13 @@ const login = async (req, res) => {
         throw new HTTPError(400, 'Tài khoản của bạn đã hết hạn');
     }
 
+    const roleId = await UserRoleModel.find({userId: existUser._id});
+    let role = [];
+    await Promise.all(roleId.map(async (element) => {
+        const roleTemp = await RoleModel.findById(element.roleId);
+        role.push(roleTemp);
+    }))
+
     const userId = existUser._id;
     const token = jwt.sign({
         userId,
@@ -76,6 +84,7 @@ const login = async (req, res) => {
         success: 1, data: {
             _id: userId,
             username: username,
+            role,
             token
         }
     });
@@ -110,36 +119,19 @@ const changePassword = async (req, res) => {
 
 const verify = async (req, res) => {
     const { user } = req;
+    const roleId = await UserRoleModel.find({userId: user._id});
 
-    res.send({ success: 1, data: user });
+    let role = [];
+    await Promise.all(roleId.map(async (element) => {
+        const roleTemp = await RoleModel.findById(element.roleId);
+        role.push(roleTemp);
+    }))
+    res.send({ success: 1, data: {
+        _id: user._id,
+        username: user.username,
+        role,
+    } });
 };
-
-// const changePassword = async (req, res) => {
-//     const senderUser = req.user;
-//     const {password, newPassword} = req.body;
-
-//     const existUser = await UserModel.findById(senderUser._id);
-//     if (!existUser) {
-//         throw new HTTPError(400, 'Bạn k có quyền');
-//     }
-
-//     const matchPassword = await bcrypt.compare(password, existUser.password);
-
-//     if (!matchPassword) {
-//         throw new HTTPError(400, 'Username or Password incorrect');
-//     }
-
-//     const salt = await bcrypt.genSalt(10);
-//     const hashPassword = await bcrypt.hash(newPassword, salt);
-
-//     await UserModel.findByIdAndUpdate(existUser._id, {password: hashPassword});
-
-//     res.send({
-//         success: 1, data: {
-//             _id: existUser._id,
-//         }
-//     });
-// }
 
 module.exports = {
     //register,

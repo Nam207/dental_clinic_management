@@ -1,14 +1,12 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 const MedicalPaperSchema = Joi.object({
   customerId: Joi.string().required(),
   doctorId: Joi.string().required(),
-  reExamination: Joi.date(),
-  status: Joi.number().integer().required(),
+  reExamination: Joi.date().allow(null, ""),
+  status: Joi.number().integer(),
   medicalService: Joi.array().items(Joi.object()).required(),
-  note: Joi.string().allow(null, ''),
-  systemicMedicalHistory: Joi.array(),
-  dentalMedicalHistory: Joi.array(),
+  note: Joi.string().allow(null, ""),
 });
 
-module.exports = MedicalPaperSchema
+module.exports = MedicalPaperSchema;

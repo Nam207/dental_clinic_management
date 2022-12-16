@@ -1,13 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const MedicinePrescribeSchema = new mongoose.Schema({
+const MedicinePrescribeSchema = new mongoose.Schema(
+  {
     doctorId: {
-        type: String,
-        require: true,
+      type: String,
+      require: true,
     },
     medicalPaperId: {
-        type: String,
-        require: true,
+      type: String,
+      require: true,
+    },
+    medicineId: {
+      type: String,
+      require: true,
+    },
+    quantity: {
+      type: Number,
+      require: true,
+    },
+    usage: {
+      type: String,
+      require: true,
     },
     medicineId: {
         type: String,
@@ -21,15 +34,20 @@ const MedicinePrescribeSchema = new mongoose.Schema({
         type: String,
     },
     createBy: {
-        type: mongoose.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
     },
     modifyBy: {
-        type: mongoose.Types.ObjectId,
-    }
-}, {
-    timestamps: true
-});
+      type: mongoose.Types.ObjectId,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const MedicinePrescribeModel = mongoose.model('MedicinePrescribe', MedicinePrescribeSchema);
+const MedicinePrescribeModel = mongoose.model(
+  "MedicinePrescribe",
+  MedicinePrescribeSchema
+);
 
-module.exports = MedicinePrescribeModel
+module.exports = MedicinePrescribeModel;

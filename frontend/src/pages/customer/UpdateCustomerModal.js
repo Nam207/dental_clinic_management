@@ -287,7 +287,7 @@ const UpdateCustomerModal = ({ closeModal, isVisible, cusId, loadData }) => {
                   <Form.Control
                     type="date"
                     value={formik.values.dateOfBirth}
-                    max={formik.values.dateOfBirth}
+                    max={new Date().toISOString().split("T")[0]}
                     id="dateOfBirth"
                     onChange={formik.handleChange}
                   />

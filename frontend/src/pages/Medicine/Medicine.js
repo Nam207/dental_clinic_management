@@ -253,7 +253,14 @@ const Medicine = () => {
           }}
         />
       </div>
-      <div style={{ marginLeft: "100px", marginRight: "100px" }}>
+      <div
+        style={{
+          // marginLeft: "100px",
+          // marginRight: "100px"
+          margin: "auto",
+          width: "90%",
+        }}
+      >
         <Form>
           <Form.Group className="mb-3">
             <Form.Control
