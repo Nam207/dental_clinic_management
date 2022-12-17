@@ -206,10 +206,13 @@
   text-rendering: auto;
   line-height: 1;
 }
-.col{
+.overflow-hidden{
   padding: 30px;
 }
 .text-shadow{
   text-shadow: 0 1px 3px #000;
   font-weight: 400;
+}
+h3{
+  text-align: center;
 }

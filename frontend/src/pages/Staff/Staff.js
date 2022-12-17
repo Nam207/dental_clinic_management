@@ -4,7 +4,7 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { FaRedoAlt, FaEdit } from "react-icons/fa";
+import { FaRedoAlt, FaEdit, FaEye } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
 import ModaladdStaff from "./ModaladdStaff";
 import { AiOutlineCheck, AiOutlineCloseCircle } from "react-icons/ai";
@@ -14,30 +14,26 @@ import Editstaff from "./EditStaff";
 import Swal from "sweetalert2";
 import CustomToast from "../../components/CustomToast";
 
-function Staff({user}) {
+function Staff({ user }) {
+  console.log(user)
   const [meds, setMeds] = useState([]);
   const [searchEmployee, setsearchEmployee] = useState("");
-
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
-
   const [isShowUpdate, setIsShowUpdate] = useState(false);
   const [empId, setEmpId] = useState("");
-
   const [fillrole, setFillroll] = useState([]);
-
+  const [temp, setTemp] = useState(false);
+  const [tempEye, setTempeye] = useState(false);
+  const [temp1, setTemp1] = useState(false);
+  
   const loadData = async () => {
-    // medicineProcessor.getAll("", 1, "");
     const response = await axios
       .get(
         `/api/profile?keyword=${searchEmployee}&offset=${offset}&limit=${limit}`
       )
       .then((response) => {
-        // response.success === 1 &&
-        //   setMeds(response.data.data) &&
-        // setTotal(response.data.total);
-
         if (response.success === 1) {
           setMeds(response.data.data);
           setTotal(response.data.total);
@@ -45,10 +41,6 @@ function Staff({user}) {
       });
 
     const fillrole = await axios.get(`/api/role/`).then((fillrole) => {
-      // response.success === 1 &&
-      //   setMeds(response.data.data) &&
-      // setTotal(response.data.total);
-
       if (fillrole.success === 1) {
         setFillroll(fillrole.data);
       }
@@ -75,7 +67,6 @@ function Staff({user}) {
   };
 
   const openUpdateModal = (id) => {
-    console.log(id);
     setIsShowUpdate(true);
     setEmpId(id);
   };
@@ -91,7 +82,12 @@ function Staff({user}) {
   };
 
   useEffect(() => {
+    console.log(temp1);
+  }, [temp1]);
+
+  useEffect(() => {
     loadData();
+    getPermission("Quản lý nhân viên");
   }, [offset, searchEmployee, limit]);
 
   const columns = [
@@ -208,45 +204,97 @@ function Staff({user}) {
       // "false"
       action: (
         <>
-          <FaEdit
-            className="mx-2"
-            color="#2980b9"
-            cursor={"pointer"}
-            size={25}
-            onClick={() => {
-              openUpdateModal(med._id);
-            }}
-          />
+          {tempEye === true ? (
+            <FaEdit
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
+          ) : (
+            <FaEye
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
+          )}
 
-          <Form.Check
-            type="switch"
-            checked={med.status}
-            style={{ display: "inline", marginLeft: "10px" }}
-            onChange={async (e) => {
-              const result = await axios({
-                url: `/api/profile/${med._id}/${e.target.checked}`,
-                method: "put",
-              });
-              console.log(result);
-              if (result.success === 1) {
-                showToast(`Cập nhật id: ${med._id} thành công`, true);
-                await loadData();
-              }
-              if (result.success !== 1) {
-                Swal.fire(
-                  "Thất bại",
-                  `Cập nhật thất bại tại id=${med._id}`,
-                  "failed"
-                );
-              }
-            }}
-          />
+          {temp === true ? (
+            <Form.Check
+              type="switch"
+              checked={med.status}
+              style={{ display: "inline", marginLeft: "10px" }}
+              onChange={async (e) => {
+                const result = await axios({
+                  url: `/api/profile/${med._id}/${e.target.checked}`,
+                  method: "put",
+                });
+                console.log(result);
+                if (result.success === 1) {
+                  showToast(`Cập nhật id: ${med._id} thành công`, true);
+                  await loadData();
+                }
+                if (result.success !== 1) {
+                  Swal.fire(
+                    "Thất bại",
+                    `Cập nhật thất bại tại id=${med._id}`,
+                    "failed"
+                  );
+                }
+              }}
+            />
+          ) : null}
         </>
       ),
     };
   });
 
-  console.log(user)
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+    let tempView = 0;
+    await Promise.all(
+      user.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].view === true) {
+          tempView++;
+          setTemp1(true);
+        }
+        if (permission.data[0].delete === true) {
+          setTemp(true);
+        }
+        if (permission.data[0].edit === true) {
+          setTempeye(true);
+        }
+      })
+    );
+    if(tempView===0){
+      window.location.href = "/Page404";
+    }
+  };
 
   return (
     <>
@@ -265,14 +313,22 @@ function Staff({user}) {
             </Nav>
             <Form className="d-flex">
               <ModaladdStaff userAA={user} loadData={loadData} />
-              <Button type="primary" onClick={loadData} style={{ marginRight: "20px",borderRadius:"5px",width:"100px",height:"38px" }}>
+              <Button
+                type="primary"
+                onClick={loadData}
+                style={{
+                  marginRight: "20px",
+                  borderRadius: "5px",
+                  width: "100px",
+                  height: "38px",
+                }}
+              >
                 <FaRedoAlt /> Tải lại
               </Button>
             </Form>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
       <div
         style={{
           position: "fixed",
@@ -298,7 +354,6 @@ function Staff({user}) {
         loadData={loadData}
         userAB={user}
       />
-
       <div style={{ marginLeft: "100px", marginRight: "100px" }}>
         <Form>
           <Form.Group className="mb-3">

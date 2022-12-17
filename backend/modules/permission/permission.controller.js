@@ -193,6 +193,18 @@ const getPermission = async(req, res) => {
     res.send({success: 1, data: permission});
 };
 
+const getPermissionByRoleAndFunction = async(req, res) => {
+  const {roleId, functionId}= req.params;
+
+  const permission = await PerrmissionModel.findOne({"roleId": roleId});
+  
+  const temp = [];
+  await Promise.all(permission.permissionArray.map((elment) => {
+    if(elment.functionId.toString() === functionId) temp.push(elment);
+  }))
+  res.send({success: 1, data: temp});
+}
+
 const updatePermission = async(req, res) => {
     const {permission} = req.body;
     let newPermission = [];
@@ -209,4 +221,5 @@ module.exports = {
   createPermission,
   getPermission,
   updatePermission,
+  getPermissionByRoleAndFunction,
 };

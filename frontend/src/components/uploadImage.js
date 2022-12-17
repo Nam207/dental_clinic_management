@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import { AiOutlineClose } from "react-icons/ai";
+import axios from "../apis/api";
 
-const UploadAndDisplayImage = ({ value = [], onChange = () => { } }) => {
+const UploadAndDisplayImage = ({ userI,value = [], onChange = () => { } }) => {
   let [files, setFiles] = useState([]);
-
+  const [temp, setTemp] = useState(false);
   const openFileDialog = () => {
     document.getElementById("imageUrl").click();
   };
@@ -12,12 +13,42 @@ const UploadAndDisplayImage = ({ value = [], onChange = () => { } }) => {
   useEffect(() => {
     onChange(files);
   }, [files]);
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userI.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].edit === true ) {
+        setTemp(true);
+        return;
+      }
+    }))
+    return;
+  }
 
   return (
     <>
-      <Button onClick={openFileDialog} variant="primary">
+    {temp === true ? (<Button onClick={openFileDialog} variant="primary">
         Chọn ảnh
-      </Button>
+      </Button>): null}
+      
       <input
         id="imageUrl"
         type="file"

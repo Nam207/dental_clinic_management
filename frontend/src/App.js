@@ -22,14 +22,16 @@ import PrivateRoute from "./components/Route/PrivateRoute";
 import GuestRoute from "./components/Route/GuestRoute";
 import Clinic from "./pages/Clinic/Clinic";
 import axios from "../src/apis/api";
-import React from "react";
+import React, { useState, useEffect, Component } from "react";
 import Staff from "./pages/Staff/Staff";
 import Decentralization from "./pages/decentralization/Decentralization";
 import DashBoard from "./pages/dashBoard/dashBoard";
-
+import Page404 from "./pages/page404/Page404";
+import DashBoardTech from "./pages/dashBoard/dashBoardtechnicians";
 export const AuthContext = React.createContext();
 function App() {
   const isLoading = useSelector((state) => state.loading);
+  const [temp, setTemp] = useState(false);
   const [userInfo, setUserInfo] = React.useState({
     status: "idle",
     data: null,
@@ -71,7 +73,6 @@ function App() {
 
   if (userInfo.status === "error") return <div>Error</div>;
 
-
   return (
     <>
       <AuthContext.Provider value={{ user: userInfo.data, login, logout }}>
@@ -87,16 +88,24 @@ function App() {
               <Route path="/DashBoard" element={<DashBoard />} />
               <Route path="/Decentralization" element={<Decentralization />} />
               <Route path="/clinic" element={<Clinic />} />
-              <Route
-                path="/medicine"
-                element={<Medicine itemsPerPage={5} />}
-              ></Route>
+              <Route path="/Page404" element={<Page404 />} />
               <Route path="/ChangePassword" element={<Changepassword />} />
               <Route path="/Profile" element={<Profile />} />
-              <Route path="/medicine" element={<Medicine />}></Route>
-              <Route path="/service" element={<Service />}></Route>
+              <Route path="/DashBoardTech" element={<DashBoardTech />} />
+              <Route
+                path="/service"
+                element={<Service user={userInfo.data} />}
+              ></Route>
+              <Route
+                path="/medicine"
+                element={<Medicine user={userInfo.data} />}
+              ></Route>
+
               <Route path="/Customer" element={<Customer />}></Route>
-              <Route path="/Staff"   element={<Staff user={userInfo.data}/>}></Route>
+              <Route
+                path="/Staff"
+                element={<Staff user={userInfo.data} />}
+              ></Route>
             </Route>
           </Routes>
         </Router>

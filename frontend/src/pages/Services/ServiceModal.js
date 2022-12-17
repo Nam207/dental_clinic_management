@@ -26,9 +26,9 @@ import {
   InputNumber,
 } from "antd";
 // PHẦN này gồm typeahead trong Form.Item
-const ServiceModal = ({ loadData }) => {
+const ServiceModal = ({ userA,loadData }) => {
   const [form] = FormAntd.useForm();
-
+  const [temp, setTemp] = useState(false);
   const [consumableUiList, setConsumableUiList] = useState([]);
   const [numberOfUses, setNumberOfUses] = useState(0);
   const [singleSelections, setSingleSelections] = useState([]);
@@ -183,6 +183,7 @@ const ServiceModal = ({ loadData }) => {
 
   useEffect(() => {
     getMedicine();
+    getPermission("Quản lý dịch vụ");
   }, []);
 
   const deleteConsumableUiList = (rowIndex) => {
@@ -216,16 +217,46 @@ const ServiceModal = ({ loadData }) => {
     // setIsShowSuggestion1([...isShowSuggestion1, true]);
     setPrescriptionList([...prescriptionList, ["", "", "", "", "", ""]]);
   };
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
 
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+    await Promise.all(
+      userA.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        
+        if (permission.data[0].add === true) {
+          setTemp(true);
+        }
+       
+      })
+    );
+    
+  };
   return (
     <>
-      <Button
+    {temp === true ? (<Button
         variant="success"
         onClick={handleShow}
         style={{ marginRight: "20px" }}
       >
         <FaPlusCircle></FaPlusCircle> Thêm thủ thuật
-      </Button>
+      </Button>) : null}
+      
       <Modal
         id="serviceModal"
         // class="modal-dialog modal-xl"

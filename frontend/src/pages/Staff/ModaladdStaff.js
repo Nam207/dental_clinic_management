@@ -13,7 +13,6 @@ import Swal from "sweetalert2";
 const { TextArea } = Input;
 function ModaladdStaff({ userAA, loadData }) {
   const [form] = Form.useForm();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState([]);
@@ -35,8 +34,8 @@ function ModaladdStaff({ userAA, loadData }) {
   const [value7, setValue7] = useState([]);
   const [valuecn, setValuecn] = useState([]);
   const format = "HH:mm";
-  console.log(userAA)
 
+  const [temp, setTemp] = useState(false);
   const disPlay = () => {
     Swal.fire("Thành Công", `Thêm thành công`, "success");
   };
@@ -84,6 +83,36 @@ function ModaladdStaff({ userAA, loadData }) {
     }
   };
 
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userAA.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].add === true) {
+        setTemp(true);
+        return;
+      }
+    }))
+    return;
+  }
+
   let options = [];
   const getRole = async () => {
     await axios.get(`/api/role/`).then(async (response) => {
@@ -96,8 +125,10 @@ function ModaladdStaff({ userAA, loadData }) {
       value: role._id,
     });
   });
+
   useEffect(() => {
     getRole();
+    getPermission("Quản lý nhân viên");
   }, []);
 
   const reset = () => {
@@ -124,8 +155,6 @@ function ModaladdStaff({ userAA, loadData }) {
     setDisabledcn(false);
     setValuecn([]);
   };
-  const a = "Bắt Đầu";
-  const b = "Kết Thúc";
 
   const formik = useFormik({
     initialValues: {
@@ -258,15 +287,6 @@ function ModaladdStaff({ userAA, loadData }) {
     },
   });
 
-  function findIndexByProperty(data, key, value) {
-    for (var i = 0; i < data.length; i++) {
-      if (data[i][key] === value) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   const removeSchedule = (weekday) => {
     const index = findIndexByProperty(
       formik.values.schedule,
@@ -296,7 +316,7 @@ function ModaladdStaff({ userAA, loadData }) {
     } else {
       formik.values.schedule.push(scheduleTemp);
     }
-
+    formik.setFieldValue(formik.values.schedule)
     let startTime = moment();
     startTime.hours(e[0]._d.getHours());
     startTime.minutes(e[0]._d.getMinutes());
@@ -345,19 +365,15 @@ function ModaladdStaff({ userAA, loadData }) {
   const handleCancel = () => {
     setOpen(false);
   };
-  var temp = false;
-  for (let i = 0; i < userAA.role.length; i++) {
-    if (
-      userAA.role[i].name.includes("Bác sĩ") ||
-      userAA.role[i].name.includes("Kỹ thuật viên") ||
-      userAA.role[i].name.includes("Lễ tân")
-    ) {
-      temp = false;
-    }else{
-      temp = true;
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
     }
+    return -1;
   }
-  console.log(temp);
 
   return (
     <>
@@ -377,21 +393,7 @@ function ModaladdStaff({ userAA, loadData }) {
           <FaPlusCircle></FaPlusCircle> Thêm nhân viên
         </Button>
       ) : null}
-      {/* <Button
-        variant="success"
-        onClick={showModal}
-        style={{
-          marginRight: "20px",
-          backgroundColor: "#14A44D",
-          color: "white",
-          borderRadius:"5px",
-          width:"180px",
-          height:"38px"
-          
-        }}
-      >
-        <FaPlusCircle></FaPlusCircle> Thêm nhân viên
-      </Button> */}
+     
 
       <Modal
         title="Thêm nhân viên"

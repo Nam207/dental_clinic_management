@@ -14,10 +14,10 @@ import * as Yup from "yup";
 import UploadAndDisplayImage from "../../components/uploadImage";
 import axios from "../../apis/api";
 
-const MedicineModal = (prop) => {
-  const { loadData } = prop;
+const MedicineModal = ({userA},prop) => {
+   const { loadData } = prop;
   const [show, setShow] = useState(false);
-
+  const [temp, setTemp] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setShow(true);
@@ -100,16 +100,50 @@ const MedicineModal = (prop) => {
       loadData();
     },
   });
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  useEffect(() => {
+    getPermission("Quản lý thuốc");
+  }, []);
 
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userA.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].add === true) {
+        setTemp(true);
+        return;
+      }
+    }))
+    return;
+  }
   return (
     <>
-      <Button
+     {temp === true ? (
+        <Button
         variant="success"
         onClick={handleShow}
         style={{ marginRight: "20px" }}
       >
         <FaPlusCircle></FaPlusCircle> Thêm thuốc
       </Button>
+      ) : null}
+    
 
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>

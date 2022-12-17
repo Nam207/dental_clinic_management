@@ -17,7 +17,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import CloseButton from "react-bootstrap/CloseButton";
 import { FaPlusCircle } from "react-icons/fa";
-import { FaRedoAlt, FaEdit } from "react-icons/fa";
+import { FaRedoAlt, FaEdit, FaEye } from "react-icons/fa";
 // import Table from "react-bootstrap/Table";
 import Col from "react-bootstrap/Col";
 import ServiceModal from "./ServiceModal";
@@ -27,7 +27,11 @@ import CustomToast from "../../components/CustomToast";
 import UpdateServiceModal from "./UpdateServiceModal";
 import { Pagination, Table } from "antd";
 
-const Service = () => {
+const Service = ({ user }) => {
+ 
+  const [temp, setTemp] = useState(false);
+  const [tempEye, setTempeye] = useState(false);
+  const [temp1, setTemp1] = useState(false);
   const [key, setKey] = useState("profile");
   const [searchSers, setSearchSers] = useState("");
 
@@ -75,6 +79,7 @@ const Service = () => {
 
   useEffect(() => {
     // console.log("chay vao day");
+    getPermission("Quản lý dịch vụ");
     loadData();
   }, [offset, searchSers, limit]);
 
@@ -167,35 +172,91 @@ const Service = () => {
       // "false"
       action: (
         <>
-          <FaEdit
-            className="mx-2"
-            color="#2980b9"
-            cursor={"pointer"}
-            size={25}
-            onClick={() => {
-              openUpdateModal(med._id);
-            }}
-          />
-          <Form.Check
-            type="switch"
-            checked={med.status}
-            style={{ display: "inline", marginLeft: "10px" }}
-            onChange={async (e) => {
-              // refreshData(e, med, index);
-              const result = await serviceProcessor.changeStatus(
-                med._id,
-                e.target.checked
-              );
-              if (result.success === 1) {
-                showToast(`Cập nhật id: ${med._id} thành công`, true);
-                await loadData();
-              }
-            }}
-          />
+          {tempEye === true ? (
+            <FaEdit
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
+          ) : (
+            <FaEye
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
+          )}
+
+          {temp === true ? (
+            <Form.Check
+              type="switch"
+              checked={med.status}
+              style={{ display: "inline", marginLeft: "10px" }}
+              onChange={async (e) => {
+                // refreshData(e, med, index);
+                const result = await serviceProcessor.changeStatus(
+                  med._id,
+                  e.target.checked
+                );
+                if (result.success === 1) {
+                  showToast(`Cập nhật id: ${med._id} thành công`, true);
+                  await loadData();
+                }
+              }}
+            />
+          ) : null}
         </>
       ),
     };
   });
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+    let tempView = 0;
+    console.log(user);
+    await Promise.all(
+      user.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].view === true) {
+          tempView++;
+          setTemp1(true);
+        }
+        if (permission.data[0].delete === true) {
+          setTemp(true);
+        }
+        if (permission.data[0].edit === true) {
+          setTempeye(true);
+        }
+      })
+    );
+    if (tempView === 0) {
+      window.location.href = "/Page404";
+    }
+  };
 
   return (
     <>
@@ -204,6 +265,7 @@ const Service = () => {
         isVisible={isShowUpdate}
         serviceId={serviceId}
         loadData={loadData}
+        userB={user}
       />
       <Navbar>
         <Container fluid>
@@ -220,7 +282,7 @@ const Service = () => {
               </h4>
             </Nav>
             <Form className="d-flex">
-              <ServiceModal loadData={loadData} />
+              <ServiceModal userA={user} loadData={loadData} />
 
               <Button
                 variant="primary"

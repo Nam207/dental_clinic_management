@@ -27,11 +27,17 @@ import {
   message,
 } from "antd";
 
-const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
+const UpdateServiceModal = ({
+  userB,
+  serviceId,
+  isVisible,
+  closeModal,
+  loadData,
+}) => {
   const [form] = FormAntd.useForm();
-
+  const [temp, setTemp] = useState(false);
   const [suggestionList, setSuggestionList] = useState([]);
-
+  const [disabledinPut, setDisabledinPut] = useState(false);
   const [isShowSuggestion, setIsShowSuggestion] = useState([]);
 
   const [show, setShow] = useState(false);
@@ -124,6 +130,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
       // form.resetFields();
       getService();
       getMedicine();
+      getPermission("Quản lý dịch vụ");
     }
   }, [serviceId, isVisible]);
 
@@ -242,6 +249,39 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
     setPrescriptionList([...temp]);
   };
 
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+
+    await Promise.all(
+      userB.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].edit === true) {
+          setTemp(true);
+          setDisabledinPut(false);
+          return;
+        }
+      })
+    );
+    return;
+  };
+
   return (
     <>
       <Modal
@@ -278,6 +318,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                   value={formik.values.name}
                   // value = {currService.name}
                   onChange={formik.handleChange}
+                  readOnly={!temp}
                 />
                 {formik.errors.name && (
                   <p className="errorMsg"> {formik.errors.name} </p>
@@ -290,6 +331,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                   Hình Ảnh
                 </Form.Label>
                 <UploadAndDisplayImage
+                  userI={userB}
                   value={formik.values.imageUrl ? formik.values.imageUrl : []}
                   onChange={(value) => {
                     // console.log(value);
@@ -308,6 +350,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                   Thời gian (phút)
                 </Form.Label>
                 <Form.Control
+                  readOnly={!temp}
                   id="time"
                   type="text"
                   value={formik.values.time}
@@ -326,6 +369,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                 <Row className="mb-3">
                   <Form.Group className="mb-3" as={Col}>
                     <Form.Control
+                      readOnly={!temp}
                       id="price"
                       type="text"
                       value={formik.values.price}
@@ -342,6 +386,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
               <Form.Group className="mb-3" as={Col}>
                 <Form.Label>Ghi chú</Form.Label>
                 <Form.Control
+                  readOnly={!temp}
                   as="textarea"
                   rows={3}
                   id="note"
@@ -412,6 +457,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                             initialValue={row[1]}
                           >
                             <Typeahead
+                              disabled={!temp}
                               id="basic-typeahead-single"
                               onChange={(e) => {
                                 // console.log(e + " : " + rowIndex);
@@ -453,6 +499,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                             initialValue={row[4]}
                           >
                             <Form.Control
+                              disabled={!temp}
                               min="1"
                               type="number"
                               onChange={(e) => {
@@ -463,14 +510,24 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                             />
                           </FormAntd.Item>
                         </td>
-
-                        <td onClick={() => deleteConsumableUiList(rowIndex)}>
-                          <FaTrashAlt
-                            cursor="pointer"
-                            color="#e74c3c"
-                            style={{ transform: "translateY(7px)" }}
-                          />
-                        </td>
+                        {temp === true ? (
+                          <td onClick={() => deleteConsumableUiList(rowIndex)}>
+                            <FaTrashAlt
+                              cursor="pointer"
+                              color="#e74c3c"
+                              style={{ transform: "translateY(7px)" }}
+                            />
+                          </td>
+                        ) : (
+                          <td onClick={() => deleteConsumableUiList(rowIndex)}>
+                            <FaTrashAlt
+                              onClick={"return false"}
+                              cursor="pointer"
+                              color="#e74c3c"
+                              style={{ transform: "translateY(7px)" }}
+                            />
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -537,6 +594,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                         >
                           <Typeahead
                             id="basic-typeahead-single"
+                            disabled={!temp}
                             onChange={(e) => {
                               fillDataPre(e, rowIndex);
 
@@ -572,6 +630,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                         <Form.Control
                           value={row[4]}
                           // defaultValue={row[4]}
+                          disabled={!temp}
                           type="number"
                           min="1"
                           required
@@ -599,6 +658,7 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                           // initialValue={row[5]}
                         >
                           <Form.Control
+                            disabled={!temp}
                             value={row[5]}
                             // defaultValue={row[5]}
                             type="text"
@@ -614,35 +674,57 @@ const UpdateServiceModal = ({ serviceId, isVisible, closeModal, loadData }) => {
                           />
                         </FormAntd.Item>
                       </td>
-                      <td onClick={() => deleteprescriptionList(rowIndex)}>
-                        <FaTrashAlt
-                          cursor="pointer"
-                          color="#e74c3c"
-                          style={{ transform: "translateY(7px)" }}
-                        />
-                      </td>
+
+                      {temp === true ? (
+                        <td onClick={() => deleteprescriptionList(rowIndex)}>
+                          <FaTrashAlt
+                            cursor="pointer"
+                            color="#e74c3c"
+                            style={{ transform: "translateY(7px)" }}
+                          />
+                        </td>
+                      ) : (
+                        <td onClick={() => deleteprescriptionList(rowIndex)}>
+                          <FaTrashAlt
+                            onClick={"return false"}
+                            cursor="pointer"
+                            color="#e74c3c"
+                            style={{ transform: "translateY(7px)" }}
+                          />
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
               </tbody>
             </Table>
-
-            <Button type="submit" variant="primary" style={{ float: "right" }}>
+            {temp === true ? (
+              <Button
+                type="submit"
+                variant="primary"
+                style={{ float: "right" }}
+              >
+                Lưu lại
+              </Button>
+            ) : null}
+            {/* <Button type="submit" variant="primary" style={{ float: "right" }}>
               Lưu lại
-            </Button>
-            <Button
-              style={{
-                float: "right",
-                marginRight: "10px",
-                backgroundColor: "gray",
-              }}
-              onClick={() => {
-                closeModal();
-                resetData();
-              }}
-            >
-              Hủy bỏ
-            </Button>
+            </Button> */}
+            {temp === true ? (
+              <Button
+                style={{
+                  float: "right",
+                  marginRight: "10px",
+                  backgroundColor: "gray",
+                }}
+                onClick={() => {
+                  closeModal();
+                  resetData();
+                }}
+              >
+                Hủy bỏ
+              </Button>
+            ) : null}
           </FormAntd>
         </Modal.Body>
       </Modal>

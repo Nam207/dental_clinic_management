@@ -23,14 +23,14 @@ import axios from "../../apis/api";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
-const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
+const UpdateMedicineModal = ({ userU,medID, isVisible, closeModal, loadData }) => {
   const dispatch = useDispatch();
-
+  console.log(userU)
+  const [temp, setTemp] = useState(false);
   const newMedicine = useSelector((state) => state.med.medDetail);
   // const [newMedicine, setNewMedicine] = useState({});
 
   useEffect(() => {
-    console.log(medID);
     medID && medicineProcessor.getMedicineDetailObj(medID);
     if (medID) {
       getNewMedicine();
@@ -102,6 +102,36 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
       loadData();
     },
   });
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userU.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].edit === true ) {
+        setTemp(true);
+        return;
+      }
+    }))
+    return;
+  }
 
   return (
     <>
@@ -189,6 +219,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   <Form.Control
                     id="quantity"
                     type="text"
+                    readOnly={!temp}
                     placeholder="0"
                     value={formik.values.quantity}
                     onChange={formik.handleChange}
@@ -218,6 +249,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                       <Form.Control
                         id="price"
                         type="text"
+                        readOnly={!temp}
                         value={formik.values.price}
                         onChange={formik.handleChange}
                         placeholder="0"
@@ -246,6 +278,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   </Form.Label>
                   <Form.Control
                     id="effect"
+                    readOnly={!temp}
                     type="text"
                     value={formik.values.effect}
                     onChange={formik.handleChange}
@@ -273,6 +306,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                       <Form.Control
                         id="purchasePrice"
                         type="text"
+                        readOnly={!temp}
                         onChange={formik.handleChange}
                         value={formik.values.purchasePrice}
                       />
@@ -302,6 +336,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   </Form.Label>
                   <Form.Control
                     id="usage"
+                    readOnly={!temp}
                     value={formik.values.usage}
                     onChange={formik.handleChange}
                     as="textarea"
@@ -327,6 +362,7 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   </Form.Label>
                   <Form.Control
                     id="contraindication"
+                    readOnly={!temp}
                     value={formik.values.contraindication}
                     onChange={formik.handleChange}
                     as="textarea"
@@ -337,24 +373,28 @@ const UpdateMedicineModal = ({ medID, isVisible, closeModal, loadData }) => {
                   )}
                 </Form.Group>
               </Row>
-
-              <Button
+               {temp === true ? (
+                <Button
                 variant="primary"
                 type="submit"
                 style={{ float: "right" }}
               >
                 Lưu lại
               </Button>
-              <Button
-                onClick={closeModal}
-                style={{
-                  float: "right",
-                  marginRight: "10px",
-                  backgroundColor: "gray",
-                }}
-              >
-                Hủy bỏ
-              </Button>
+               ):null}
+              {temp === true ? (
+                 <Button
+                 onClick={closeModal}
+                 style={{
+                   float: "right",
+                   marginRight: "10px",
+                   backgroundColor: "gray",
+                 }}
+               >
+                 Hủy bỏ
+               </Button>
+               ):null}
+             
             </Form>
           </>
         </Modal.Body>

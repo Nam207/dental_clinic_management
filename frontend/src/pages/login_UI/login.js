@@ -47,6 +47,7 @@ function Login() {
 
 
         if (res.success === 1) {
+          window.location.href= "/DashBoard"
           login({
             _id: res.data._id,
             token: res.data.token,

@@ -25,6 +25,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
   const [disabled6, setDisabled6] = useState(false);
   const [disabled7, setDisabled7] = useState(false);
   const [disabledcn, setDisabledcn] = useState(false);
+  const [disabledinPut, setDisabledinPut] = useState(false);
   const format = "HH:mm";
 
   const [value2, setValue2] = useState([]);
@@ -39,8 +40,10 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
   const [empPhone, setempPhone] = useState("");
   const [empEmail, setempEmail] = useState("");
 
+  const [temp, setTemp] = useState(false);
+
   const toggleDisablet2 = () => {
-    setDisabled2([]);
+    setValue2([]);
     if (disabled2) {
       removeSchedule("monday");
     }
@@ -99,7 +102,6 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
 
   const getProfile = async () => {
     await axios.get(`/api/profile/${empId}`).then(async (response) => {
-      console.log(response.data);
       setProfile(response.data);
       setempPhone(response.data.phone);
       setempEmail(response.data.email);
@@ -164,6 +166,8 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
       setDisabled6(false);
       setDisabled7(false);
       setDisabledcn(false);
+      getPermission("Quản lý nhân viên");
+      // disabledInputForm();
     }
   }, [empId]);
 
@@ -392,29 +396,40 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
       default:
     }
   };
-  console.log(userAB)
-  const [disabledEdit, setDisabledEdit] = useState(false);
-  var temp = false;
-  for (let i = 0; i < userAB.role.length; i++) {
-    if (
-      userAB.role[i].name.includes("Bác sĩ") ||
-      userAB.role[i].name.includes("Kỹ thuật viên") ||
-      userAB.role[i].name.includes("Lễ tân")
-    ) {
-      var temp = false;
-    }else{
-      var temp = true;
-    }
-  }
-  console.log(temp)
-  const disableInput = (temp) => {
-       if(temp = false){
-        setDisabledEdit(!disabledEdit)
-       }else{
-        setDisabledEdit(disabledEdit)
-       }
-  } 
 
+  
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userAB.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].edit === true ) {
+        setTemp(true);
+        setDisabledinPut(false);
+        return;
+      }
+    }))
+    return;
+  }
+  
   return (
     <>
       <Modal
@@ -422,7 +437,8 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
         open={isVisible}
         onCancel={closeModal}
         width={1000}
-        footer={[
+        footer={temp === true ?
+          [
           <Button
             key="back"
             onClick={closeModal}
@@ -432,6 +448,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
               color: "white,",
               borderRadius: "5px",
             }}
+            
           >
             Hủy
           </Button>,
@@ -451,7 +468,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
           >
             Lưu lại
           </Button>,
-        ]}
+        ]: null}
         // footer={null}
       >
         <Form onSubmit={formik.handleSubmit}>
@@ -477,7 +494,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   type="text"
                   id="employeeCode"
                   name="employeeCode"
-                  disabled = "true"
+                  disabled={true}
                   value={empId}
                   onChange={formik.handleChange}
                 />
@@ -500,6 +517,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 <Input
                   type="text"
                   id="fullname"
+                  readOnly={!temp}
                   name="fullname"
                   value={formik.values.fullname}
                   onChange={formik.handleChange}
@@ -525,6 +543,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   type="text"
                   id="phone"
                   name="phone"
+                  readOnly={!temp}
                   value={formik.values.phone}
                   onChange={formik.handleChange}
                 />
@@ -553,6 +572,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   }}
                   placeholder="Chọn chức vụ"
                   id="competence"
+                  disabled={!temp}
                   name="competence"
                   onChange={(value) => {
                     formik.setFieldValue("competence", value);
@@ -583,6 +603,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 <Input
                   type="text"
                   id="email"
+                  readOnly={!temp}
                   name="email"
                   value={formik.values.email}
                   onChange={formik.handleChange}
@@ -599,6 +620,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   type="text"
                   id="address"
                   name="address"
+                  readOnly={!temp}
                   value={formik.values.address}
                   onChange={formik.handleChange}
                 />
@@ -617,6 +639,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   </span>
                 <Input
                   type="text"
+                  readOnly={!temp}
                   id="numberOfWorkdays"
                   name="numberOfWorkdays"
                   value={formik.values.numberOfWorkdays}
@@ -645,6 +668,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 <Input
                   type="text"
                   id="salary"
+                  readOnly={!temp}
                   name="salary"
                   value={formik.values.salary}
                   onChange={formik.handleChange}
@@ -680,6 +704,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 </div>
                 <div className="col-md-2" style={{ textAlign: "end" }}>
                   <Checkbox
+                    
                     onClick={toggleDisablet2}
                     checked={disabled2}
                   ></Checkbox>
@@ -689,11 +714,12 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                     <TimePicker.RangePicker
                       size="large"
                       TimePicker
+                      
                       id="schedule"
                       name="schedule"
                       value={value2.length < 1 ? [null, null] : value2}
                       format={format}
-                      disabled={!disabled2}
+                      disabled={!disabled2 || !temp}
                       status="success"
                       onChange={(e) => {
                         pushSchedule(e, "monday");
@@ -717,7 +743,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
                     <TimePicker.RangePicker
-                      disabled={!disabled3}
+                      disabled={!disabled3 || !temp}
                       size="large"
                       status="success"
                       id="schedule"
@@ -748,7 +774,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   <Space direction="vertical">
                     <TimePicker.RangePicker
                       size="large"
-                      disabled={!disabled4}
+                      disabled={!disabled4 || !temp}
                       status="success"
                       id="schedule"
                       name="schedule"
@@ -778,7 +804,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   <Space direction="vertical">
                     <TimePicker.RangePicker
                       size="large"
-                      disabled={!disabled5}
+                      disabled={!disabled5 || !temp}
                       status="success"
                       id="schedule"
                       name="schedule"
@@ -801,14 +827,14 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                 <div className="col-md-2" style={{ textAlign: "end" }}>
                   <Checkbox
                     onClick={toggleDisablet6}
-                    checked={disabled6}
+                    checked={disabled6 }
                   ></Checkbox>
                 </div>
                 <div className="col-md-8" style={{ textAlign: "center" }}>
                   <Space direction="vertical">
                     <TimePicker.RangePicker
                       size="large"
-                      disabled={!disabled6}
+                      disabled={!disabled6 || !temp}
                       status="success"
                       id="schedule"
                       name="schedule"
@@ -839,7 +865,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   <Space direction="vertical">
                     <TimePicker.RangePicker
                       size="large"
-                      disabled={!disabled7}
+                      disabled={!disabled7 || !temp}
                       status="success"
                       id="schedule"
                       name="schedule"
@@ -869,7 +895,7 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
                   <Space direction="vertical">
                     <TimePicker.RangePicker
                       size="large"
-                      disabled={!disabledcn}
+                      disabled={!disabledcn || !temp}
                       status="success"
                       id="schedule"
                       name="schedule"

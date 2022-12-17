@@ -114,7 +114,7 @@ const CustomerModal = ({
           function (value) {
             return new Promise((resolve, reject) => {
               axios
-                .get(`http://localhost:8080/api/customer/checkEmail/${value}`)
+                .get(`http://localhost:9000/api/customer/checkEmail/${value}`)
                 .then((res) => {
                   if (res.success === 1) resolve(true);
                   else resolve(false);
