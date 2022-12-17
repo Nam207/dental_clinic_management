@@ -12,7 +12,6 @@ const createPayment = async () => {
             { name: "VNPAY" },
             { name: "Chuyển khoản" },
             { name: "Thẻ trả trước" },
-            { name: "VNPAY" },
         ];
 
         await PaymentModel.create(payments);

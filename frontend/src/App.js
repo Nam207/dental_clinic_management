@@ -32,6 +32,7 @@ import Pdf from "./components/exportPdf";
 import DashBoard from "./pages/dashBoard/dashBoard";
 import Page404 from "./pages/page404/Page404";
 import DashBoardTech from "./pages/dashBoard/dashBoardtechnicians";
+import DashBoardDoctor from "./pages/dashBoard/dashBoardDoctor";
 export const AuthContext = React.createContext();
 function App() {
   const isLoading = useSelector((state) => state.loading);
@@ -96,6 +97,8 @@ function App() {
               <Route path="/ChangePassword" element={<Changepassword />} />
               <Route path="/Profile" element={<Profile />} />
               <Route path="/DashBoardTech" element={<DashBoardTech />} />
+              <Route path="/DashBoardDoctor" element={<DashBoardDoctor />} />
+              <Route path="/Customer" element={<Customer user={userInfo.data} />} />
               <Route
                 path="/service"
                 element={<Service user={userInfo.data} />}

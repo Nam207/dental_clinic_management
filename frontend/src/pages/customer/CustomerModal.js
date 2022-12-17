@@ -18,9 +18,10 @@ const CustomerModal = ({
   widthh,
   closeMedPaper,
   openMedPaper,
+  userA,
 }) => {
   const [show, setShow] = useState(false);
-
+  const [temp, setTemp] = useState(false);
   const handleClose = () => {
     setShow(false);
     openMedPaper();
@@ -63,6 +64,7 @@ const CustomerModal = ({
   useEffect(() => {
     loadDentalMed();
     loadSystemMed();
+    getPermission("Quản lý khách hàng");
   }, []);
 
   const formik = useFormik({
@@ -151,15 +153,48 @@ const CustomerModal = ({
     closeMedPaper();
   };
 
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName)
+
+    await Promise.all(userA.role.map(async (element) => {
+      const permission = await axios({
+        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+        method: "get",
+      })
+      console.log(permission)
+      if(permission.success === 0 || !permission.data) return;
+      if(permission.data[0].add === true) {
+        setTemp(true)
+        return;
+      }
+    }))
+    return;
+  }
   return (
     <>
-      <Button
-        variant="success"
-        onClick={handleShow}
-        style={{ marginRight: "20px", width: `${widthh}` }}
-      >
-        <FaPlusCircle></FaPlusCircle> {lbl}
-      </Button>
+    {temp === true ? (
+       <Button
+       variant="success"
+       onClick={handleShow}
+       style={{ marginRight: "20px", width: `${widthh}` }}
+     >
+       <FaPlusCircle></FaPlusCircle> {lbl}
+     </Button>
+    ): null}
+    
 
       <Modal id="customerModal" show={show} onHide={handleClose}>
         <Modal.Header closeButton>

@@ -47,11 +47,23 @@ function Login() {
 
 
         if (res.success === 1) {
-          window.location.href= "/DashBoard"
           login({
             _id: res.data._id,
             token: res.data.token,
           });
+          if(res.data.role[0].name === "Admin"){
+            window.location.href= "/DashBoard"
+            return;
+          }
+          if(res.data.role.find((e) => e.name === "Lễ tân")){
+            window.location.href= "/Receptionist"
+            return;
+          }
+          if(res.data.role.find((e) => e.name === "Bác sĩ")){
+            window.location.href= "/DashboardDoctor"
+            return;
+          }
+          window.location.href= "/DashBoardTech"
         }
       } catch (err) {
         Swal.fire(

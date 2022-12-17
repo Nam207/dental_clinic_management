@@ -12,11 +12,13 @@ import React, { useState, useEffect, Component } from "react";
 // import ModalD from "../Modal/Modal";
 
 const Navbarr = ({ user }) => {
-  console.log(user);
   const [tempStaff, setTempStaff] = useState(false);
   const [tempService, setTempService] = useState(false);
   const [tempMedicine, setTempMedicine] = useState(false);
   const [tempRoom, setTempRoom] = useState(false);
+  const [tempDoctor, setTempDoctor] = useState(false);
+  const [tempLT, setTempLT] = useState(false);
+  const [tempKTV, setTempKTV] = useState(false);
   const logout = () => {
     localStorage.removeItem("token");
   };
@@ -30,21 +32,66 @@ const Navbarr = ({ user }) => {
     return -1;
   }
 
+  const [linkURL, setLinkUrl] = useState("");
+  const getRole = () => {
+    if (user.role[0].name === "Admin") {
+      setTempDoctor(true);
+      setTempLT(true);
+      setTempKTV(true);
+      return;
+    }
+    let countBs = 0;
+    let countLT = 0;
+    user.role.map((element) => {
+      switch (element.name) {
+        case "Bác sĩ":
+          setTempDoctor(true);
+          countBs++;
+          break;
+        case "Lễ tân":
+          setTempLT(true);
+          countLT++;
+          break;
+        case "Kỹ thuật viên":
+          setTempKTV(true);
+          break;
+        default:
+          break;
+      }
+    });
+    if(countLT>0){
+      setLinkUrl("/Receptionist");
+      return;
+    }
+    if(countBs>0){
+      setLinkUrl("/DashboardDoctor");
+      return;
+    }
+    setLinkUrl("/DashBoardTech");
+      return;
+  };
+
   useEffect(() => {
     getPermission("Quản lý nhân viên");
     getPermissionService("Quản lý dịch vụ");
     getPermissionMedicine("Quản lý thuốc");
     getPermissionRoom("Quản lý phòng khám");
-    
-  }, []);
+    getRole();
+  }, [user]);
 
+  useEffect(()=> {
+    console.log(linkURL);
+  }, [linkURL]);
   const getPermissionRoom = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTempRoom(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
     });
     const index = findIndexByProperty(functionArray.data, "name", functionName);
-    let tempView = 0;
     await Promise.all(
       user.role.map(async (element) => {
         const permission = await axios({
@@ -55,19 +102,22 @@ const Navbarr = ({ user }) => {
 
         if (permission.data[0].view === true) {
           setTempRoom(true);
+          return;
         }
-       
       })
     );
   };
 
   const getPermissionMedicine = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTempMedicine(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
     });
     const index = findIndexByProperty(functionArray.data, "name", functionName);
-    let tempView = 0;
     await Promise.all(
       user.role.map(async (element) => {
         const permission = await axios({
@@ -78,19 +128,22 @@ const Navbarr = ({ user }) => {
 
         if (permission.data[0].view === true) {
           setTempMedicine(true);
+          return;
         }
-       
       })
     );
   };
 
   const getPermissionService = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTempService(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
     });
     const index = findIndexByProperty(functionArray.data, "name", functionName);
-    let tempView = 0;
     await Promise.all(
       user.role.map(async (element) => {
         const permission = await axios({
@@ -101,19 +154,22 @@ const Navbarr = ({ user }) => {
 
         if (permission.data[0].view === true) {
           setTempService(true);
+          return;
         }
-       
       })
     );
   };
 
   const getPermission = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTempStaff(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
     });
     const index = findIndexByProperty(functionArray.data, "name", functionName);
-    let tempView = 0;
     await Promise.all(
       user.role.map(async (element) => {
         const permission = await axios({
@@ -124,8 +180,8 @@ const Navbarr = ({ user }) => {
 
         if (permission.data[0].view === true) {
           setTempStaff(true);
+          return;
         }
-       
       })
     );
   };
@@ -133,44 +189,72 @@ const Navbarr = ({ user }) => {
   return (
     <Navbar bg="primary" variant="dark">
       <Container>
-        <Navbar.Brand href="/Dashboard">Dental Clinic</Navbar.Brand>
+        <NavDropdown.Divider />
+        {user.role[0].name === "Admin" ? (
+          <Navbar.Brand href="/Dashboard">Dental Clinic</Navbar.Brand>
+        ) : (
+          <Navbar.Brand href={linkURL}>Dental Clinic</Navbar.Brand>
+        )}
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
+            <NavDropdown title="Danh sách" id="basic-nav-dropdown">
+              {tempLT === true ? (
+                <NavDropdown.Item href="/Receptionist">
+                  Danh sách tái khám
+                </NavDropdown.Item>
+              ) : null}
+
+              {tempDoctor === true ? (
+                <NavDropdown.Item href="/DashboardDoctor">
+                  Danh sách khách hàng chờ khám
+                </NavDropdown.Item>
+              ) : null}
+
+              {tempKTV === true ? (
+                <NavDropdown.Item href="/DashBoardTech">
+                  Danh sách khách hàng chờ thực hiện thủ thuật
+                </NavDropdown.Item>
+              ) : null}
+            </NavDropdown>
             <Nav.Link href="/MedicalPaper">Phiếu khám</Nav.Link>
             <Nav.Link href="/Customer">Khách hàng</Nav.Link>
 
             <NavDropdown title="Thiết lập" id="basic-nav-dropdown">
-            {tempMedicine === true ? (
-                
+              {tempMedicine === true ? (
                 <NavDropdown.Item href="/medicine">
-                Quản lý thuốc
-              </NavDropdown.Item>
+                  Quản lý thuốc
+                </NavDropdown.Item>
               ) : null}
-             
+
               {tempService === true ? (
-                
                 <NavDropdown.Item href="/service">
-                Quản lý thủ thuật
-              </NavDropdown.Item>
+                  Quản lý thủ thuật
+                </NavDropdown.Item>
               ) : null}
-             
-           
-              <NavDropdown.Divider />
+
               {tempStaff === true ? (
-                
                 <NavDropdown.Item href="/staff">
                   Quản lý nhân viên
                 </NavDropdown.Item>
               ) : null}
 
               <NavDropdown.Divider />
-              {tempRoom === true ? (         
+              {user.role[0].name === "Admin" ? (
+                <NavDropdown.Item href="/Decentralization">
+                  Phân quyền người dùng
+                </NavDropdown.Item>
+              ) : (
+                <></>
+              )}
+
+              {tempRoom === true ? (
                 <NavDropdown.Item href="/clinic">
-                Thông tin phòng khám
-              </NavDropdown.Item>
-              ) : null}
-              
+                  Thông tin phòng khám
+                </NavDropdown.Item>
+              ) : (
+                <></>
+              )}
             </NavDropdown>
           </Nav>
 

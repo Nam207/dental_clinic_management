@@ -6,7 +6,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import { FaRedoAlt, FaEdit } from "react-icons/fa";
+import { FaRedoAlt, FaEdit, FaEye } from "react-icons/fa";
 // import Table from "react-bootstrap/Table";
 import { AiFillDelete } from "react-icons/ai";
 import CustomerModal from "./CustomerModal";
@@ -19,13 +19,18 @@ import axios from "../../apis/api";
 import Swal from "sweetalert2";
 import { Pagination, Table } from "antd";
 
-const Customer = () => {
+const Customer = ({user}) => {
+  console.log(user)
   const [customers, setCustomers] = useState([]);
 
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
   const [searchMeds, setSearchMeds] = useState("");
+
+  const [temp, setTemp] = useState(false);
+  const [tempEye, setTempeye] = useState(false);
+  const [temp1, setTemp1] = useState(false);
 
   const loadData = () => {
     axios
@@ -50,6 +55,7 @@ const Customer = () => {
 
   useEffect(() => {
     loadData();
+    getPermission("Quản lý khách hàng");
   }, [offset, total, searchMeds, limit]);
 
   const onChangePage = (current, pageSize) => {
@@ -144,6 +150,8 @@ const Customer = () => {
     },
   ];
 
+  
+
   const data = customers.map((med) => {
     return {
       key: med._id,
@@ -160,7 +168,19 @@ const Customer = () => {
       // "false"
       action: (
         <>
-          <FaEdit
+        
+            {tempEye === true ? (
+           <FaEdit
+           className="mx-2"
+           color="#2980b9"
+           cursor={"pointer"}
+           size={25}
+           onClick={() => {
+             openUpdateModal(med._id);
+           }}
+         />
+          ) : (
+            <FaEye
             className="mx-2"
             color="#2980b9"
             cursor={"pointer"}
@@ -168,40 +188,83 @@ const Customer = () => {
             onClick={() => {
               openUpdateModal(med._id);
             }}
-          />
+            />
+          )}
+           {temp === true ? (
           <Form.Check
-            type="switch"
-            checked={med.status}
-            style={{ display: "inline", marginLeft: "10px" }}
-            onChange={async (e) => {
-              // refreshData(e, med, index);
-              let resul;
-              let temp = e.target.checked;
-              // console.log(e.target.checked);
-              await Swal.fire({
-                title: "Bạn có chắc chắn muốn đổi",
-                showDenyButton: true,
-                confirmButtonText: "Đổi",
-                denyButtonText: `Huỷ`,
-              }).then(async (result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                  console.log(temp);
-                  resul = await customerProcessor.changeStatus(med._id, temp);
-                } else if (result.isDenied) {
-                }
-              });
-
-              if (resul.success === 1) {
-                showToast(`Cập nhật id: ${med._id} thành công`, true);
-                await loadData();
+          type="switch"
+          checked={med.status}
+          style={{ display: "inline", marginLeft: "10px" }}
+          onChange={async (e) => {
+            // refreshData(e, med, index);
+            let resul;
+            let temp = e.target.checked;
+            // console.log(e.target.checked);
+            await Swal.fire({
+              title: "Bạn có chắc chắn muốn đổi",
+              showDenyButton: true,
+              confirmButtonText: "Đổi",
+              denyButtonText: `Huỷ`,
+            }).then(async (result) => {
+              /* Read more about isConfirmed, isDenied below */
+              if (result.isConfirmed) {
+                console.log(temp);
+                resul = await customerProcessor.changeStatus(med._id, temp);
+              } else if (result.isDenied) {
               }
-            }}
-          />
+            });
+
+            if (resul.success === 1) {
+              showToast(`Cập nhật id: ${med._id} thành công`, true);
+              await loadData();
+            }
+          }}
+        />
+        ) : null}
         </>
       ),
     };
   });
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+    let tempView = 0;
+    await Promise.all(
+      user.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].view === true) {
+          tempView++;
+          setTemp1(true);
+        }
+        if (permission.data[0].delete === true) {
+          setTemp(true);
+        }
+        if (permission.data[0].edit === true) {
+          setTempeye(true);
+        }
+      })
+    );
+    if(tempView===0){
+      window.location.href = "/Page404";
+    }
+  };
 
   return (
     <>
@@ -210,6 +273,7 @@ const Customer = () => {
         isVisible={isShowUpdate}
         cusId={cusId}
         loadData={loadData}
+        userU={user}
       />
 
       <Navbar>
@@ -230,6 +294,7 @@ const Customer = () => {
                 lbl="Thêm Khách hàng"
                 loadData={loadData}
                 widthh="181px"
+                userA={user}
               />
               <Button
                 variant="primary"

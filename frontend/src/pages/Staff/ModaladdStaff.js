@@ -128,7 +128,7 @@ function ModaladdStaff({ userAA, loadData }) {
 
   useEffect(() => {
     getRole();
-    getPermission("Quản lý nhân viên");
+    getPermission("Quản lý khách hàng");
   }, []);
 
   const reset = () => {
