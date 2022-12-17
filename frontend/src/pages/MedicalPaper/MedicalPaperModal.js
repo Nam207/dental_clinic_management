@@ -24,9 +24,20 @@ import { Select, Pagination, Table as TableAntd, Form as FormAntd } from "antd";
 import { Typeahead } from "react-bootstrap-typeahead";
 import AdCusSearch from "./AdCusSearch";
 import MedListPaper from "./MedListPaper";
-const MedicalPaperModal = () => {
+import Payment from "./Payment";
+const MedicalPaperModal = ({ loadData }) => {
   // const options = [];
-  const [pk, setPK] = useState({});
+  const [pk, setPK] = useState({
+    customerId: "",
+    doctorId: "",
+    reExamination: null,
+    medicalService: [],
+    systemicMedicalHistory: [],
+    dentalMedicalHistory: [],
+    note: "",
+  });
+
+  const [selectedCus, setSelectedCus] = useState({});
 
   const [note, setNote] = useState();
 
@@ -56,25 +67,47 @@ const MedicalPaperModal = () => {
   const [dentalMed, setDentalMed] = useState([]);
   const [opac, setOpac] = useState(1);
 
-  // const addPK = () =>{
-  //   setPK({
-  //     doctorId:
-  //     customerId:
-  //     reExamination:
-  //     medicalService
-  //     systemicMedicalHistory
-  //     dentalMedicalHistory
-  //     note
-  //   })
-  // }
+  const addPk = async () => {
+    try {
+      const res = await axios({
+        url: "/api/customer/updateCustomerWithMedical",
+        method: "put",
+        data: {
+          customerId: pk.customerId,
+          dentalMedicalHistory: pk.dentalMedicalHistory,
+          systemicMedicalHistory: pk.systemicMedicalHistory,
+        },
+      });
+      const ress = await axios({
+        url: "/api/medicalPaper",
+        method: "post",
+        data: {
+          doctorId: pk.doctorId,
+          customerId: pk.customerId,
+          reExamination: pk.reExamination,
+          medicalService: pk.medicalService,
+          note: pk.note,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    handleClose();
+    loadData();
+    //reset data after submit
+    setCurrentItemList([]);
+    setSelectedCus({});
+    setSingleSelectionsDoc([]);
+    setSingleSelections([]);
+    setBirthDay(null);
+  };
 
   const loadTechStaffData = () => {
     axios
       .get("/api/profile/getTechStaff")
       .then((response) => {
-        // console.log(response.data);
         setTechStaff([
-          // ...customerId,
           ...response.data.map((item) => ({
             name: item.fullname,
             id: item._id,
@@ -90,9 +123,7 @@ const MedicalPaperModal = () => {
     axios
       .get("/api/profile/getDoctor")
       .then((response) => {
-        // console.log(response.data);
         setDocList([
-          // ...customerId,
           ...response.data.map((item) => ({
             name: item.fullname,
             id: item._id,
@@ -108,9 +139,7 @@ const MedicalPaperModal = () => {
     axios
       .get("/api/customer/allCustomer")
       .then((response) => {
-        // console.log(response.data);
         setCustomerId([
-          // ...customerId,
           ...response.data.map((item) => ({
             name: item.fullname,
             id: item._id,
@@ -161,16 +190,6 @@ const MedicalPaperModal = () => {
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
 
-  // useEffect(() => {
-  //   loadServiceTable();
-  //   loadSystemMed();
-  //   loadDentalMed();
-  //   loadCustomerData();
-  //   loadCurProfile();
-  //   loadDocData();
-  //   loadTechStaffData();
-  // }, []);
-
   useEffect(() => {
     loadServiceTable();
     loadSystemMed();
@@ -179,7 +198,7 @@ const MedicalPaperModal = () => {
     loadCurProfile();
     loadDocData();
     loadTechStaffData();
-  }, [offset, total, searchMeds]);
+  }, [offset, searchMeds]);
 
   const onChangePage = (current, pageSize) => {
     // console.log(current, pageSize);
@@ -242,19 +261,53 @@ const MedicalPaperModal = () => {
   //PAGINATION
   // We start with an empty list of items.
 
-  const [selectedCus, setSelectedCus] = useState({});
-
   //fill Data from chonsen SingleSelection - chưa xoá được
   const fillCusDataByName = async (e) => {
+    // console.log("????");
+    // console.log(e[0].id);
     const response = await axios.get(`api/customer/${e[0].id}`);
-
-    console.log(response.data);
     //fill Data
     setSelectedCus(response.data);
+    // console.log(response.data);
+
+    setPK({
+      ...pk,
+      customerId: e[0].id,
+      systemicMedicalHistory: response.data.systemicMedicalHistory,
+      dentalMedicalHistory: response.data.dentalMedicalHistory,
+    });
+
+    // setPK({
+    //   ...pk,
+    //   dentalMedicalHistory: response.data.dentalMedicalHistory,
+    // });
   };
 
   const [currentItemList, setCurrentItemList] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    // const iterator = currentItemList.values();
+    // for (const value of iterator) {
+    //   console.log(value);
+    // }
+    setPK({
+      ...pk,
+      medicalService: [
+        ...currentItemList.map((item, index) => {
+          return {
+            serviceId: item[5],
+            ktvId: item[3] && item[3][0] ? item[3][0].id : "",
+            status: item[4] && item[4][0] ? item[4][0].id : "",
+          };
+        }),
+      ],
+    });
+  }, [currentItemList]);
+
+  // useEffect(() => {
+  //   console.log(pk);
+  // }, [pk]);
 
   const [curDate, setCurDate] = useState(new Date());
 
@@ -287,13 +340,25 @@ const MedicalPaperModal = () => {
       });
       t.count += 1;
     }
+
+    // currentItemList.forEach((item) => {
+    //   console.log(item[3], item[4], item[5]);
+    // });
+    // setPK({ ...pk, medicalService: [...pk.medicalService, {serviceId:[], op.slice(0, 1), id}] });
+
+    // const temList = currentItemList.map((t) => ({ serviceId: t[5] ,ktvId:t[3][0].id,}));
+
+    // setPK({ ...pk, medicalService: currentItemList });
   };
 
   const deleteCurrentItems = (rowIndex, price, id) => {
     // console.log(price);
     let temp = currentItemList;
     temp.splice(rowIndex, 1);
-    setCurrentItemList([...temp]);
+    //deu render lai duoc
+    // setCurrentItemList([...temp]);
+    setCurrentItemList(temp);
+
     setTotalPrice(totalPrice - price);
 
     //xoa id khoi serListID
@@ -313,6 +378,8 @@ const MedicalPaperModal = () => {
         serListID.splice(pos, 1);
       }
     }
+
+    // setPK({ ...pk, medicalService: currentItemList });
   };
 
   const [changeMoney, setChangeMoney] = useState(0);
@@ -345,13 +412,7 @@ const MedicalPaperModal = () => {
         </Modal.Header>
 
         <Modal.Body>
-          <FormAntd
-            name="basic"
-            // initialValues={{
-            //   // TT: [{ id: 0, label: "Chưa thực hiện" }],
-            //   // currentItemList
-            // }}
-          >
+          <FormAntd name="basic" onFinish={addPk}>
             <div id="serviceLeft">
               <Form.Group className="mb-3">
                 <Form.Control
@@ -578,18 +639,10 @@ const MedicalPaperModal = () => {
                   textAlign: "center",
                 }}
               >
-                <Button
-                  type="submit"
-                  variant="primary"
-                  style={{
-                    backgroundColor: "#e67e22",
-                    width: "52%",
-                    marginBottom: "8px",
-                    display: "inline",
-                  }}
-                >
-                  In đơn thuốc
-                </Button>
+                <Payment
+                  closeMedPaper={closeMedpaper}
+                  openMedPaper={openMedPaper}
+                />
               </div>
             </div>
 
@@ -621,7 +674,7 @@ const MedicalPaperModal = () => {
                 </Col>
                 <Col sm={1}></Col>
 
-                <Form.Label column sm={1} style={{ width: "10%" }}>
+                <Form.Label column sm={1} style={{ width: "12%" }}>
                   <b>Tái khám</b>
                 </Form.Label>
                 <Col sm={2}>
@@ -630,7 +683,10 @@ const MedicalPaperModal = () => {
                       selected={birthDay}
                       dateFormat="dd/MM/yyyy"
                       onChange={(e) => {
-                        console.log(birthDay);
+                        setPK({
+                          ...pk,
+                          reExamination: e,
+                        });
                         setBirthDay(e);
                       }}
                       minDate={new Date()}
@@ -677,7 +733,7 @@ const MedicalPaperModal = () => {
                 style={{ margin: "5px", marginTop: "39px" }}
               >
                 <Form.Label column sm={4}>
-                  Tên Bác sỹ
+                  Bác sỹ
                   <span
                     style={{
                       display: "inline",
@@ -703,7 +759,9 @@ const MedicalPaperModal = () => {
                       id="basic-typeahead-single"
                       labelKey="name"
                       onChange={(e) => {
-                        //
+                        if (e[0]) {
+                          setPK({ ...pk, doctorId: e[0].id });
+                        }
                         setSingleSelectionsDoc(e);
                       }}
                       options={docList}
@@ -749,8 +807,13 @@ const MedicalPaperModal = () => {
                       id="basic-typeahead-single"
                       labelKey="name"
                       onChange={(e) => {
-                        console.log(e);
-                        fillCusDataByName(e);
+                        if (e[0]) {
+                          // setPK({ ...pk, customerId: e[0].id });
+                          fillCusDataByName(e);
+                        } else {
+                          selectedCus.systemicMedicalHistory = [];
+                          selectedCus.dentalMedicalHistory = [];
+                        }
                         setSingleSelections(e);
                       }}
                       options={customerId}
@@ -781,12 +844,12 @@ const MedicalPaperModal = () => {
                 </Col>
                 <Col sm={4}>
                   {/* Đơn thuốc */}
-                  <MedListPaper
+                  {/* <MedListPaper
                     closeMedPaper={closeMedpaper}
                     openMedPaper={openMedPaper}
                     singleSelectionsDoc={singleSelectionsDoc}
                     serListID={serListID}
-                  />
+                  /> */}
                 </Col>
               </Row>
               <hr style={{ marginTop: "8px", marginBottom: "4px" }} />
@@ -837,10 +900,30 @@ const MedicalPaperModal = () => {
                                 labelKey="name"
                                 onChange={(e) => {
                                   row[3] = e;
+
+                                  setPK({
+                                    ...pk,
+                                    medicalService: [
+                                      ...currentItemList.map((item, index) => {
+                                        return {
+                                          serviceId: item[5],
+                                          ktvId:
+                                            item[3] && item[3][0]
+                                              ? item[3][0].id
+                                              : "",
+                                          status:
+                                            item[4] && item[4][0]
+                                              ? item[4][0].id
+                                              : "",
+                                        };
+                                      }),
+                                    ],
+                                  });
+
                                   //cần 1 nhịp chay cua cái này thì mới display được
-                                  let tempSelect = singleSelectionsKTV;
-                                  tempSelect[rowIndex] = e;
-                                  setSingleSelectionsKTV([...tempSelect]);
+                                  // let tempSelect = singleSelectionsKTV;
+                                  // tempSelect[rowIndex] = e;
+                                  // setSingleSelectionsKTV([...tempSelect]);
                                 }}
                                 options={techStaff}
                                 placeholder="Chọn kĩ thuật viên"
@@ -869,10 +952,30 @@ const MedicalPaperModal = () => {
                               initialValue={row[4]}
                             >
                               <Typeahead
+                                disabled
                                 style={{ width: "100%", margin: "auto" }}
                                 id="basic-typeahead-single"
                                 onChange={(e) => {
                                   row[4] = e;
+
+                                  setPK({
+                                    ...pk,
+                                    medicalService: [
+                                      ...currentItemList.map((item, index) => {
+                                        return {
+                                          serviceId: item[5],
+                                          ktvId:
+                                            item[3] && item[3][0]
+                                              ? item[3][0].id
+                                              : "",
+                                          status:
+                                            item[4] && item[4][0]
+                                              ? item[4][0].id
+                                              : "",
+                                        };
+                                      }),
+                                    ],
+                                  });
 
                                   let tempSelect = singleSelectionsStatus;
                                   tempSelect[rowIndex] = e;
@@ -900,7 +1003,6 @@ const MedicalPaperModal = () => {
                                   // Swal.fire('Saved!', '', 'success')
                                   deleteCurrentItems(rowIndex, row[2], row[5]);
                                 } else if (result.isDenied) {
-                                  // Swal.fire('Changes are not saved', '', 'info')
                                 }
                               });
                             }}
@@ -959,6 +1061,11 @@ const MedicalPaperModal = () => {
                                 1
                               );
                           }
+                          setPK({
+                            ...pk,
+                            systemicMedicalHistory:
+                              tempCus.systemicMedicalHistory,
+                          });
                           setSelectedCus({ ...tempCus });
                         }}
                       />
@@ -999,7 +1106,7 @@ const MedicalPaperModal = () => {
                               tempCus = {
                                 ...tempCus,
                                 dentalMedicalHistory: [
-                                  ...tempCus.dentalMeKHdicalHistory,
+                                  ...tempCus.dentalMedicalHistory,
                                   den._id,
                                 ],
                               };
@@ -1012,6 +1119,11 @@ const MedicalPaperModal = () => {
                                   1
                                 );
                             }
+                            setPK({
+                              ...pk,
+                              dentalMedicalHistory:
+                                tempCus.dentalMedicalHistory,
+                            });
                             setSelectedCus({ ...tempCus });
                           }}
                           // onChange={formik.handleChange}
@@ -1039,6 +1151,7 @@ const MedicalPaperModal = () => {
                     as="textarea"
                     rows={3}
                     onChange={(e) => {
+                      setPK({ ...pk, note: e.target.value });
                       setNote(e.target.value);
                     }}
                   />

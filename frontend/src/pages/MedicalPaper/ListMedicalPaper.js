@@ -6,8 +6,8 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import { FaRedoAlt, FaEdit } from "react-icons/fa";
-import Table from "react-bootstrap/Table";
+import { FaRedoAlt, FaEdit, FaRegEye } from "react-icons/fa";
+// import Table from "react-bootstrap/Table";
 import { AiFillDelete } from "react-icons/ai";
 import CustomTable from "../../components/CustomTable";
 import { AiOutlineCheck, AiOutlineCloseCircle } from "react-icons/ai";
@@ -15,18 +15,50 @@ import CustomToast from "../../components/CustomToast";
 import customerProcessor from "../../apis/customerProcessor";
 import axios from "../../apis/api";
 import MedicalPaperModal from "./MedicalPaperModal";
+import {
+  Pagination,
+  Table,
+  Button as ButtonAntd,
+  DatePicker,
+  Space,
+} from "antd";
+import DocMedicalPaperModal from "./DocMedicalPaperModal";
 
 const ListMedicalPaper = () => {
+  const { RangePicker } = DatePicker;
+  const dateFormat = "DD/MM/YYYY";
+  const [pkList, setPkList] = useState([]);
+
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+  const [searchMeds, setSearchMeds] = useState("");
+  const [fromDate, setFromDate] = useState();
+  const [toDate, setToDate] = useState();
+
+  const [opac, setOpac] = useState(1);
+  const openMedPaper = () => {
+    setOpac(1);
+  };
+  const closeMedpaper = () => {
+    setOpac(0);
+  };
+
   const [isShowUpdate, setIsShowUpdate] = useState(false);
-  const [MedPaper, setMedPaper] = useState();
+  const [pkID, setPKID] = useState();
 
   const openUpdateModal = (id) => {
-    setMedPaper(id);
+    setPKID(id);
     setIsShowUpdate(true);
+    openMedPaper();
   };
 
   const closeUpdateModal = () => {
     setIsShowUpdate(false);
+  };
+
+  const handleSearch = (e) => {
+    setSearchMeds(e.target.value);
   };
 
   const [isToast, setIsToast] = useState({
@@ -44,142 +76,145 @@ const ListMedicalPaper = () => {
     });
   };
 
-  //load Data of all MedicalPaper
-  const loadData = () => {
+  const onChangePage = (current, pageSize) => {
+    // console.log(current, pageSize);
+    setOffset(current - 1);
+    setLimit(pageSize);
+  };
+
+  const loadDataFilterByDate = () => {
     axios
-      .get("/api/customer")
-      .then((response) => {})
+      .get(
+        `/api/medicalPaper?keyword=${searchMeds}&offset=${offset}&limit=${limit}&startDate=${fromDate}&endDate=${toDate}`
+      )
+      .then((response) => {
+        setPkList(response.data.data);
+        setTotal(response.data.total);
+      })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const title = [
+  //load Data of all MedicalPaper
+  // const loadData = () => {
+  //   axios
+  //     .get(
+  //       `/api/medicalPaper?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
+  //     )
+  //     .then((response) => {
+  //       setPkList(response.data.data);
+  //       setTotal(response.data.total);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  useEffect(() => {
+    // loadData();
+    loadDataFilterByDate();
+  }, [offset, searchMeds, limit, fromDate]);
+
+  const columns = [
     {
-      dataKey: "_id",
-      displayName: "Mã Phiếu khám",
+      title: "Mã Phiếu khám",
+      dataIndex: "_id",
+      align: "center",
+      // defaultSortOrder: "descend",
+      sorter: (a, b) => a._id.localeCompare(b._id),
     },
     {
-      dataKey: "fullname",
-      displayName: "Ngày",
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      align: "center",
+      sorter: (a, b) => a.fullname.length - b.fullname.length,
     },
     {
-      dataKey: "phone",
-      displayName: "Khách hàng",
+      title: "Khách hàng",
+      dataIndex: "customer",
+      align: "center",
+      width: "180px",
+      sorter: (a, b) => a.phone.localeCompare(b.phone),
     },
     {
-      dataKey: "address",
-      displayName: "Nhân viên",
+      title: "Nhân viên",
+      dataIndex: "staff",
+      align: "center",
+      // width: "180px",
+      // sorter: (a, b) => a.price - b.price,
     },
     {
-      dataKey: "address",
-      displayName: "Thành tiền",
+      title: "Thanh toán",
+      dataIndex: "status",
+      align: "center",
+      // filters: [
+      //   {
+      //     text: "Thanh toán",
+      //     value: `Thanh toan`,
+      //   },
+      //   {
+      //     text: "Còn nợ",
+      //     value: `Con no`,
+      //   },
+      // ],
+      // onFilter: (value, record) => record.status.type.name === value,
     },
     {
-      dataKey: "status",
-      displayName: "Thanh toán",
-      custom: (value, data) => {
-        return value ? (
-          <AiOutlineCheck color="#009432" size={25} />
-        ) : (
-          <AiOutlineCloseCircle color="#EA2027" size={25} />
-        );
-      },
-    },
-    {
-      dataKey: "",
-      displayName: "",
-      fixedWidth: 500,
-      custom: (value, data) => {
-        return (
-          <>
-            <FaEdit
-              className="mx-2"
-              color="#2980b9"
-              cursor={"pointer"}
-              size={25}
-              onClick={() => {
-                openUpdateModal(data._id);
-              }}
-            />
-            <Form.Check
-              type="switch"
-              checked={data.status}
-              style={{ display: "inline", marginLeft: "10px" }}
-              onChange={async (e) => {
-                // refreshData(e, med, index);
-                const result = await customerProcessor.changeStatus(
-                  data._id,
-                  e.target.checked
-                );
-                if (result.success === 1) {
-                  showToast(`Cập nhật id: ${data._id} thành công`, true);
-                  // setTimeout(() => {
-                  //   loadData();
-                  // },1);
-                  loadData();
-                }
-              }}
-            />
-          </>
-        );
-      },
+      title: " ",
+      dataIndex: "action",
+      align: "center",
     },
   ];
 
-  function MedicalPaperTable() {
-    return (
-      <>
-        <div
-          style={{
-            position: "fixed",
-            right: "10px",
-            bottom: "20px",
-            zIndex: "3",
-          }}
-        >
-          <CustomToast
-            value={isToast.value}
-            content={isToast.content}
-            isSuccess={isToast.isSuccess}
-            onClose={() => {
-              setIsToast({ ...isToast, value: false });
+  const data = pkList.map((p) => {
+    return {
+      key: p._id,
+      _id: p._id,
+      createdAt: new Date(p.createdAt).toLocaleDateString("en-GB"),
+      customer: p.customer,
+      staff: p.staff,
+      status:
+        p.status.$numberDecimal === "0" ? (
+          <Button
+            variant="danger"
+            style={{ width: "60%" }}
+            onClick={() => {
+              console.log("con no!!!");
             }}
-          />
-        </div>
-        <Tabs id="uncontrolled-tab-example" className="mb-3">
-          {/* <Tab eventKey="http://localhost:3000/pathological1" title="Home">
-          asd
-        </Tab> */}
+          >
+            Con no
+          </Button>
+        ) : (
+          <Button variant="success">Thanh toan</Button>
+        ),
 
-          <Tab eventKey="profile" title="Tất cả">
-            <div style={{ marginLeft: "100px", marginRight: "100px" }}>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Control placeholder="Tìm kiếm" />
-                </Form.Group>
-              </Form>
+      action: (
+        //de update/view trong nay
+        <FaRegEye
+          onClick={() => {
+            openUpdateModal(p._id);
+          }}
+          cursor={"pointer"}
+          size={25}
+        ></FaRegEye>
+      ),
+    };
+  });
 
-              <CustomTable
-                //   data={customers}
-                title={title}
-              />
-            </div>
-          </Tab>
-        </Tabs>
-      </>
-    );
-  }
   return (
     <div>
       {" "}
       {/* Update Modal */}
-      {/* <UpdateCustomerModal
+      <DocMedicalPaperModal
+        opac={opac}
+        closeMedpaper={closeMedpaper}
+        PKID={pkID}
         closeModal={closeUpdateModal}
         isVisible={isShowUpdate}
-        cusId={cusId}
-        loadData={loadData}
-      /> */}
+        loadData={loadDataFilterByDate}
+        openMedPaper={openMedPaper}
+      />
       <Navbar>
         <Container fluid>
           <Navbar.Toggle aria-controls="navbarScroll" />
@@ -194,12 +229,24 @@ const ListMedicalPaper = () => {
               </h4>
             </Nav>
             <Form className="d-flex">
+              {/* Date filter */}
+              {/* <Space direction="vertical" size={12}> */}
+              <RangePicker
+                format={dateFormat}
+                onChange={(date, dateString) => {
+                  setFromDate(dateString[0]);
+                  setToDate(dateString[1]);
+                  // loadDataFilterByDate(dateString[0], dateString[1]);
+                }}
+                style={{ marginRight: "20px" }}
+              />
+              {/* </Space> */}
               {/* Add Modal */}
-              <MedicalPaperModal />
+              <MedicalPaperModal loadData={loadDataFilterByDate} />
               <Button
                 variant="primary"
                 style={{ marginRight: "20px" }}
-                onClick={loadData}
+                onClick={loadDataFilterByDate}
               >
                 <FaRedoAlt /> Tải lại
               </Button>
@@ -207,7 +254,32 @@ const ListMedicalPaper = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <MedicalPaperTable />
+      <div style={{ marginLeft: "100px", marginRight: "100px" }}>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Control
+              placeholder="Tìm kiếm"
+              autoFocus
+              value={searchMeds}
+              onChange={handleSearch}
+              style={{ marginTop: "20px" }}
+            />
+          </Form.Group>
+        </Form>
+        {/* <ServiceTable currentItems={services} /> */}
+        <Table columns={columns} dataSource={data} pagination={false} />
+        <div id="pagin">
+          <Pagination
+            showSizeChanger
+            current={offset + 1}
+            total={total}
+            onChange={onChangePage}
+            defaultPageSize={5}
+            pageSizeOptions={[5, 10, 20, 50]}
+          />
+        </div>
+      </div>
+      {/* <MedicalPaperTable /> */}
     </div>
   );
 };

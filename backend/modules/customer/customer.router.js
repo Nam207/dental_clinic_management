@@ -6,11 +6,25 @@ const isRole = require("../../middlewares/isRole");
 const customerSchema = require("./customer.validation");
 const validateInput = require("../../middlewares/validateInput");
 
+router.put(
+  "/updateCustomerWithMedical",
+  needAuthenticated,
+  //isRole,
+  customerController.updateCustomerWithMedical
+);
+
 router.get(
   "/allCustomer",
   needAuthenticated,
   //isRole,
   customerController.getAllCustomer
+);
+
+router.get(
+  "/birthday",
+  needAuthenticated,
+  //isRole,
+  customerController.getBirthday
 );
 
 router.get(
@@ -45,6 +59,13 @@ router.post(
   //isRole,
   validateInput(customerSchema, "body"),
   customerController.createCustomer
+);
+
+router.put(
+  "/updateCustomerWithMedical",
+  needAuthenticated,
+  //isRole,
+  customerController.updateCustomerWithMedical
 );
 
 router.put(

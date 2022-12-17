@@ -6,6 +6,7 @@ import {
   Redirect,
   Navigate,
 } from "react-router-dom";
+import ReactDOM from 'react-dom';
 import Login from "./pages/login_UI/login";
 import Medicine from "./pages/Medicine/Medicine";
 import { useSelector } from "react-redux";
@@ -24,7 +25,10 @@ import Clinic from "./pages/Clinic/Clinic";
 import axios from "../src/apis/api";
 import React, { useState, useEffect, Component } from "react";
 import Staff from "./pages/Staff/Staff";
+import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper"
 import Decentralization from "./pages/decentralization/Decentralization";
+import Receptionist from "./pages/Receptionist/Receptionist";
+import Pdf from "./components/exportPdf";
 import DashBoard from "./pages/dashBoard/dashBoard";
 import Page404 from "./pages/page404/Page404";
 import DashBoardTech from "./pages/dashBoard/dashBoardtechnicians";
@@ -100,11 +104,15 @@ function App() {
                 path="/medicine"
                 element={<Medicine user={userInfo.data} />}
               ></Route>
-
-              <Route path="/Customer" element={<Customer />}></Route>
+              <Route path="/Receptionist" element={<Receptionist />}></Route>
+              <Route path="/Invoice" element={<Pdf />}></Route>
               <Route
                 path="/Staff"
                 element={<Staff user={userInfo.data} />}
+              ></Route>
+              <Route
+                path="/MedicalPaper"
+                element={<MedicalPaper user={userInfo.data} />}
               ></Route>
             </Route>
           </Routes>

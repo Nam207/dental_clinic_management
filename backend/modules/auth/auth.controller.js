@@ -18,47 +18,6 @@ const generatePassword = () => {
     return randomstring;
 }
 
-// const generateUsername = async (fullname) => {
-//     const temp = fullname.split(' ');
-//     var username = temp[temp.length - 1];
-//     for (var i = 0; i < temp.length - 1; i++) {
-//         username += temp[i].charAt(0);
-//     }
-//     username = username.toLowerCase();
-//     var count = 0;
-//     var tempUsername = username;
-//     while (true) {
-//         const existUser = await UserModel.findOne({ username: tempUsername });
-//         if (existUser) {
-//             count++;
-//             tempUsername = username + count;
-//             continue;
-//         }
-//         return tempUsername;
-//     }
-// }
-
-// const register = async (req, res) => {
-//     const email = "namnguyenluk@gmail.com";
-//     const password = generatePassword();
-//     const username = await generateUsername("Nguyen Van A");
-//     const salt = await bcrypt.genSalt(10);
-//     const hashPassword = await bcrypt.hash(password, salt);
-
-//     // const newUser = await UserModel.create({
-//     //     username,
-//     //     password: hashPassword
-//     // });
-
-//     await sendEmail(
-//         email, 
-//         '[DCManagement] Tài khoản và mật khẩu của bạn', 
-//         `<h3>Chào mừng bạn đến với Dentail Clinic Management!</h3> <p>Tài khoản của bạn là ${username}</p> <p>Mật khẩu của bạn là ${password}</p>`
-//     );
-    
-//     res.send("OK");
-// }
-
 const forgotPassword = async(req, res) => {
     const {email} = req.body;
     const existUser = await ProfileModel.findOne({email: email});
@@ -173,8 +132,6 @@ const verify = async (req, res) => {
         role,
     } });
 };
-
-
 
 module.exports = {
     //register,

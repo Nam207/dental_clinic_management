@@ -111,6 +111,8 @@ const Decentralization = () => {
         "functionId",
         f._id
       );
+      console.log(indexFunction);
+      console.log(permission[indexRole].permissionArray[indexFunction]);
       const add = permission[indexRole].permissionArray[indexFunction].add;
       const edit = permission[indexRole].permissionArray[indexFunction].edit;
       const deleteCheck =
@@ -162,6 +164,7 @@ const Decentralization = () => {
       title: "Phân Quyền",
       dataIndex: "name",
       key: "name",
+      className: "thTh"
     },
   ];
   const data = [];

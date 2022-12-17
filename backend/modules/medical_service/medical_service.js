@@ -1,36 +1,42 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const MedicalServiceSchema = new mongoose.Schema({
+const MedicalServiceSchema = new mongoose.Schema(
+  {
     serviceId: {
-        type: String,
-        require: true,
-        ref: 'Service'
+      type: String,
+      require: true,
+      ref: "Service",
     },
-    TechStaffId: {
-        type: String,
-        require: true,
-        ref: 'Profile'
+    techStaffId: {
+      type: String,
+      require: true,
+      ref: "Profile",
     },
     medicalPaperId: {
-        type: String,
-        require: true,
-        ref: 'MedicalPaper'
-    }, 
+      type: String,
+      require: true,
+      ref: "MedicalPaper",
+    },
     status: {
-        type: mongoose.Types.Decimal128,
-        default: 0,
-        require: true,
+      type: mongoose.Types.Decimal128,
+      default: 0,
+      require: true,
     },
     createBy: {
-        type: mongoose.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
     },
     modifyBy: {
-        type: mongoose.Types.ObjectId,
-    }
-}, {
-    timestamps: true
-});
+      type: mongoose.Types.ObjectId,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const MedicalServiceModel = mongoose.model('MedicalService', MedicalServiceSchema);
+const MedicalServiceModel = mongoose.model(
+  "MedicalService",
+  MedicalServiceSchema
+);
 
-module.exports = MedicalServiceModel
+module.exports = MedicalServiceModel;

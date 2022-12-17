@@ -133,7 +133,7 @@ const Navbarr = ({ user }) => {
   return (
     <Navbar bg="primary" variant="dark">
       <Container>
-        <Navbar.Brand href="#home">Dental Clinic</Navbar.Brand>
+        <Navbar.Brand href="/Dashboard">Dental Clinic</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
@@ -165,8 +165,7 @@ const Navbarr = ({ user }) => {
               ) : null}
 
               <NavDropdown.Divider />
-              {tempRoom === true ? (
-                
+              {tempRoom === true ? (         
                 <NavDropdown.Item href="/clinic">
                 Thông tin phòng khám
               </NavDropdown.Item>
@@ -183,9 +182,6 @@ const Navbarr = ({ user }) => {
               </NavDropdown.Item>
               <NavDropdown.Item href="/Changepassword">
                 Đổi mật khẩu
-              </NavDropdown.Item>
-              <NavDropdown.Item href="/pathological1">
-                Chăm sóc khách hàng
               </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item href="/login" onClick={logout}>

@@ -316,7 +316,7 @@ function ModaladdStaff({ userAA, loadData }) {
     } else {
       formik.values.schedule.push(scheduleTemp);
     }
-    formik.setFieldValue(formik.values.schedule)
+    formik.setFieldValue(formik.values.schedule);
     let startTime = moment();
     startTime.hours(e[0]._d.getHours());
     startTime.minutes(e[0]._d.getMinutes());

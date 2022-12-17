@@ -225,32 +225,42 @@ function Staff({ user }) {
               }}
             />
           )}
-
-          {temp === true ? (
-            <Form.Check
-              type="switch"
-              checked={med.status}
-              style={{ display: "inline", marginLeft: "10px" }}
-              onChange={async (e) => {
-                const result = await axios({
-                  url: `/api/profile/${med._id}/${e.target.checked}`,
-                  method: "put",
-                });
-                console.log(result);
-                if (result.success === 1) {
-                  showToast(`Cập nhật id: ${med._id} thành công`, true);
-                  await loadData();
+        {temp === true ? (
+          <Form.Check
+            type="switch"
+            checked={med.status}
+            style={{ display: "inline", marginLeft: "10px" }}
+            onChange={async (e) => {
+              let resul;
+              let temp = e.target.checked;
+              await Swal.fire({
+                title: "Bạn có chắc chắn muốn đổi",
+                showDenyButton: true,
+                confirmButtonText: "Đổi",
+                denyButtonText: `Huỷ`,
+              }).then(async (result) => {
+                if (result.isConfirmed) {
+                  resul = await axios({
+                    url: `/api/profile/${med._id}/${temp}`,
+                    method: "put",
+                  });
+                } else if (result.isDenied) {
                 }
-                if (result.success !== 1) {
-                  Swal.fire(
-                    "Thất bại",
-                    `Cập nhật thất bại tại id=${med._id}`,
-                    "failed"
-                  );
-                }
-              }}
-            />
-          ) : null}
+              });
+              if (resul.success === 1) {
+                showToast(`Cập nhật id: ${med._id} thành công`, true);
+                await loadData();
+              }
+              if (resul.success !== 1) {
+                Swal.fire(
+                  "Thất bại",
+                  `Cập nhật thất bại tại id=${med._id}`,
+                  "failed"
+                );
+              }
+            }}
+          />
+        ) : null}
         </>
       ),
     };
