@@ -286,7 +286,6 @@ const getMedicalPaperForDoctor = async (req, res) => {
     .skip(offsetNumber * limitNumber)
     .limit(limitNumber),
   MedicalPaperModel.count(filter)]);
-
   if (keyword) {
     let listMedicalPaperArray = [];
     let totalListMedicalPaper = 0;

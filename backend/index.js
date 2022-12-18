@@ -42,6 +42,9 @@ const medicinePrescribeRouter = require("./modules/medicine_prescribe/medicine_p
 const paymentController = require("./modules/payment/payment.controller");
 const paymentRouter = require("./modules/payment/payment.router");
 
+
+const medicalServiceRouter = require("./modules/medical_service/medical_service.router");
+
 const billRouter = require("./modules/bill/bill.router");
 
 const medicalServiceRouter = require("./modules/medical_service/medical_service.router");
@@ -88,9 +91,10 @@ app.use("/api/medicalPaper", medicalPaperRouter);
 app.use("/api/function", functionRouter);
 app.use("/api/permission", permissionRouter);
 app.use("/api/medicinePrescribe", medicinePrescribeRouter);
-app.use("/api/invoice", invoicePdfRouter);
-app.use("/api/prescriptionPdf", prescriptionPdfRouter);
-app.use("/api/payment", paymentRouter);
+app.use('/api/invoice', invoicePdfRouter);
+app.use('/api/prescriptionPdf', prescriptionPdfRouter);
+app.use('/api/payment', paymentRouter);
+app.use("/api/medicalService", medicalServiceRouter);;
 app.use("/api/bill", billRouter);
 app.use("/api/medicalService", medicalServiceRouter);
 app.use("/api/staticstial", staticsticalRouter);

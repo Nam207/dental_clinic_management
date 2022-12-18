@@ -432,7 +432,7 @@ const UpdateServiceModal = ({
                   <th>Mã thuốc</th>
                   <th>Tên thuốc</th>
                   <th>Lượng</th>
-                  <th>Đơn vị</th>
+                  <th>Công dụng</th>
                   <th>Số lần dùng</th>
                 </tr>
               </thead>
@@ -466,19 +466,14 @@ const UpdateServiceModal = ({
                               disabled={!temp}
                               id="basic-typeahead-single"
                               onChange={(e) => {
-                                // console.log(e + " : " + rowIndex);
                                 fillData(e, rowIndex);
-                                row[1] = e;
 
-                                let tempSelect = singleSelections;
-                                tempSelect[rowIndex] = e;
-                                setSingleSelections([...tempSelect]);
+                                let temp = consumableUiList;
+                                temp[rowIndex][1] = e;
+                                setConsumableUiList([...temp]);
                               }}
                               options={suggestionList}
-                              // selected={singleSelections[rowIndex]}
                               selected={row[1]}
-                              // defaultSelected={suggestionList.slice(0, 1)}
-                              // defaultInputValue={row.medicineName}
                               placeholder="Chọn tên thuốc..."
                             />
                           </FormAntd.Item>
@@ -490,31 +485,21 @@ const UpdateServiceModal = ({
                           <Form.Control
                             disabled
                             value={row[3]}
-                          // onChange={formik.handleChange}
+                            // onChange={formik.handleChange}
                           />
                         </td>
                         <td>
-                          <FormAntd.Item
-                            name={`useConu${rowIndex}`}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Nhập số lần dùng",
-                              },
-                            ]}
-                            initialValue={row[4]}
-                          >
-                            <Form.Control
-                              disabled={!temp}
-                              min="1"
-                              type="number"
-                              onChange={(e) => {
-                                // console.log(e.target.value);
-                                row[4] = e.target.value;
-                              }}
-                            // defaultValue={row[4]}
-                            />
-                          </FormAntd.Item>
+                          <Form.Control
+                            value={row[4]}
+                            disabled={!temp}
+                            min="1"
+                            type="number"
+                            onChange={(e) => {
+                              let temp = consumableUiList;
+                              temp[rowIndex][4] = e.target.value;
+                              setConsumableUiList([...temp]);
+                            }}
+                          />
                         </td>
                         {temp === true ? (
                           <td onClick={() => deleteConsumableUiList(rowIndex)}>
@@ -599,10 +584,11 @@ const UpdateServiceModal = ({
                             onChange={(e) => {
                               fillDataPre(e, rowIndex);
 
-                              row[1] = e;
-                              let tempSelect = singleSelectionsPre;
-                              tempSelect[rowIndex] = e;
-                              setSingleSelectionsPre([...tempSelect]);
+                              // row[1] = e;
+
+                              let temp = prescriptionList;
+                              temp[rowIndex][1] = e;
+                              setPrescriptionList([...temp]);
                             }}
                             options={suggestionList}
                             selected={row[1]}
@@ -617,17 +603,6 @@ const UpdateServiceModal = ({
                         <Form.Control disabled value={row[3]} />
                       </td>
                       <td>
-                        {/* <FormAntd.Item
-                          name={`usePreu${rowIndex}`}
-                          rules={[
-                            {
-                              required: true,
-                              message: "Nhập số lần dùng",
-                            },
-                          ]}
-                          // initialValue={row[4]}
-                          // preserve={false}
-                        > */}
                         <Form.Control
                           value={row[4]}
                           // defaultValue={row[4]}
@@ -636,43 +611,25 @@ const UpdateServiceModal = ({
                           min="1"
                           required
                           onChange={(e) => {
-                            row[4] = e.target.value;
-
-                            //bước đệm
-                            let tempSelect = singleSelectionsPre;
-                            tempSelect[rowIndex] = e;
-                            setSingleSelectionsPre([...tempSelect]);
+                            let temp = prescriptionList;
+                            temp[rowIndex][4] = e.target.value;
+                            setPrescriptionList([...temp]);
                           }}
                         />
-                        {/* </FormAntd.Item> */}
                       </td>
 
                       <td>
-                        {/* <FormAntd.Item
-                          name={`usagePreu${rowIndex}`}
-                          rules={[
-                            {
-                              required: true,
-                              message: "Nhập cách dùng",
-                            },
-                          ]}
-                          // initialValue={row[5]}
-                        >
-                          <Form.Control
-                            disabled={!temp}
-                            value={row[5]}
-                            // defaultValue={row[5]}
-                            type="text"
-                            onChange={(e) => {
-                              // console.log(row[5]);
-                              row[5] = e.target.value;
-                            //bước đệm
-                            let tempSelect = singleSelectionsPre;
-                            tempSelect[rowIndex] = e;
-                            setSingleSelectionsPre([...tempSelect]);
+                        <Form.Control
+                          disabled={!temp}
+                          value={row[5]}
+                          // defaultValue={row[5]}
+                          type="text"
+                          onChange={(e) => {
+                            let temp = prescriptionList;
+                            temp[rowIndex][5] = e.target.value;
+                            setPrescriptionList([...temp]);
                           }}
                         />
-                        {/* </FormAntd.Item> */}
                       </td>
 
                       {temp === true ? (

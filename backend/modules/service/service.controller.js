@@ -316,6 +316,11 @@ const getMedicineByService = async (req, res) => {
   res.send({ success: 1, data: medicine });
 };
 
+const getAllService = async (req, res) => {
+  const allEmployee = await ServiceModel.find();
+  res.send({ success: 1, data: allEmployee });
+};
+
 module.exports = {
   getService,
   createService,
@@ -324,4 +329,5 @@ module.exports = {
   updateStatus,
   getActiveService,
   getMedicineByService,
+  getAllService,
 };

@@ -59,16 +59,16 @@ const Navbarr = ({ user }) => {
           break;
       }
     });
-    if(countLT>0){
+    if (countLT > 0) {
       setLinkUrl("/Receptionist");
       return;
     }
-    if(countBs>0){
+    if (countBs > 0) {
       setLinkUrl("/DashboardDoctor");
       return;
     }
     setLinkUrl("/DashBoardTech");
-      return;
+    return;
   };
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const Navbarr = ({ user }) => {
     getRole();
   }, [user]);
 
-  useEffect(()=> {
+  useEffect(() => {
     console.log(linkURL);
   }, [linkURL]);
   const getPermissionRoom = async (functionName) => {
@@ -217,8 +217,10 @@ const Navbarr = ({ user }) => {
                 </NavDropdown.Item>
               ) : null}
             </NavDropdown>
+
             <Nav.Link href="/MedicalPaper">Phiếu khám</Nav.Link>
             <Nav.Link href="/Customer">Khách hàng</Nav.Link>
+            <Nav.Link href="/Statistical">Thống kê</Nav.Link>
 
             <NavDropdown title="Thiết lập" id="basic-nav-dropdown">
               {tempMedicine === true ? (

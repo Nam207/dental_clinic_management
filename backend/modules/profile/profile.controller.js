@@ -507,6 +507,11 @@ function removeVietnameseTones(str) {
   return str;
 }
 
+const getAllEmployee = async (req, res) => {
+  const allEmployee = await ProfileModel.find({ _id: { $nin: ["admin"] } });
+  res.send({ success: 1, data: allEmployee });
+};
+
 module.exports = {
   createAdmin,
   getProfile,
@@ -521,4 +526,5 @@ module.exports = {
   getDoctor,
   getTechStaff,
   getReceptionist,
+  getAllEmployee,
 };

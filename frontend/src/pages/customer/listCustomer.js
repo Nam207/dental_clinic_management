@@ -19,8 +19,7 @@ import axios from "../../apis/api";
 import Swal from "sweetalert2";
 import { Pagination, Table } from "antd";
 
-const Customer = ({user}) => {
-  console.log(user)
+const Customer = ({ user }) => {
   const [customers, setCustomers] = useState([]);
 
   const [offset, setOffset] = useState(0);
@@ -150,8 +149,6 @@ const Customer = ({user}) => {
     },
   ];
 
-  
-
   const data = customers.map((med) => {
     return {
       key: med._id,
@@ -168,59 +165,58 @@ const Customer = ({user}) => {
       // "false"
       action: (
         <>
-        
-            {tempEye === true ? (
-           <FaEdit
-           className="mx-2"
-           color="#2980b9"
-           cursor={"pointer"}
-           size={25}
-           onClick={() => {
-             openUpdateModal(med._id);
-           }}
-         />
+          {tempEye === true ? (
+            <FaEdit
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
           ) : (
             <FaEye
-            className="mx-2"
-            color="#2980b9"
-            cursor={"pointer"}
-            size={25}
-            onClick={() => {
-              openUpdateModal(med._id);
-            }}
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
             />
           )}
-           {temp === true ? (
-          <Form.Check
-          type="switch"
-          checked={med.status}
-          style={{ display: "inline", marginLeft: "10px" }}
-          onChange={async (e) => {
-            // refreshData(e, med, index);
-            let resul;
-            let temp = e.target.checked;
-            // console.log(e.target.checked);
-            await Swal.fire({
-              title: "Bạn có chắc chắn muốn đổi",
-              showDenyButton: true,
-              confirmButtonText: "Đổi",
-              denyButtonText: `Huỷ`,
-            }).then(async (result) => {
-              /* Read more about isConfirmed, isDenied below */
-              if (result.isConfirmed) {
-                console.log(temp);
-                resul = await customerProcessor.changeStatus(med._id, temp);
-              } else if (result.isDenied) {
-              }
-            });
+          {temp === true ? (
+            <Form.Check
+              type="switch"
+              checked={med.status}
+              style={{ display: "inline", marginLeft: "10px" }}
+              onChange={async (e) => {
+                // refreshData(e, med, index);
+                let resul;
+                let temp = e.target.checked;
+                // console.log(e.target.checked);
+                await Swal.fire({
+                  title: "Bạn có chắc chắn muốn đổi",
+                  showDenyButton: true,
+                  confirmButtonText: "Đổi",
+                  denyButtonText: `Huỷ`,
+                }).then(async (result) => {
+                  /* Read more about isConfirmed, isDenied below */
+                  if (result.isConfirmed) {
+                    console.log(temp);
+                    resul = await customerProcessor.changeStatus(med._id, temp);
+                  } else if (result.isDenied) {
+                  }
+                });
 
-            if (resul.success === 1) {
-              showToast(`Cập nhật id: ${med._id} thành công`, true);
-              await loadData();
-            }
-          }}
-        />
-        ) : null}
+                if (resul.success === 1) {
+                  showToast(`Cập nhật id: ${med._id} thành công`, true);
+                  await loadData();
+                }
+              }}
+            />
+          ) : null}
         </>
       ),
     };
@@ -267,7 +263,7 @@ const Customer = ({user}) => {
         }
       })
     );
-    if(tempView===0){
+    if (tempView === 0) {
       window.location.href = "/Page404";
     }
   };
@@ -302,6 +298,8 @@ const Customer = ({user}) => {
                 widthh="181px"
                 userA={user}
               />
+              {/* <ExportCSV csvData={customers} fileName={"Demo"} /> */}
+
               <Button
                 variant="primary"
                 style={{ marginRight: "20px" }}

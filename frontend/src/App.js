@@ -6,7 +6,7 @@ import {
   Redirect,
   Navigate,
 } from "react-router-dom";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import Login from "./pages/login_UI/login";
 import Medicine from "./pages/Medicine/Medicine";
 import { useSelector } from "react-redux";
@@ -25,13 +25,15 @@ import Clinic from "./pages/Clinic/Clinic";
 import axios from "../src/apis/api";
 import React, { useState, useEffect, Component } from "react";
 import Staff from "./pages/Staff/Staff";
-import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper"
+import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper";
 import Decentralization from "./pages/decentralization/Decentralization";
 import Receptionist from "./pages/Receptionist/Receptionist";
 import DashBoard from "./pages/dashBoard/dashBoard";
 import Page404 from "./pages/page404/Page404";
 import DashBoardTech from "./pages/dashBoard/dashBoardtechnicians";
 import DashBoardDoctor from "./pages/dashBoard/dashBoardDoctor";
+import Statistical from "./pages/statistical/statistical";
+
 export const AuthContext = React.createContext();
 function App() {
   const isLoading = useSelector((state) => state.loading);
@@ -81,7 +83,8 @@ function App() {
     <>
       <AuthContext.Provider value={{ user: userInfo.data, login, logout }}>
         <Router>
-          {userInfo.data ? <Navbarr user={userInfo.data} /> : <><Navigate to="/Login" /></>}
+          {userInfo.data ? <Navbarr user={userInfo?.data} /> : <></>}
+
           <Routes>
             <Route element={<GuestRoute user={userInfo.data} />}>
               <Route path="/Login" element={<Login />} />
@@ -91,13 +94,16 @@ function App() {
             <Route element={<PrivateRoute user={userInfo.data} />}>
               <Route path="/DashBoard" element={<DashBoard />} />
               <Route path="/Decentralization" element={<Decentralization />} />
-              <Route path="/clinic" element={<Clinic user={userInfo.data}/>} />
+              <Route path="/clinic" element={<Clinic user={userInfo.data} />} />
               <Route path="/Page404" element={<Page404 />} />
               <Route path="/ChangePassword" element={<Changepassword />} />
               <Route path="/Profile" element={<Profile />} />
               <Route path="/DashBoardTech" element={<DashBoardTech />} />
               <Route path="/DashBoardDoctor" element={<DashBoardDoctor />} />
-              <Route path="/Customer" element={<Customer user={userInfo.data} />} />
+              <Route
+                path="/Customer"
+                element={<Customer user={userInfo.data} />}
+              />
               <Route
                 path="/service"
                 element={<Service user={userInfo.data} />}
@@ -114,6 +120,10 @@ function App() {
               <Route
                 path="/MedicalPaper"
                 element={<MedicalPaper user={userInfo.data} />}
+              ></Route>
+              <Route
+                path="/Statistical"
+                element={<Statistical user={userInfo.data} />}
               ></Route>
             </Route>
           </Routes>

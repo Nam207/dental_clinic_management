@@ -5,23 +5,18 @@ import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import axios from "../../apis/api";
-import { Pagination, Table, DatePicker } from "antd";
+import axios from "../apis/api";
+import { Pagination, Table } from "antd";
 import moment from "moment";
-import {  FaEye } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
-import ModaleTech from "./modalTech";
 
-function DashBoardTech() {
+export const TablePayment = ({ a }) => {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
-  const [keyWord, setkeyWord] = useState([]);
-
-  const [table, setTable] = useState([]);
+  const [reExamination, setReExamination] = useState([]);
 
   const today = new Date();
-  const dateFormat = "DD/MM/YYYY";
 
   const [startDate, setStartDate] = useState(
     moment(today).format("YYYY-MM-DD")
@@ -31,15 +26,13 @@ function DashBoardTech() {
   const loadDataReExam = async () => {
     const response = await axios
       .get(
-        `/api/medicalService?limit=${limitReExam}&offset=${offsetReExam}&keyword=${keyWord}&startDate=${startDate}&endDate=${endDate}`
+        `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
       )
       .then((response) => {
         if (response.success === 1) {
-          setTable(response.data.data);
+          setReExamination(response.data.data);
           setTotalReExam(response.data.total);
         }
-
-        console.log(response.data.data[0].status);
       });
   };
 
@@ -54,115 +47,33 @@ function DashBoardTech() {
 
   const columnsReExam = [
     {
-      title: "Mã phiếu khám",
-      dataIndex: "_idPH",
+      title: "STT",
+      dataIndex: "_stt",
       align: "center",
       sorter: (a, b) => a._id.localeCompare(b._id),
     },
     {
-      title: "Mã khách hàng",
-      dataIndex: "_idKH",
-      align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
-    },
-    {
-      title: "Khách hàng",
-      dataIndex: "nameKH",
+      title: "Hình thức thanh toán",
+      dataIndex: "id",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: "Mã thủ thuật",
-      dataIndex: "_idTT",
-      align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
-    },
-    {
-      title: "Thủ thuật",
-      dataIndex: "nameTT",
+      title: "Doanh thu ",
+      dataIndex: "payment",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "dateT",
+      title: "Số lượng phiếu",
+      dataIndex: "paper",
       align: "center",
-      sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      align: "center",
-      filters: [
-        {
-          text: "Thực hiện",
-          value: `2`,
-        },
-        {
-          text: "Đang thực hiện",
-          value: `1`,
-        },
-        {
-          text: "Chưa thực hiện",
-          value: `0`,
-        },
-      ],
-    },
-    {
-      title: "",
-      dataIndex: "view",
-      align: "center",
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
   ];
 
-  const dataReExam = table.map((element) => {
-    return {
-      _idPH: element.medicalPaperId,
-      _idKH: element.customerId._id,
-      nameKH: element.customerId.fullname,
-      _idTT: element.serviceId._id,
-      nameTT: element.serviceId.name,
-      dateT: moment(element.createdAt).format("DD/MM/YYYY"),
-      status:
-        element.status.$numberDecimal === "0"
-          ? "Chưa thực hiện"
-          : element.status.$numberDecimal === "1"
-          ? "Đang thực hiện"
-          : "Thực hiện",
-      view: (
-        <FaEye
-          className="mx-2"
-          color="#2980b9"
-          cursor={"pointer"}
-          size={25}
-          onClick={() => {
-            openUpdateModal(element._id);
-          }}
-        />
-      ),
-    };
-  });
-  const [empId, setEmpId] = useState("");
-  const [isShowUpdate, setIsShowUpdate] = useState(false);
-  const openUpdateModal = (id) => {
-    setIsShowUpdate(true);
-    setEmpId(id);
-  };
-
-  const closeUpdateModal = () => {
-    setEmpId("");
-    setIsShowUpdate(false);
-  };
-
   return (
     <>
-    <ModaleTech
-    closeModal={closeUpdateModal}
-    isVisible={isShowUpdate}
-    empId={empId}
-    >
-
-    </ModaleTech>
       <div
         style={{
           margin: "auto",
@@ -183,30 +94,30 @@ function DashBoardTech() {
                 navbarScroll
               >
                 <h4 style={{ display: "inline-block", margin: "10px" }}>
-                  Khách hàng chờ làm thủ thuật
+                  Thống kê hình thức thanh toán
                 </h4>
               </Nav>
-              <DatePicker.RangePicker
+              {/* <DatePicker.RangePicker
                 defaultValue={[
                   moment(today, dateFormat),
                   moment(today, dateFormat),
                 ]}
                 format={dateFormat}
                 style={{ float: "right", marginRight: "20px" }}
-              />
+              /> */}
               <Form className="d-flex">
                 <Button
                   variant="primary"
                   style={{ marginRight: "20px" }}
                   onClick={loadDataReExam}
                 >
-                  <FaRedoAlt /> Tải lại
+                  Xuất file
                 </Button>
               </Form>
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        <div style={{ marginLeft: "80px", marginRight: "80px"}}>
+        <div style={{ marginLeft: "80px", marginRight: "80px" }}>
           <Form>
             <Form.Group className="mb-3">
               <Form.Control
@@ -220,15 +131,11 @@ function DashBoardTech() {
         <div
           style={{ marginLeft: "80px", marginRight: "80px", marginTop: "5px" }}
         >
-          <span style={{ fontSize: "20px", fontWeight: "500" }}>
+          {/* <span style={{ fontSize: "20px", fontWeight: "500" }}>
             Tổng: {totalReExam}
-          </span>
+          </span> */}
 
-          <Table
-            columns={columnsReExam}
-            dataSource={dataReExam}
-            pagination={false}
-          />
+          <Table columns={columnsReExam} pagination={false} />
         </div>
 
         <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>
@@ -244,6 +151,6 @@ function DashBoardTech() {
       </div>
     </>
   );
-}
+};
 
-export default DashBoardTech;
+export default TablePayment;

@@ -31,16 +31,16 @@ const getMedicalPaperWithService = async (req, res) => {
     MedicalServiceModel.count(filter)
   ])
 
-  if (!keyword && keyword !== 'undefined' && typeof keyword !== 'undefined') {
+  if (keyword) {
     let listMedicalServiceArray = [];
     let totalListMedicalService = 0;
     await Promise.all(listMedicalService.map((element) => {
       if (
-        element.medicalPaperId.includes(keyword) ||
-        element.customerId._id.includes(keyword) ||
-        element.customerId.fullname.includes(keyword) ||
-        element.serviceId._id.includes(keyword) ||
-        element.serviceId.name.includes(keyword)
+        element.medicalPaperId.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.customerId._id.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.customerId.fullname.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.serviceId._id.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.serviceId.name.toLowerCase().includes(keyword.toLowerCase())
       ) {
         listMedicalServiceArray.push({ ...element._doc });
         totalListMedicalService++;
@@ -70,7 +70,6 @@ const updateStatus = async (req, res) => {
   if (!existMedicalService) {
     throw new HTTPError(400, "Not found medical service");
   }
-
   if (role[0].name !== "Admin") {
     const profile = await ProfileModel.findOne({ userId: senderUser._id });
     if (profile._id !== existMedicalService.techStaffId) {

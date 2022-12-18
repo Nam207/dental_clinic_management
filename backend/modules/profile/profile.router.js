@@ -7,6 +7,8 @@ const needAuthenticated = require("../../middlewares/needAuthenticated");
 
 router.get("/curProfile", needAuthenticated, profileController.curProfile);
 
+router.get("/allEmployee", needAuthenticated, profileController.getAllEmployee);
+
 router.get("/", needAuthenticated, profileController.getProfile);
 
 router.get("/getTechStaff", needAuthenticated, profileController.getTechStaff);
