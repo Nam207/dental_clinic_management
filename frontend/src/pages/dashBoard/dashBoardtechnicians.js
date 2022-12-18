@@ -137,7 +137,7 @@ function DashBoardTech() {
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        <div style={{ marginLeft: "80px", marginRight: "80px" }}>
+        <div style={{ marginLeft: "80px", marginRight: "80px"}}>
           <Form>
             <Form.Group className="mb-3">
               <Form.Control

@@ -202,6 +202,7 @@ const MedicineModal = ({userA},prop) => {
                     </span>
                   </Form.Label>
                   <UploadAndDisplayImage
+                  userI={userA}
                     value={formik.values.imageUrl ? formik.values.imageUrl : []}
                     onChange={(value) => {
                       // formik.setFieldValue("imageUrl", value);

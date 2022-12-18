@@ -12,6 +12,7 @@ const UploadAndDisplayImage = ({ userI,value = [], onChange = () => { } }) => {
 
   useEffect(() => {
     onChange(files);
+    getPermission("Quản lý thuốc")
   }, [files]);
   function findIndexByProperty(data, key, value) {
     for (var i = 0; i < data.length; i++) {

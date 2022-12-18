@@ -28,11 +28,17 @@ import Staff from "./pages/Staff/Staff";
 import MedicalPaper from "./pages/MedicalPaper/ListMedicalPaper"
 import Decentralization from "./pages/decentralization/Decentralization";
 import Receptionist from "./pages/Receptionist/Receptionist";
-import Pdf from "./components/exportPdf";
 import DashBoard from "./pages/dashBoard/dashBoard";
 import Page404 from "./pages/page404/Page404";
 import DashBoardTech from "./pages/dashBoard/dashBoardtechnicians";
 import DashBoardDoctor from "./pages/dashBoard/dashBoardDoctor";
+import Statistical from "./pages/statistical/statistical";
+
+import { TableDate } from "./components/tableDate"; 
+import { Customers123 } from "./components/tableCustomer";
+import { TablePayment } from "./components/tablePayment";
+import { TableTechnical } from "./components/tableTechnical";
+import { TableStaff } from "./components/tableStaff";
 export const AuthContext = React.createContext();
 function App() {
   const isLoading = useSelector((state) => state.loading);
@@ -108,7 +114,6 @@ function App() {
                 element={<Medicine user={userInfo.data} />}
               ></Route>
               <Route path="/Receptionist" element={<Receptionist />}></Route>
-              <Route path="/Invoice" element={<Pdf />}></Route>
               <Route
                 path="/Staff"
                 element={<Staff user={userInfo.data} />}
@@ -117,6 +122,15 @@ function App() {
                 path="/MedicalPaper"
                 element={<MedicalPaper user={userInfo.data} />}
               ></Route>
+              <Route
+                path="/Statistical"
+                element={<Statistical user={userInfo.data} />}
+              ></Route>
+               <Route path="/Customers123" element={<Customers123 />} />
+               <Route path="/TableDate" element={<TableDate />} />
+               <Route path="/TablePayment" element={<TablePayment />} />
+               <Route path="/TableTechnical" element={<TableTechnical />} />
+               <Route path="/TableStaff" element={<TableStaff />} />
             </Route>
           </Routes>
         </Router>
