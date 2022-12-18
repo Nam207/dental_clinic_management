@@ -188,10 +188,6 @@ const ServiceModal = ({ userA,loadData }) => {
     getPermission("Quản lý dịch vụ");
   }, []);
 
-  useEffect(() => {
-    console.log(consumableUiList);
-  }, [consumableUiList]);
-
   const deleteConsumableUiList = (rowIndex) => {
     let temp = consumableUiList;
     temp.splice(rowIndex, 1);
@@ -233,6 +229,10 @@ const ServiceModal = ({ userA,loadData }) => {
   }
 
   const getPermission = async (functionName) => {
+    if (userA.role[0].name === "Admin") {
+      setTemp(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
@@ -310,9 +310,9 @@ const ServiceModal = ({ userA,loadData }) => {
                   Hình Ảnh
                 </Form.Label>
                 <UploadAndDisplayImage
+                  permission={temp}
                   value={formik.values.imageUrl ? formik.values.imageUrl : []}
                   onChange={(value) => {
-                    // console.log(value);
                     if (value && value.length > 0) {
                       formik.values.imageUrl = value;
                     }

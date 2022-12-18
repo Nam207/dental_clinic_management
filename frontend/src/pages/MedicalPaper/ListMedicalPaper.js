@@ -22,6 +22,8 @@ import {
   DatePicker,
   Space,
 } from "antd";
+import dayjs from "dayjs";
+import moment from "moment";
 import DocMedicalPaperModal from "./DocMedicalPaperModal";
 
 const ListMedicalPaper = () => {
@@ -236,8 +238,11 @@ const ListMedicalPaper = () => {
                 onChange={(date, dateString) => {
                   setFromDate(dateString[0]);
                   setToDate(dateString[1]);
-                  // loadDataFilterByDate(dateString[0], dateString[1]);
                 }}
+                defaultValue={[
+                  moment(new Date(), dateFormat),
+                  moment(new Date(), dateFormat),
+                ]}
                 style={{ marginRight: "20px" }}
               />
               {/* </Space> */}

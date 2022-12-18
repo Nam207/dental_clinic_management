@@ -17,10 +17,10 @@ const MedicalPaperSchema = new mongoose.Schema(
       ref: "Profile",
     },
     reExamination: {
-        type: Date,
+      type: Date,
     },
-    note:{
-        type: String,
+    note: {
+      type: String,
     },
     status: {
       type: mongoose.Types.Decimal128,
@@ -33,6 +33,14 @@ const MedicalPaperSchema = new mongoose.Schema(
     },
     modifyBy: {
       type: mongoose.Types.ObjectId,
+    },
+    totalAmount: {
+      type: mongoose.Types.Decimal128,
+      default: 0,
+    },
+    customerPayment: {
+      type: mongoose.Types.Decimal128,
+      default: 0,
     },
   },
   {

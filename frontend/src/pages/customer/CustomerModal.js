@@ -163,6 +163,10 @@ const CustomerModal = ({
   }
 
   const getPermission = async (functionName) => {
+    if (userA.role[0].name === "Admin") {
+      setTemp(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",

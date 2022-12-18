@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import CustomToast from "../../components/CustomToast";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -11,32 +10,57 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import UploadAndDisplayImage from "../../components/uploadImage";
 import clinicProcessor from "../../apis/clinicProcessor";
+import axios from "../../apis/api";
 
-const Clinic = () => {
+const Clinic = ({user}) => {
     const [clinic, setClinic] = useState({});
 
-    const [isToast, setIsToast] = useState({
-        value: false,
-        isSuccess: true,
-        content: "",
-    });
-
-    const showToast = (content, isSuccess) => {
-        setIsToast({
-            ...isToast,
-            content: content,
-            isSuccess: isSuccess,
-            value: true,
-        });
-    };
+    const [tempEye, setTempeye] = useState(false);
 
     useEffect(() => {
-        getClinic()
+        getClinic();
+        getPermission("Quản lý phòng khám")
     }, []);
 
     const getClinic = async () => {
         const response = await clinicProcessor.getClinic();
         setClinic(response);
+    };
+
+    function findIndexByProperty(data, key, value) {
+        for (var i = 0; i < data.length; i++) {
+            if (data[i][key] === value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    const getPermission = async (functionName) => {
+        if (user.role[0].name === "Admin") {
+            setTempeye(true);
+            return;
+        }
+        const functionArray = await axios({
+            url: `/api/function`,
+            method: "get",
+        });
+        const index = findIndexByProperty(functionArray.data, "name", functionName);
+        await Promise.all(
+            user.role.map(async (element) => {
+                const permission = await axios({
+                    url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+                    method: "get",
+                });
+                if (permission.success === 0 || !permission.data) return;
+                if (permission.data[0].view === false) {
+                    window.location.href = "/Page404";
+                }
+                if (permission.data[0].edit === true) {
+                    setTempeye(true);
+                }
+            })
+        );
     };
 
     const formik = useFormik({
@@ -96,14 +120,6 @@ const Clinic = () => {
                     zIndex: "3",
                 }}
             >
-                <CustomToast
-                    value={isToast.value}
-                    content={isToast.content}
-                    isSuccess={isToast.isSuccess}
-                    onClose={() => {
-                        setIsToast({ ...isToast, value: false });
-                    }}
-                />
             </div>
             <div style={{
                 width: "100%",
@@ -114,7 +130,7 @@ const Clinic = () => {
             }}>
                 <Form onSubmit={formik.handleSubmit} style={{ width: "70%" }}>
                     <Row className="mb-3">
-                        <Col style={{borderRight: '1px dashed lime'}}>
+                        <Col style={{ borderRight: '1px dashed lime' }}>
                             <div style={{
                                 textAlign: 'center'
                             }}>
@@ -292,25 +308,28 @@ const Clinic = () => {
                             marginTop: '0'
                         }}
                     />
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        style={{ float: "right" }}
-                    >
-                        Lưu lại
-                    </Button>
-                    <Button
-                        style={{
-                            float: "right",
-                            marginRight: "10px",
-                            backgroundColor: "gray",
-                        }}
-                        onClick={(e) => {
-                            window.location.reload(false);
-                        }}
-                    >
-                        Đặt lại
-                    </Button>
+                    {tempEye === true ? (
+                        <>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                style={{ float: "right" }}
+                            >
+                                Lưu lại
+                            </Button>
+                            <Button
+                                style={{
+                                    float: "right",
+                                    marginRight: "10px",
+                                    backgroundColor: "gray",
+                                }}
+                                onClick={(e) => {
+                                    window.location.reload(false);
+                                }}
+                            >
+                                Đặt lại
+                            </Button>
+                        </>) : (<></>)}
                 </Form>
             </div>
         </>

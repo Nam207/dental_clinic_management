@@ -87,6 +87,7 @@ const MedicalPaperModal = ({ loadData }) => {
           reExamination: pk.reExamination,
           medicalService: pk.medicalService,
           note: pk.note,
+          totalAmount: totalPrice,
         },
       });
     } catch (error) {
@@ -513,39 +514,18 @@ const MedicalPaperModal = ({ loadData }) => {
 
               {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
               <Row>
-                {/* <div> */}
-                {/* <h6
-                  style={{
-                    margin: "0px",
-                    padding: "5px",
-                    fontFamily: "Times New Roman",
-                    display: "inline-block",
-                  }}
-                >
-                  Tiền khách trả:
-                </h6> */}
-                {/* <h6
-                style={{
-                  // marginLeft:"110px",
-                  float: "right",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                2,000
-              </h6> */}
                 <Form.Label column style={{ marginLeft: "5px" }}>
                   <b>Tiền khách trả</b>
                 </Form.Label>
                 <Col>
                   <Form.Control
-                    style={{ backgroundColor: "#ecf0f1" }}
+                    // style={{ backgroundColor: "#ecf0f1" }}
                     plaintext
+                    readOnly
                     // id="phone"
                     type="number"
                     // value = {payment.toLocaleString("en-US")}
-                    placeholder="Nhập số tiền"
+                    placeholder="0"
                     onChange={(e) => {
                       calPayment(e.target.value);
                       // setPayment(e.target.value)
@@ -553,32 +533,8 @@ const MedicalPaperModal = ({ loadData }) => {
                     }}
                   />
                 </Col>
-                {/* </div> */}
               </Row>
-              {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
-              {/* <div>
-              <h6
-                style={{
-                  margin: "0px",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                Tiền thừa:
-              </h6>
-              <h6
-                style={{
-                  // marginLeft:"110px",
-                  float: "right",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                2,000
-              </h6>
-            </div> */}
+
               <Row>
                 <Form.Label column style={{ marginLeft: "5px" }}>
                   <b>Tiền thừa</b>
@@ -616,7 +572,7 @@ const MedicalPaperModal = ({ loadData }) => {
                   Lưu lại
                 </Button>
               </div>
-              <div
+              {/* <div
                 style={{
                   textAlign: "center",
                 }}
@@ -633,8 +589,8 @@ const MedicalPaperModal = ({ loadData }) => {
                 >
                   In Phiếu thu
                 </Button>
-              </div>
-              <div
+              </div> */}
+              {/* <div
                 style={{
                   textAlign: "center",
                 }}
@@ -643,7 +599,7 @@ const MedicalPaperModal = ({ loadData }) => {
                   closeMedPaper={closeMedpaper}
                   openMedPaper={openMedPaper}
                 />
-              </div>
+              </div> */}
             </div>
 
             <div id="serviceMiddle">

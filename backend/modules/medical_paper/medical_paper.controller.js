@@ -12,18 +12,21 @@ const getReExamination = async (req, res) => {
   const limitNumber = limit && Number(limit) ? Number(limit) : 5;
 
   let filter = {};
-  if(startDate && endDate){
-    filter.reExamination = {$gte: [startDate], $lt: [endDate]}
+  if (startDate && endDate) {
+    filter.reExamination = { $gte: [startDate], $lt: [endDate] };
   }
 
   const [medicalPaper, totalMedicalPaper] = await Promise.all([
     MedicalPaperModel.find(filter)
       .skip(offsetNumber * limitNumber)
       .limit(limitNumber),
-      MedicalPaperModel.countDocuments(filter),
+    MedicalPaperModel.countDocuments(filter),
   ]);
 
-  res.send({ success: 1, data: { data: medicalPaper, total: totalMedicalPaper } });
+  res.send({
+    success: 1,
+    data: { data: medicalPaper, total: totalMedicalPaper },
+  });
 };
 
 const getMedicalPaper = async (req, res) => {
@@ -66,6 +69,18 @@ const getMedicalPaper = async (req, res) => {
     toDate.setSeconds(0);
 
     filter.createdAt = { $gte: fromDate, $lte: toDate };
+  } else {
+    console.log(1);
+    var fromDate = new Date();
+    fromDate.setHours(0);
+    fromDate.setMinutes(0);
+    fromDate.setSeconds(0);
+
+    var toDate = new Date();
+    toDate.setHours(24);
+    toDate.setMinutes(0);
+    toDate.setSeconds(0);
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   const [medicalPaper, totalMedicalPaper] = await Promise.all([
@@ -76,7 +91,6 @@ const getMedicalPaper = async (req, res) => {
     MedicalPaperModel.countDocuments(filter),
   ]);
 
-  console.log(totalMedicalPaper);
   let medicalPaperArray = [];
   await Promise.all(
     medicalPaper.map(async (element) => {
@@ -111,6 +125,7 @@ const createMedicalPaper = async (req, res) => {
     status,
     note,
     medicalService,
+    totalAmount,
   } = req.body;
   const medicalId = await getNext();
 
@@ -137,7 +152,67 @@ const createMedicalPaper = async (req, res) => {
     note,
     status,
     createBy: profile[0]._id,
+    totalAmount,
   });
+  res.send({ success: 1, data: newMedicalPaper });
+};
+
+const updateMedicalPaper = async (req, res) => {
+  const senderUser = req.user;
+  const { medicalPaperId } = req.params;
+  const profile = await ProfileModel.find({ userId: senderUser });
+
+  if (!profile) {
+    throw new HTTPError(400, "Not found profile");
+  }
+
+  const medicalPaper = await MedicalPaperModel.find({ _id: medicalPaperId });
+
+  if (!medicalPaper) {
+    throw new HTTPError(400, "Not found medical Paper");
+  }
+
+  const {
+    customerId,
+    doctorId,
+    reExamination,
+    status,
+    note,
+    medicalService,
+    totalAmount,
+  } = req.body;
+
+  await MedicalServiceModel.deleteMany({ medicalPaperId: medicalPaperId });
+  let medicalServiceArray;
+  if (medicalService != null) {
+    medicalServiceArray = JSON.parse(JSON.stringify(medicalService));
+
+    medicalServiceArray.forEach(async (element) => {
+      await MedicalServiceModel.create({
+        serviceId: element.serviceId,
+        techStaffId: element.ktvId,
+        status: element.status,
+        medicalPaperId: medicalPaperId,
+        createBy: senderUser._id,
+      });
+    });
+  }
+  console.log(1);
+  console.log(medicalPaperId);
+  const newMedicalPaper = await MedicalPaperModel.findByIdAndUpdate(
+    medicalPaperId,
+    {
+      customerId,
+      doctorId,
+      reExamination,
+      note,
+      status,
+      modifyBy: senderUser._id,
+      totalAmount,
+    },
+    { new: true }
+  );
+  console.log(newMedicalPaper);
   res.send({ success: 1, data: newMedicalPaper });
 };
 
@@ -203,4 +278,5 @@ module.exports = {
   getMedicalPaperById,
   createMedicalPaper,
   getReExamination,
+  updateMedicalPaper,
 };

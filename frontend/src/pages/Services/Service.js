@@ -240,13 +240,18 @@ const Service = ({ user }) => {
   }
 
   const getPermission = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTemp(true);
+      setTemp1(true);
+      setTempeye(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
     });
     const index = findIndexByProperty(functionArray.data, "name", functionName);
     let tempView = 0;
-    console.log(user);
     await Promise.all(
       user.role.map(async (element) => {
         const permission = await axios({

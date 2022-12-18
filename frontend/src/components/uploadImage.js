@@ -3,9 +3,8 @@ import Button from "react-bootstrap/Button";
 import { AiOutlineClose } from "react-icons/ai";
 import axios from "../apis/api";
 
-const UploadAndDisplayImage = ({ userI,value = [], onChange = () => { } }) => {
+const UploadAndDisplayImage = ({ permission,value = [], onChange = () => { } }) => {
   let [files, setFiles] = useState([]);
-  const [temp, setTemp] = useState(false);
   const openFileDialog = () => {
     document.getElementById("imageUrl").click();
   };
@@ -23,32 +22,11 @@ const UploadAndDisplayImage = ({ userI,value = [], onChange = () => { } }) => {
     return -1;
   }
 
-  const getPermission = async (functionName) => {
-    const functionArray = await axios({
-      url: `/api/function`,
-      method: "get",
-    });
-    const index = findIndexByProperty(functionArray.data, "name", functionName)
-
-    await Promise.all(userI.role.map(async (element) => {
-      const permission = await axios({
-        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
-        method: "get",
-      })
-      if(permission.success === 0 || !permission.data) return;
-      if(permission.data[0].edit === true ) {
-        setTemp(true);
-        return;
-      }
-    }))
-    return;
-  }
-
   return (
     <>
-    {temp === true ? (<Button onClick={openFileDialog} variant="primary">
+    {permission === true ? (<Button onClick={openFileDialog} variant="primary">
         Chọn ảnh
-      </Button>): null}
+      </Button>): <></>}
       
       <input
         id="imageUrl"

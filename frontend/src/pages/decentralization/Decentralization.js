@@ -81,25 +81,21 @@ const Decentralization = () => {
         title: "Thêm",
         dataIndex: "add",
         key: "add",
-        //render: () => <Checkbox onChange={onChange}>Checkbox</Checkbox>
       },
       {
         title: "Sửa",
         dataIndex: "edit",
         key: "edit",
-        //render: () => <Checkbox onChange={onChange}>Checkbox</Checkbox>
       },
       {
         title: "Xóa",
         dataIndex: "delete",
         key: "delete",
-        //render: () => <Checkbox onChange={onChange}>Checkbox</Checkbox>
       },
       {
         title: "Xem",
         dataIndex: "view",
         key: "view",
-        //render: () => <Checkbox onChange={onChange}>Checkbox</Checkbox>
       },
     ];
 
@@ -120,11 +116,13 @@ const Decentralization = () => {
         key: f._id,
         name: f.name,
         add: (
-          <Checkbox
-            options={{ label: "", value: f._id, key: "add" }}
-            onChange={onChange}
-            defaultChecked={add}
-          ></Checkbox>
+          f.name === "Quản lý phòng khám" ? (<></>) : (
+            <Checkbox
+              options={{ label: "", value: f._id, key: "add" }}
+              onChange={onChange}
+              defaultChecked={add}
+            ></Checkbox>
+          )
         ),
         edit: (
           <Checkbox
@@ -134,11 +132,13 @@ const Decentralization = () => {
           ></Checkbox>
         ),
         delete: (
-          <Checkbox
-            options={{ label: "", value: f._id, key: "delete" }}
-            onChange={onChange}
-            defaultChecked={deleteCheck}
-          ></Checkbox>
+          f.name === "Quản lý phòng khám" ? (<></>) : (
+            <Checkbox
+              options={{ label: "", value: f._id, key: "delete" }}
+              onChange={onChange}
+              defaultChecked={deleteCheck}
+            ></Checkbox>
+          )
         ),
         view: (
           <Checkbox
@@ -245,8 +245,8 @@ const Decentralization = () => {
           dataSource={data}
           pagination={false}
         />
-        </div>
-       <div style={{ marginLeft: "100px", marginRight: "100px",marginTop: "20px"}}>
+      </div>
+      <div style={{ marginLeft: "100px", marginRight: "100px", marginTop: "20px" }}>
         <div className="btn_Huy">
           <Button
             onClick={eventBack}

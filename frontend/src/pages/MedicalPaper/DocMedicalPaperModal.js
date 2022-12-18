@@ -37,15 +37,7 @@ const DocMedicalPaperModal = ({
   const [tempDate, setTempDate] = useState([]);
 
   // const options = [];
-  const [pk, setPK] = useState({
-    customerId: "",
-    doctorId: "",
-    reExamination: null,
-    medicalService: [],
-    systemicMedicalHistory: [],
-    dentalMedicalHistory: [],
-    note: "",
-  });
+  const [pk, setPK] = useState({});
 
   // const [selectedCus, setSelectedCus] = useState({});
 
@@ -62,6 +54,10 @@ const DocMedicalPaperModal = ({
     { id: 1, label: "Đang thực hiện" },
     { id: 2, label: "Hoàn thành" },
   ];
+
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [cusPayment, setCusPayment] = useState(0);
+  const [changeMoney, setChangeMoney] = useState(totalPrice - cusPayment);
 
   const [serListID, setSerListID] = useState([]);
 
@@ -102,50 +98,52 @@ const DocMedicalPaperModal = ({
           i.serviceId,
         ]),
       ]);
-
+      setTotalPrice(Number(res.data.totalAmount.$numberDecimal));
+      setCusPayment(Number(res.data.customerPayment.$numberDecimal));
       setSingleSelectionsDoc([
         { id: res.data.doctorId, name: res.data.doctor },
       ]);
 
-      setBirthDay(new Date(res.data.createdAt));
+      setBirthDay(new Date(res.data.reExamination));
     } catch (error) {
       console.log(error);
     }
   };
 
   const addPk = async () => {
-    console.log(pk.medicalService);
-    // try {
-    //   const res = await axios({
-    //     url: "/api/customer/updateCustomerWithMedical",
-    //     method: "put",
-    //     data: {
-    //       customerId: pk.customerId,
-    //       dentalMedicalHistory: pk.dentalMedicalHistory,
-    //       systemicMedicalHistory: pk.systemicMedicalHistory,
-    //     },
-    //   });
-    //   const ress = await axios({
-    //     url: "/api/medicalPaper",
-    //     method: "post",
-    //     data: {
-    //       doctorId: pk.doctorId,
-    //       customerId: pk.customerId,
-    //       reExamination: pk.reExamination,
-    //       medicalService: pk.medicalService,
-    //       note: pk.note,
-    //     },
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    // handleClose();
-    // //reset data after submit
-    // setCurrentItemList([]);
-    // // setSelectedCus({});
-    // setSingleSelectionsDoc([]);
-    // setSingleSelections([]);
-    // setBirthDay(null);
+    try {
+      const res = await axios({
+        url: "/api/customer/updateCustomerWithMedical",
+        method: "put",
+        data: {
+          customerId: pk.customerId,
+          dentalMedicalHistory: pk.dentalMedicalHistory,
+          systemicMedicalHistory: pk.systemicMedicalHistory,
+        },
+      });
+      const ress = await axios({
+        url: `/api/medicalPaper/${pk._id}`,
+        method: "put",
+        data: {
+          doctorId: pk.doctorId,
+          customerId: pk.customerId,
+          reExamination: pk.reExamination,
+          medicalService: pk.medicalService,
+          note: pk.note,
+          totalAmount: totalPrice,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    handleClose();
+    loadData();
+    //reset data after submit
+    setCurrentItemList([]);
+    setSingleSelectionsDoc([]);
+    setSingleSelections([]);
+    setBirthDay(null);
   };
 
   const loadTechStaffData = () => {
@@ -351,7 +349,6 @@ const DocMedicalPaperModal = ({
   };
 
   const [currentItemList, setCurrentItemList] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     setPK({
@@ -427,8 +424,6 @@ const DocMedicalPaperModal = ({
 
     setPK({ ...pk, medicalService: currentItemList });
   };
-
-  const [changeMoney, setChangeMoney] = useState(0);
 
   const calPayment = (payment) => {
     setChangeMoney(payment - totalPrice);
@@ -551,7 +546,86 @@ const DocMedicalPaperModal = ({
                     readOnly
                     id="phone"
                     type="number"
-                    placeholder={totalPrice.toLocaleString("en-US")}
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(totalPrice)}
+                  />
+                </Col>
+              </Row>
+
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Tiền khách trả</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    // style={{ backgroundColor: "#ecf0f1" }}
+                    plaintext
+                    readOnly
+                    // id="phone"
+                    type="number"
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(cusPayment)}
+                    onChange={(e) => {
+                      calPayment(e.target.value);
+                      // setPayment(e.target.value)
+                      // console.log(payment.toLocaleString("en-US"));
+                    }}
+                  />
+                </Col>
+              </Row>
+
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Còn nợ</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    plaintext
+                    readOnly
+                    id="phone"
+                    type="number"
+                    // placeholder={changeMoney.toLocaleString("en-US")}
+                    placeholder={
+                      totalPrice - cusPayment > 0
+                        ? new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(totalPrice - cusPayment)
+                        : new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(0)
+                    }
+                  />
+                </Col>
+              </Row>
+
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Tiền thừa</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    plaintext
+                    readOnly
+                    id="phone"
+                    type="number"
+                    // placeholder={changeMoney.toLocaleString("en-US")}
+                    placeholder={
+                      cusPayment - totalPrice <= 0
+                        ? new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(0)
+                        : new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(cusPayment - totalPrice)
+                    }
                   />
                 </Col>
               </Row>
@@ -586,9 +660,34 @@ const DocMedicalPaperModal = ({
               >
                 {/* thay doi bang Payment modal */}
                 <Payment
+                  PKID={pk._id}
+                  changeMoney={changeMoney}
+                  setChangeMoney={setChangeMoney}
+                  setCusPayment={setCusPayment}
+                  cusPayment={cusPayment}
+                  totalPrice={totalPrice}
                   closeMedPaper={closeMedpaper}
                   openMedPaper={openMedPaper}
                 />
+              </div>
+
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                <Button
+                  // type="submit"
+                  // variant="primary"
+                  style={{
+                    backgroundColor: "#2ecc71",
+                    width: "50%",
+                    marginBottom: "8px",
+                    display: "inline",
+                  }}
+                >
+                  In Phiếu thu
+                </Button>
               </div>
             </div>
 
@@ -1085,6 +1184,7 @@ const DocMedicalPaperModal = ({
                 </Form.Label>
                 <Col sm={10}>
                   <Form.Control
+                    value={pk.note}
                     id="gc"
                     type="text"
                     as="textarea"

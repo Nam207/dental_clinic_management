@@ -260,6 +260,11 @@ const UpdateServiceModal = ({
   }
 
   const getPermission = async (functionName) => {
+    if (userB.role[0].name === "Admin") {
+      setTemp(true);
+      setDisabledinPut(false);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
@@ -485,7 +490,7 @@ const UpdateServiceModal = ({
                           <Form.Control
                             disabled
                             value={row[3]}
-                            // onChange={formik.handleChange}
+                          // onChange={formik.handleChange}
                           />
                         </td>
                         <td>
@@ -507,7 +512,7 @@ const UpdateServiceModal = ({
                                 // console.log(e.target.value);
                                 row[4] = e.target.value;
                               }}
-                              // defaultValue={row[4]}
+                            // defaultValue={row[4]}
                             />
                           </FormAntd.Item>
                         </td>
