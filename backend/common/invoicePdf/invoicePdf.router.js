@@ -8,15 +8,15 @@ const memoryStorage = multer.memoryStorage()
 const uploadWithMemoryStorage = multer({ storage: memoryStorage })
 
 router.get(
-    '/',
-    //needAuthenticated,
-    invoicePdf.exportPdf,
+  '/',
+  needAuthenticated,
+  invoicePdf.exportPdf,
 );
 
 router.post(
-    '/',
-    uploadWithMemoryStorage.single('file'),
-    invoicePdf.uploadToCloud
-  );
+  '/',
+  uploadWithMemoryStorage.single('file'),
+  invoicePdf.uploadToCloud
+);
 
 module.exports = router;

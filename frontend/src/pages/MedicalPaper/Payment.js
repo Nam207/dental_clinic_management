@@ -61,9 +61,6 @@ const Payment = ({
         console.error(error);
       });
   };
-  useEffect(() => {
-    console.log(paymentList);
-  }, [paymentList]);
 
   const handleShow = () => {
     closeMedPaper();
@@ -82,7 +79,7 @@ const Payment = ({
   const loadTT = async () => {
     try {
       const res = await axios({
-        url: `/api/Payment/`,
+        url: `/api/payment/`,
         method: "get",
       });
       setOP([...res.data.map((i) => ({ id: i._id, name: i.name }))]);

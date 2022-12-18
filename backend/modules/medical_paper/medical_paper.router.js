@@ -7,6 +7,13 @@ const medicalPaperSchema = require("./medical_paper.validation");
 const validateInput = require("../../middlewares/validateInput");
 
 router.get(
+  "/getMedicalForDoctor",
+  needAuthenticated,
+  //isRole,
+  medicalPaperController.getMedicalPaperForDoctor
+);
+
+router.get(
   "/",
   needAuthenticated,
   //isRole,
@@ -42,5 +49,6 @@ router.get(
   //isRole,
   medicalPaperController.getMedicalPaperById
 );
+
 
 module.exports = router;

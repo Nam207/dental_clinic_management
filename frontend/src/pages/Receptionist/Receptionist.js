@@ -28,6 +28,7 @@ const Receptionist = () => {
     const [endDate, setEndDate] = useState(moment(today).format("YYYY-MM-DD"));
 
     const loadDataReExam = async () => {
+        console.log(1);
         const response = await axios
             .get(
                 `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
@@ -39,6 +40,7 @@ const Receptionist = () => {
                 }
             });
     };
+
     const loadDataBirthday = async () => {
         const response = await axios
             .get(
@@ -55,7 +57,7 @@ const Receptionist = () => {
     useEffect(() => {
         loadDataReExam();
         loadDataBirthday();
-    }, [offsetReExam, limitReExam, totalReExam, offsetBirthday, limitBirthday, totalBirthday]);
+    }, [offsetReExam, limitReExam, offsetBirthday, limitBirthday, startDate, endDate]);
 
     const onChangePageReExam = (current, pageSize) => {
         setOffsetReExam(current - 1);
@@ -67,6 +69,10 @@ const Receptionist = () => {
         setLimitBirthday(pageSize);
     };
 
+    const handleSubmit = (e) => {
+        setStartDate(moment(e[0]).format("YYYY-MM-DD"));
+        setEndDate(moment(e[1]).format("YYYY-MM-DD"))
+    }
     const columnsReExam = [
         {
             title: "Mã khách hàng",
@@ -123,8 +129,8 @@ const Receptionist = () => {
         return {
             key: element._id,
             _id: element.customerId,
-            name: element.fullname,
-            date: element.reExamination,
+            name: element.customerName,
+            date: moment(element.reExamination).format("DD/MM/YYYY"),
             medicalPaper: element._id,
             phone: element.phone
         };
@@ -173,6 +179,7 @@ const Receptionist = () => {
                         defaultValue={[moment(today, dateFormat), moment(today, dateFormat)]}
                         format={dateFormat}
                         style={{ float: "right" }}
+                        onChange = {handleSubmit}
                     />
                     <Table columns={columnsReExam} dataSource={dataReExam} pagination={false} />
                 </div>

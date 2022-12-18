@@ -59,7 +59,12 @@ const inputBill = async (req, res) => {
     })
   );
 
-  await MedicalPaperModel.findByIdAndUpdate(billArray[0].medicalPaperId,{ customerPayment: paymentMoney}, {new: true});
+  const medicalPaper = await MedicalPaperModel.findById(billArray[0].medicalPaperId);
+  let status = 0;
+  if(paymentMoney>0){
+    (medicalPaper.totalAmount.$numberDecimal - paymentMoney <= 0 ? status = 2 : status = 1)
+  }
+  await MedicalPaperModel.findByIdAndUpdate(billArray[0].medicalPaperId,{ customerPayment: paymentMoney, status: status}, {new: true});
 
   const bill = await BillModel.find({
     medicalPaperId: billArray[0].medicalPaperId,

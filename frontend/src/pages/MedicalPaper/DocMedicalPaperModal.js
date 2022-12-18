@@ -35,11 +35,7 @@ const DocMedicalPaperModal = ({
   openMedPaper,
 }) => {
   const [tempDate, setTempDate] = useState([]);
-
-  // const options = [];
   const [pk, setPK] = useState({});
-
-  // const [selectedCus, setSelectedCus] = useState({});
 
   const [note, setNote] = useState();
 
@@ -194,32 +190,10 @@ const DocMedicalPaperModal = ({
       });
   };
 
-  //   const [curUser, setCurUser] = useState({});
-  //   const loadCurProfile = () => {
-  //     axios
-  //       .get("/api/profile/curProfile")
-  //       .then((response) => {
-  //         // console.log(response.data);
-  //         // setCurUser(response.data[0]);
-  //         setCurUser(response.data);
-  //       })
-  //       .catch((error) => {
-  //         console.error(error);
-  //       });
-  //   };
-
-  // const [show, setShow] = useState(false);
-
   const handleClose = () => {
-    // setShow(false);
     closeModal();
     closeMedpaper();
   };
-
-  // const handleShow = () => {
-  //   setShow(true);
-  //   openMedPaper();
-  // };
 
   const [services, setServices] = useState([]);
 
@@ -289,6 +263,26 @@ const DocMedicalPaperModal = ({
     setLimit(pageSize);
   };
 
+  const onPrintInvoice = async () => {
+    const response = await axios
+      .get(`/api/invoice?medicalPaperId=${PKID}`, {
+        responseType: "arraybuffer",
+        headers: {
+          Accept: "application/pdf",
+        },
+      })
+      .then(async (response) => {
+        const pdfBlod = new Blob([response], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(pdfBlod);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "prescription.pdf"); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+        const pdfWindow = window.open();
+        pdfWindow.location.href = url;
+      });
+  }
   const loadServiceTable = async () => {
     await axios
       .get(
@@ -685,6 +679,7 @@ const DocMedicalPaperModal = ({
                     marginBottom: "8px",
                     display: "inline",
                   }}
+                  onClick={onPrintInvoice}
                 >
                   In Phiếu thu
                 </Button>

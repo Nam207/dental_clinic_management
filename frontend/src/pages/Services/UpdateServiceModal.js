@@ -525,13 +525,8 @@ const UpdateServiceModal = ({
                             />
                           </td>
                         ) : (
-                          <td onClick={() => deleteConsumableUiList(rowIndex)}>
-                            <FaTrashAlt
-                              onClick={"return false"}
-                              cursor="pointer"
-                              color="#e74c3c"
-                              style={{ transform: "translateY(7px)" }}
-                            />
+                          <td>
+                            <></>
                           </td>
                         )}
                       </tr>

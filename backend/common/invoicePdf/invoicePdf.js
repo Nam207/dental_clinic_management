@@ -15,9 +15,11 @@ const { createCanvas, loadImage } = require('canvas');
 const cloudinary = require('cloudinary');
 const streamifier = require('streamifier')
 const multer = require('multer');
-
-const memoryStorage = multer.memoryStorage()
-const uploadWithMemoryStorage = multer({ storage: memoryStorage })
+const MedicalPaperModel = require('../../modules/medical_paper/medical_paper');
+const CustomerModel = require("../../modules/customer/customer");
+const MedicalServiceModel = require('../../modules/medical_service/medical_service');
+const ServiceModel = require('../../modules/service/service');
+const e = require('express');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -34,10 +36,174 @@ function getImage(url, size) {
     });
 }
 
+function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i][key] === value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function buildTable(data, data2) {
+    let body = [];
+    body.push([
+        {
+            text: 'TT',
+            fillColor: '#eaf2f5',
+            border: [false, true, false, true],
+            margin: [0, 5, 0, 5],
+            textTransform: 'uppercase',
+        },
+        {
+            text: 'Nội dung dịch vụ',
+            border: [false, true, false, true],
+            alignment: 'center',
+            fillColor: '#eaf2f5',
+            margin: [0, 5, 0, 5],
+            textTransform: 'uppercase',
+        },
+        {
+            text: 'SL',
+            border: [false, true, false, true],
+            alignment: 'center',
+            fillColor: '#eaf2f5',
+            margin: [0, 5, 0, 5],
+            textTransform: 'uppercase',
+        },
+        {
+            text: 'Đơn giá',
+            border: [false, true, false, true],
+            alignment: 'center',
+            fillColor: '#eaf2f5',
+            margin: [0, 5, 0, 5],
+            textTransform: 'uppercase',
+        },
+        {
+            text: 'Thành tiền',
+            border: [false, true, false, true],
+            alignment: 'center',
+            fillColor: '#eaf2f5',
+            margin: [0, 5, 0, 5],
+            textTransform: 'uppercase',
+        },
+    ])
+    let temp = 1;
+    data.forEach(element => {
+        body.push([
+            {
+                text: temp,
+                border: [false, false, false, true],
+                margin: [0, 5, 0, 5],
+                alignment: 'left',
+            },
+            {
+                border: [false, false, false, true],
+                text: element.name,
+                bold: true,
+                alignment: 'left',
+                margin: [0, 5, 0, 5],
+            },
+            {
+                text: element.quantity,
+                border: [false, false, false, true],
+                margin: [0, 5, 0, 5],
+                alignment: 'center',
+            },
+            {
+                text: element.price,
+                border: [false, false, false, true],
+                margin: [0, 5, 0, 5],
+                alignment: 'center',
+            },
+            {
+                text: element.price * element.quantity,
+                border: [false, false, false, true],
+                margin: [0, 5, 0, 5],
+                alignment: 'right',
+            },
+        ])
+
+        temp++;
+    });
+    body.push([
+        {
+            text: '',
+            border: [false, false, false, true],
+            margin: [0, 5, 0, 5],
+            alignment: 'left',
+        },
+        {
+            text: '',
+            border: [false, false, false, true],
+            margin: [0, 5, 0, 5],
+            alignment: 'left',
+        },
+        {
+            text: '',
+            border: [false, false, false, true],
+            margin: [0, 5, 0, 5],
+            alignment: 'left',
+        },
+        {
+            text: 'Tổng cộng',
+            fontSize: 18,
+            bold: true,
+            border: [false, false, false, true],
+            margin: [0, 5, 0, 5],
+            alignment: 'right',
+        },
+        {
+            text: Number(data2.totalAmount),
+            fontSize: 18,
+            bold: true,
+            border: [false, false, false, true],
+            fillColor: '#f5f5f5',
+            alignment: 'right',
+            margin: [0, 5, 0, 5],
+        },
+    ])
+    return body;
+}
+
 const exportPdf = async (req, res) => {
     const clinic = await ClinicModel.find();
     const data = await getImage(clinic[0].icon, 400);
-    //var image = Buffer.alloc(clinic[0].icon, 'base64')
+    const { medicalPaperId } = req.query;
+
+    const today = new Date();
+    const medicalPaper = await MedicalPaperModel.findOne({ _id: medicalPaperId });
+    const customer = await CustomerModel.findOne({ _id: medicalPaper.customerId });
+    const medicalService = await MedicalServiceModel.find({ medicalPaperId: medicalPaperId });
+    let medicalServiceArray = [];
+    await Promise.all(medicalService.map(async (element) => {
+        const service = await ServiceModel.findById(element.serviceId);
+        if (medicalServiceArray.length < 1) {
+            medicalServiceArray.push({
+                id: service._id,
+                name: service.name,
+                quantity: 1,
+                price: Number(service.price),
+            })
+            return;
+        }
+        const index = findIndexByProperty(medicalServiceArray, "id", element.serviceId);
+        if (index < 0) {
+            medicalServiceArray.push({
+                id: service._id,
+                name: service.name,
+                quantity: 1,
+                price: service.price.$numberDecimal,
+            })
+        } else {
+            const tempCount = Number(medicalServiceArray[index].quantity);
+            medicalServiceArray[index] = { ...medicalServiceArray[index], quantity: tempCount + 1 };
+        }
+    }));
+
+    const debt = (Number(medicalPaper.totalAmount) - Number(medicalPaper.customerPayment) > 0) ? (Number(medicalPaper.totalAmount) - Number(medicalPaper.customerPayment)) : 0;
+    const change = (Number(medicalPaper.customerPayment) - Number(medicalPaper.totalAmount) > 0) ? (Number(medicalPaper.customerPayment) - Number(medicalPaper.totalAmount)) : 0;
+
     var docDefinition = {
         content: [
             {
@@ -161,12 +327,12 @@ const exportPdf = async (req, res) => {
                         alignment: 'right',
                     },
                     {
-                        text: "0001",
+                        text: medicalPaperId,
                         bold: true,
                         fontSize: 12,
                         alignment: 'left',
                         color: '#333333',
-                        width: 70,
+                        width: 100,
                     },
                 ],
             }, '\n\n',
@@ -182,7 +348,7 @@ const exportPdf = async (req, res) => {
                         margin: [0, 0, 0, 10]
                     },
                     {
-                        text: '',
+                        text: customer.fullname,
                         color: '#333333',
                         bold: true,
                         fontSize: 13,
@@ -203,7 +369,7 @@ const exportPdf = async (req, res) => {
                         margin: [0, 0, 0, 10]
                     },
                     {
-                        text: 'aaaa',
+                        text: customer.address,
                         color: '#333333',
                         bold: true,
                         fontSize: 13,
@@ -224,7 +390,7 @@ const exportPdf = async (req, res) => {
                         margin: [0, 0, 0, 10]
                     },
                     {
-                        text: '00000',
+                        text: customer.phone,
                         color: '#333333',
                         bold: true,
                         fontSize: 13,
@@ -277,152 +443,7 @@ const exportPdf = async (req, res) => {
                 table: {
                     headerRows: 1,
                     widths: [30, '*', 30, '*', 90],
-                    body: [
-                        [
-                            {
-                                text: 'TT',
-                                fillColor: '#eaf2f5',
-                                border: [false, true, false, true],
-                                margin: [0, 5, 0, 5],
-                                textTransform: 'uppercase',
-                            },
-                            {
-                                text: 'Nội dung dịch vụ',
-                                border: [false, true, false, true],
-                                alignment: 'right',
-                                fillColor: '#eaf2f5',
-                                margin: [0, 5, 0, 5],
-                                textTransform: 'uppercase',
-                            },
-                            {
-                                text: 'SL',
-                                border: [false, true, false, true],
-                                alignment: 'right',
-                                fillColor: '#eaf2f5',
-                                margin: [0, 5, 0, 5],
-                                textTransform: 'uppercase',
-                            },
-                            {
-                                text: 'Đơn giá',
-                                border: [false, true, false, true],
-                                alignment: 'right',
-                                fillColor: '#eaf2f5',
-                                margin: [0, 5, 0, 5],
-                                textTransform: 'uppercase',
-                            },
-                            {
-                                text: 'Thành tiền',
-                                border: [false, true, false, true],
-                                alignment: 'right',
-                                fillColor: '#eaf2f5',
-                                margin: [0, 5, 0, 5],
-                                textTransform: 'uppercase',
-                            },
-                        ],
-                        [
-                            {
-                                text: 'Item 1',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                border: [false, false, false, true],
-                                text: '$999.99',
-                                fillColor: '#f5f5f5',
-                                alignment: 'right',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                text: 'Item 1',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Item 1',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Item 1',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                        ],
-                        [
-                            {
-                                text: 'Item 2',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Item 2',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Item 2',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Item 2',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: '$999.99',
-                                border: [false, false, false, true],
-                                fillColor: '#f5f5f5',
-                                alignment: 'right',
-                                margin: [0, 5, 0, 5],
-                            },
-                        ],
-                        [
-                            {
-                                text: '',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: '',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: '',
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'left',
-                            },
-                            {
-                                text: 'Tổng cộng',
-                                fontSize: 18,
-                                bold: true,
-                                border: [false, false, false, true],
-                                margin: [0, 5, 0, 5],
-                                alignment: 'right',
-                            },
-                            {
-                                text: '$999.99',
-                                fontSize: 18,
-                                bold: true,
-                                border: [false, false, false, true],
-                                fillColor: '#f5f5f5',
-                                alignment: 'right',
-                                margin: [0, 5, 0, 5],
-                            },
-                        ],
-                    ],
+                    body: buildTable(medicalServiceArray, medicalPaper),
                 },
             },
             '\n',
@@ -477,7 +498,7 @@ const exportPdf = async (req, res) => {
                             },
                             {
                                 border: [false, true, false, true],
-                                text: '$999.99',
+                                text: Number(medicalPaper.customerPayment),
                                 alignment: 'right',
                                 fillColor: '#f5f5f5',
                                 margin: [0, 5, 0, 5],
@@ -491,10 +512,25 @@ const exportPdf = async (req, res) => {
                                 margin: [0, 5, 0, 5],
                             },
                             {
-                                text: '$999.99',
+                                text: debt,
                                 border: [false, false, false, true],
                                 fillColor: '#f5f5f5',
                                 alignment: 'right',
+                                margin: [0, 5, 0, 5],
+                            },
+                        ],
+                        [
+                            {
+                                text: 'Tiền thừa',
+                                border: [false, true, false, true],
+                                alignment: 'right',
+                                margin: [0, 5, 0, 5],
+                            },
+                            {
+                                border: [false, true, false, true],
+                                text: change,
+                                alignment: 'right',
+                                fillColor: '#f5f5f5',
                                 margin: [0, 5, 0, 5],
                             },
                         ],
@@ -503,7 +539,7 @@ const exportPdf = async (req, res) => {
             },
             '\n\n',
             {
-                text: 'Hà Nội, ngày  tháng  năm',
+                text: `Hà Nội, ngày ${today.getDate()} tháng ${today.getMonth()+1} năm ${today.getFullYear()}`,
                 style: 'notesText',
                 alignment: 'right',
                 width: '*',

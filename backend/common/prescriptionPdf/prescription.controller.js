@@ -405,7 +405,7 @@ const exportPdf = async (req, res) => {
             },
             '\n\n',
             {
-                text: `Hà Nội, ngày ${today.getDay()} tháng ${today.getMonth()} năm ${today.getFullYear()}`,
+                text: `Hà Nội, ngày ${today.getDate()} tháng ${today.getMonth()+1} năm ${today.getFullYear()}`,
                 style: 'notesText',
                 alignment: 'right',
                 width: '*',
