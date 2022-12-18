@@ -17,6 +17,11 @@ const MedicalServiceSchema = new mongoose.Schema(
       require: true,
       ref: "MedicalPaper",
     },
+    customerId: {
+      type: String,
+      require: true,
+      ref: "Customer"
+    },
     status: {
       type: mongoose.Types.Decimal128,
       default: 0,

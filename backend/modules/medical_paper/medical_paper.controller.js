@@ -12,18 +12,26 @@ const getReExamination = async (req, res) => {
   const limitNumber = limit && Number(limit) ? Number(limit) : 5;
 
   let filter = {};
-  if(startDate && endDate){
-    filter.reExamination = {$gte: [startDate], $lt: [endDate]}
+  if (startDate && endDate) {
+    filter.reExamination = { $gte: new Date(startDate), $lt: new Date(endDate) };
   }
 
   const [medicalPaper, totalMedicalPaper] = await Promise.all([
     MedicalPaperModel.find(filter)
       .skip(offsetNumber * limitNumber)
       .limit(limitNumber),
-      MedicalPaperModel.countDocuments(filter),
+    MedicalPaperModel.countDocuments(filter),
   ]);
 
-  res.send({ success: 1, data: { data: medicalPaper, total: totalMedicalPaper } });
+  let fullMedicalPaper = [];
+  await Promise.all(medicalPaper.map(async (element) => {
+    const customer = await CustomerModel.findById(element.customerId);
+    fullMedicalPaper.push({...element._doc, customerName: customer.fullname, phone: customer.phone})
+  }))
+  res.send({
+    success: 1,
+    data: { data: fullMedicalPaper, total: totalMedicalPaper },
+  });
 };
 
 const getMedicalPaper = async (req, res) => {
@@ -66,6 +74,17 @@ const getMedicalPaper = async (req, res) => {
     toDate.setSeconds(0);
 
     filter.createdAt = { $gte: fromDate, $lte: toDate };
+  } else {
+    var fromDate = new Date();
+    fromDate.setHours(0);
+    fromDate.setMinutes(0);
+    fromDate.setSeconds(0);
+
+    var toDate = new Date();
+    toDate.setHours(24);
+    toDate.setMinutes(0);
+    toDate.setSeconds(0);
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   const [medicalPaper, totalMedicalPaper] = await Promise.all([
@@ -76,7 +95,6 @@ const getMedicalPaper = async (req, res) => {
     MedicalPaperModel.countDocuments(filter),
   ]);
 
-  console.log(totalMedicalPaper);
   let medicalPaperArray = [];
   await Promise.all(
     medicalPaper.map(async (element) => {
@@ -111,6 +129,7 @@ const createMedicalPaper = async (req, res) => {
     status,
     note,
     medicalService,
+    totalAmount,
   } = req.body;
   const medicalId = await getNext();
 
@@ -122,6 +141,7 @@ const createMedicalPaper = async (req, res) => {
       await MedicalServiceModel.create({
         serviceId: element.serviceId,
         techStaffId: element.ktvId,
+        customerId: customerId,
         status: element.status,
         medicalPaperId: medicalId,
         createBy: senderUser._id,
@@ -137,7 +157,65 @@ const createMedicalPaper = async (req, res) => {
     note,
     status,
     createBy: profile[0]._id,
+    totalAmount,
   });
+  res.send({ success: 1, data: newMedicalPaper });
+};
+
+const updateMedicalPaper = async (req, res) => {
+  const senderUser = req.user;
+  const { medicalPaperId } = req.params;
+  const profile = await ProfileModel.find({ userId: senderUser });
+
+  if (!profile) {
+    throw new HTTPError(400, "Not found profile");
+  }
+
+  const medicalPaper = await MedicalPaperModel.find({ _id: medicalPaperId });
+
+  if (!medicalPaper) {
+    throw new HTTPError(400, "Not found medical Paper");
+  }
+
+  const {
+    customerId,
+    doctorId,
+    reExamination,
+    status,
+    note,
+    medicalService,
+    totalAmount,
+  } = req.body;
+
+  await MedicalServiceModel.deleteMany({ medicalPaperId: medicalPaperId });
+  let medicalServiceArray;
+  if (medicalService != null) {
+    medicalServiceArray = JSON.parse(JSON.stringify(medicalService));
+
+    medicalServiceArray.forEach(async (element) => {
+      await MedicalServiceModel.create({
+        serviceId: element.serviceId,
+        techStaffId: element.ktvId,
+        customerId: customerId,
+        status: element.status,
+        medicalPaperId: medicalPaperId,
+        createBy: senderUser._id,
+      });
+    });
+  }
+  const newMedicalPaper = await MedicalPaperModel.findByIdAndUpdate(
+    medicalPaperId,
+    {
+      customerId,
+      doctorId,
+      reExamination,
+      note,
+      status,
+      modifyBy: senderUser._id,
+      totalAmount,
+    },
+    { new: true }
+  );
   res.send({ success: 1, data: newMedicalPaper });
 };
 
@@ -150,18 +228,20 @@ const getMedicalPaperById = async (req, res) => {
   });
 
   let medicalServiceArray = [];
-  await Promise.all(
-    medicalService.map(async (element) => {
-      const techStaff = await ProfileModel.findById(element.techStaffId);
-      const service = await ServiceModel.findById(element.serviceId);
-      medicalServiceArray.push({
-        ...element._doc,
-        techStaff: techStaff.fullname,
-        servicePrice: service.price,
-        serviceName: service.name,
-      });
-    })
-  );
+  if (medicalService.length > 0) {
+    await Promise.all(
+      medicalService.map(async (element) => {
+        const techStaff = await ProfileModel.findById(element.techStaffId);
+        const service = await ServiceModel.findById(element.serviceId);
+        medicalServiceArray.push({
+          ...element._doc,
+          techStaff: techStaff.fullname,
+          servicePrice: service.price,
+          serviceName: service.name,
+        });
+      })
+    );
+  }
 
   const staff = await ProfileModel.findById(medicalPaper.createBy);
   const customer = await CustomerModel.findById(medicalPaper.customerId);
@@ -180,6 +260,53 @@ const getMedicalPaperById = async (req, res) => {
     },
   });
 };
+
+const getMedicalPaperForDoctor = async (req, res) => {
+  const senderUser = req.user;
+  const role = req.role;
+  const { keyword, offset, limit, startDate, endDate } = req.query;
+
+  const offsetNumber = offset && Number(offset) ? Number(offset) : 0;
+  const limitNumber = limit && Number(limit) ? Number(limit) : 5;
+
+  let filter = {};
+
+  if (startDate && endDate) {
+    filter.createAt = { $gte: new Date(startDate), $lt: new Date(endDate) };
+  }
+
+  if (role[0].name !== "Admin") {
+    const techStaff = await ProfileModel.findOne({ userId: senderUser._id });
+    filter.doctorId = techStaff._id;
+  }
+
+  filter.status = 0;
+  if (keyword) {
+    let listMedicalPaperArray = [];
+    let totalListMedicalPaper = 0;
+    await Promise.all(listMedicalPaper.map((element) => {
+      if (
+        element._id.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.customerId._id.toLowerCase().includes(keyword.toLowerCase()) ||
+        element.customerId.fullname.toLowerCase().includes(keyword.toLowerCase())
+      ) {
+        listMedicalPaperArray.push({ ...element._doc });
+        totalListMedicalPaper++;
+      }
+    }))
+
+    res.send({
+      success: 1,
+      data: { data: listMedicalPaperArray, total: totalListMedicalPaper },
+    });
+    return;
+  }
+
+  res.send({
+    success: 1,
+    data: { data: listMedicalPaper, total: total },
+  });
+}
 
 const getNext = async () => {
   const count = await MedicalPaperModel.find().count();
@@ -203,4 +330,6 @@ module.exports = {
   getMedicalPaperById,
   createMedicalPaper,
   getReExamination,
+  updateMedicalPaper,
+  getMedicalPaperForDoctor
 };

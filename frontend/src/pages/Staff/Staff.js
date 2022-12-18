@@ -276,6 +276,12 @@ function Staff({ user }) {
   }
 
   const getPermission = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTemp1(true);
+      setTemp(true);
+      setTempeye(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
