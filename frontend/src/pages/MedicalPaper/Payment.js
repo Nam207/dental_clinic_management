@@ -23,19 +23,92 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import { useFetcher } from "react-router-dom";
 import axios from "../../apis/api";
 import Swal from "sweetalert2";
-const Payment = ({ closeMedPaper, openMedPaper }) => {
+const Payment = ({
+  PKID,
+  changeMoney,
+  setChangeMoney,
+  setCusPayment,
+  cusPayment,
+  totalPrice,
+  closeMedPaper,
+  openMedPaper,
+}) => {
+  // const [cusMon, setCusMon] = useState(customerPayment);
+  const [tempL, setTempL] = useState(0);
   const [show, setShow] = useState(false);
 
   const [paymentList, setPaymentList] = useState([]);
+
+  const getPaymentData = async () => {
+    await axios
+      .get(`/api/bill?medicalPaperId=${PKID}`)
+      .then((response) => {
+        console.log(response.data);
+        setPaymentList([
+          ...response.data.map((i) => [
+            i.createdAt,
+            [{ id: i.paymentId, name: i.namePayment }],
+            i.amount.$numberDecimal,
+            [{ id: i.employeeId, name: i.nameEmployee }],
+            i._id,
+          ]),
+        ]);
+
+        setTempL(response.data.length);
+      })
+
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  useEffect(() => {
+    console.log(paymentList);
+  }, [paymentList]);
+
   const handleShow = () => {
     closeMedPaper();
     setShow(true);
+    getPaymentData();
   };
 
   const handleClose = () => {
     openMedPaper();
     setShow(false);
   };
+
+  const [op, setOP] = useState([]);
+  const [receptionList, setReceptionList] = useState([]);
+
+  const loadTT = async () => {
+    try {
+      const res = await axios({
+        url: `/api/Payment/`,
+        method: "get",
+      });
+      setOP([...res.data.map((i) => ({ id: i._id, name: i.name }))]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const loadReceptionist = async () => {
+    try {
+      const res = await axios({
+        url: `/api/profile/getReceptionist/`,
+        method: "get",
+      });
+      console.log(res.data);
+      setReceptionList([
+        ...res.data.map((i) => ({ id: i._id, name: i.fullname })),
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadTT();
+    loadReceptionist();
+  }, []);
 
   const columns = [
     {
@@ -68,26 +141,20 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
   const curTime = new Date().getTime();
 
   const [paySelect, setPaySelect] = useState([]);
-  const op = [
-    { id: 0, name: "Tiền mặt" },
-    { id: 1, name: "VISA" },
-    { id: 2, name: "Master Card" },
-    { id: 3, name: "MOMO" },
-    { id: 4, name: "VNPAY" },
-    { id: 5, name: "Chuyển khoản" },
-    { id: 6, name: "Thẻ trả trước" },
-    { id: 7, name: "Khác" },
-  ];
-
-  const addRow = () => {
-    setPaymentList([...paymentList, ["", [], "", ""]]);
-  };
 
   const deleteRow = (rowIndex) => {
     // console.log(paymentList);
     let temp = paymentList;
     temp.splice(rowIndex, 1);
     setPaymentList([...temp]);
+
+    let total = [];
+    temp.map((i) => {
+      if (i[2]) {
+        total.push(i[2]);
+      }
+    });
+    setCusPayment(total.reduce((a, b) => a + b));
   };
 
   const dateFormat = "DD/MM/YYYY";
@@ -98,11 +165,11 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
           <Space direction="vertical">
             <DatePicker
               format={dateFormat}
-              defaultValue={dayjs(new Date())}
+              defaultValue={dayjs(row[0])}
               disabled
             />
             <TimePicker
-              defaultValue={dayjs(curTime, "HH:mm:ss")}
+              defaultValue={dayjs(row[0], "HH:mm:ss")}
               disabled
               style={{ width: "100%" }}
             />
@@ -115,11 +182,13 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
           rules={[
             {
               required: true,
-              message: "Nhập cách thanh toán",
+              message: "Nhập cách thanh toán...",
             },
           ]}
+          initialValue={row[1]}
         >
           <Typeahead
+            disabled={rowIndex < tempL ? true : false}
             style={{
               // transform: "translateY(12px)",
               marginTop: "20px",
@@ -130,13 +199,13 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
               // let temp = paySelect;
               // temp[rowIndex] = e;
               // setPaySelect([...temp]);
-              console.log(e);
+
               let temp = paymentList;
               temp[rowIndex][1] = e;
               setPaymentList([...temp]);
             }}
             options={op}
-            placeholder="Nhập thuốc"
+            placeholder="Nhập cách thanh toán"
             selected={row[1]}
           />
         </FormAntd.Item>
@@ -155,43 +224,134 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
         // />
         <>
           <InputNumber
+            disabled={rowIndex < tempL ? true : false}
             required
             min={1}
             value={row[2]}
             onChange={(e) => {
+              // console.log(e);
+
+              // if (e != null) {
+              //   // setCusMon(cusMon + e);
+              // } else {
+              //   let teme = row[2];
+              //   console.log(teme);
+              // }
+
               let temp = paymentList;
+              // console.log(temp);
               temp[rowIndex][2] = e;
               setPaymentList([...temp]);
+
+              let total = [];
+              temp.map((i) => {
+                if (i[2]) {
+                  total.push(i[2]);
+                }
+              });
+              setCusPayment(total.reduce((a, b) => a + b));
             }}
           ></InputNumber>
         </>
       ),
-      people: <Form.Control required type="text" value={"Demo value "} />,
-      action: (
-        <td
-          onClick={() => {
-            //them alert truoc khi xoa
-            Swal.fire({
-              title: "Bạn có chắc chắn muốn xoá",
-              showDenyButton: true,
-              // showCancelButton: true,
-              confirmButtonText: "Xoá",
-              denyButtonText: `Huỷ`,
-            }).then((result) => {
-              /* Read more about isConfirmed, isDenied below */
-              if (result.isConfirmed) {
-                deleteRow(rowIndex);
-              } else if (result.isDenied) {
-                // Swal.fire('Changes are not saved', '', 'info')
-              }
-            });
-          }}
+      people: (
+        <FormAntd.Item
+          name={`PP${rowIndex}`}
+          rules={[
+            {
+              required: true,
+              message: "Nhập nhân viên thu",
+            },
+          ]}
+          initialValue={row[3]}
         >
-          <FaTrashAlt cursor="pointer" color="#e74c3c" />
-        </td>
+          <Typeahead
+            disabled={rowIndex < tempL ? true : false}
+            style={{
+              // transform: "translateY(12px)",
+              marginTop: "20px",
+            }}
+            id="basic-typeahead-single"
+            labelKey="name"
+            onChange={(e) => {
+              let temp = paymentList;
+              temp[rowIndex][3] = e;
+              setPaymentList([...temp]);
+            }}
+            options={receptionList}
+            placeholder="Nhập nhân viên thu..."
+            selected={row[3]}
+            renderMenuItemChildren={(option) => (
+              <div>
+                {option.name}
+                <div>
+                  <small>ID: {option.id}</small>
+                </div>
+              </div>
+            )}
+          />
+        </FormAntd.Item>
       ),
+      action:
+        rowIndex < tempL ? (
+          <td></td>
+        ) : (
+          <td
+            // style={{ display: "none" }}
+            onClick={() => {
+              //them alert truoc khi xoa
+              Swal.fire({
+                title: "Bạn có chắc chắn muốn xoá",
+                showDenyButton: true,
+                // showCancelButton: true,
+                confirmButtonText: "Xoá",
+                denyButtonText: `Huỷ`,
+              }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                  deleteRow(rowIndex);
+                } else if (result.isDenied) {
+                  // Swal.fire('Changes are not saved', '', 'info')
+                }
+              });
+            }}
+          >
+            <FaTrashAlt cursor="pointer" color="#e74c3c" />
+          </td>
+        ),
     };
   });
+
+  const addRow = () => {
+    setPaymentList([...paymentList, [new Date(), [], "", [], ""]]);
+  };
+
+  const onSubmit = async () => {
+    console.log(paymentList);
+    let paymentListTemp = [];
+    paymentList.map((e) => {
+      paymentListTemp.push({
+        medicalPaperId: PKID,
+        employeeId: e[3][0].id,
+        paymentId: e[1][0].id,
+        amount: e[2],
+        _id: e[4],
+        createAt: e[0],
+      });
+    });
+
+    await axios
+      .post("/api/bill", { billMedical: paymentListTemp })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    handleClose();
+  };
+
   return (
     <>
       <Button
@@ -212,18 +372,25 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
         size="lg"
         show={show}
         onHide={handleClose}
-        // backdrop="static"
+        backdrop="static"
         // aria-labelledby="st-lg-modal"
       >
         <FormAntd
           name="basic"
           // form={form}
-          // onFinish={checkClose}
+          onFinish={onSubmit}
         >
           <Modal.Header>
             <Modal.Title>Thanh toán</Modal.Title>
 
             <div style={{ float: "right", display: "inline-block" }}>
+              <Button
+                variant="secondary"
+                style={{ marginRight: "10px" }}
+                onClick={handleClose}
+              >
+                Huỷ
+              </Button>
               <Button type="submit" variant="primary">
                 OK
               </Button>
@@ -243,11 +410,10 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
                     width: "100%",
                     color: "blue",
                   }}
-                  defaultValue={3000000}
-                  formatter={(value) =>
-                    `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  value={new Intl.NumberFormat("de-DE", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(totalPrice)}
                   bordered={false}
                   readOnly
                 />
@@ -265,11 +431,10 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
                     width: "100%",
                     color: "green",
                   }}
-                  defaultValue={3000000}
-                  formatter={(value) =>
-                    `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  value={new Intl.NumberFormat("de-DE", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(cusPayment)}
                   bordered={false}
                   readOnly
                 />
@@ -289,11 +454,14 @@ const Payment = ({ closeMedPaper, openMedPaper }) => {
                     width: "100%",
                     color: "red",
                   }}
-                  defaultValue={3000000}
-                  formatter={(value) =>
-                    `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  value={
+                    totalPrice - cusPayment > 0
+                      ? new Intl.NumberFormat("de-DE", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(totalPrice - cusPayment)
+                      : 0
                   }
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   bordered={false}
                   readOnly
                 />

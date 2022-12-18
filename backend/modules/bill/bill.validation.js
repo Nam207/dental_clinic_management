@@ -2,7 +2,7 @@ const { object } = require("joi");
 const Joi = require("joi");
 
 const billSchema = Joi.object({
-  bill: Joi.array()
+  billMedical: Joi.array()
     .items(
       Joi.object({
         medicalPaperId: Joi.string().required(),
@@ -10,6 +10,7 @@ const billSchema = Joi.object({
         paymentId: Joi.string().required(),
         amount: Joi.number().required(),
         createAt: Joi.date().required(),
+        _id: Joi.string().allow("", null),
       })
     )
     .required(),

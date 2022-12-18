@@ -7,6 +7,8 @@ const MedicalPaperSchema = Joi.object({
   status: Joi.number().integer(),
   medicalService: Joi.array().items(Joi.object()).required(),
   note: Joi.string().allow(null, ""),
+  totalAmount: Joi.number(),
+  customerPayment: Joi.number(),
 });
 
 module.exports = MedicalPaperSchema;

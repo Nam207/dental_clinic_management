@@ -277,8 +277,8 @@ function Staff({ user }) {
 
   const getPermission = async (functionName) => {
     if (user.role[0].name === "Admin") {
-      setTemp1(true);
       setTemp(true);
+      setTemp1(true);
       setTempeye(true);
       return;
     }

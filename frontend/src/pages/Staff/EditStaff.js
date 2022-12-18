@@ -409,6 +409,11 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
   }
 
   const getPermission = async (functionName) => {
+    if (userAB.role[0].name === "Admin") {
+      setTemp(true);
+      setDisabledinPut(false);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",

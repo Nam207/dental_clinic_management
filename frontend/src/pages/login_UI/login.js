@@ -1,18 +1,18 @@
 import "./login.css";
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "../../apis/api";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import useAuth from "../../components/hooks/useAuth";
-import { useNavigate } from "react-router";
+
 import Swal from "sweetalert2";
 import SwalCard from "../../components/CardErr";
 import { render } from "@testing-library/react";
+import { Navigate, useNavigate } from "react-router-dom";
 function Login() {
   const [error, setError] = React.useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
-
 
   const formik = useFormik({
     initialValues: {
@@ -45,7 +45,6 @@ function Login() {
           },
         });
 
-
         if (res.success === 1) {
           login({
             _id: res.data._id,
@@ -66,14 +65,19 @@ function Login() {
           window.location.href= "/DashBoardTech"
         }
       } catch (err) {
-        Swal.fire(
-          "Thất Bại",
-          `Email hoặc mật khẩu sai`,
-          "error"
-        );
+        Swal.fire("Thất Bại", `Email hoặc mật khẩu sai`, "error");
       }
     },
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("run in 1");
+    if (token) {
+      navigate("/DashBoard");
+      console.log("run in 2");
+    }
+  }, []);
 
   return (
     <section className="vh-100">

@@ -57,6 +57,11 @@ const MedListPaper = ({
     return temp;
   };
 
+  const onSubmit = async () => {
+    await checkClose();
+    handleClose();
+  };
+
   const checkClose = async (e) => {
     //chay khi length = 0 || length > 1 va dien du lieu
     //dk laf medListA.length > 1 && chua dien du lieu
@@ -94,7 +99,6 @@ const MedListPaper = ({
   };
 
   const getCurMed = async () => {
-    console.log(PKID);
     await axios
       .get(`/api/medicinePrescribe?medicalPaper=${PKID}`)
       .then((response) => {
@@ -200,6 +204,7 @@ const MedListPaper = ({
   }, [show]);
 
   const printPDF = async () => {
+    await checkClose();
     const response = await axios
       .get(`/api/prescriptionPdf?medicalPaperId=${PKID}`, {
         responseType: "arraybuffer",
@@ -239,7 +244,7 @@ const MedListPaper = ({
         backdrop="static"
         // aria-labelledby="st-lg-modal"
       >
-        <FormAntd name="basic" form={form} onFinish={checkClose}>
+        <FormAntd name="basic" form={form} onFinish={onSubmit}>
           <Modal.Header>
             <Modal.Title>Đơn thuốc</Modal.Title>
 

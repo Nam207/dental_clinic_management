@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { FaPlusCircle } from "react-icons/fa";
+import { FaPlusCircle, FaTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { addMed } from "../../apis/medicineProcessor";
 import Form from "react-bootstrap/Form";
@@ -15,7 +15,6 @@ import axios from "../../apis/api";
 import Table from "react-bootstrap/Table";
 import ReactPaginate from "react-paginate";
 import CustomerModal from "../customer/CustomerModal";
-import { FaTrashAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 // import "antd/dist/antd.css";
@@ -87,6 +86,7 @@ const MedicalPaperModal = ({ loadData }) => {
           reExamination: pk.reExamination,
           medicalService: pk.medicalService,
           note: pk.note,
+          totalAmount: totalPrice,
         },
       });
     } catch (error) {
@@ -287,10 +287,7 @@ const MedicalPaperModal = ({ loadData }) => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
-    // const iterator = currentItemList.values();
-    // for (const value of iterator) {
-    //   console.log(value);
-    // }
+    console.log("xoa");
     setPK({
       ...pk,
       medicalService: [
@@ -356,8 +353,7 @@ const MedicalPaperModal = ({ loadData }) => {
     let temp = currentItemList;
     temp.splice(rowIndex, 1);
     //deu render lai duoc
-    // setCurrentItemList([...temp]);
-    setCurrentItemList(temp);
+    setCurrentItemList([...temp]);
 
     setTotalPrice(totalPrice - price);
 
@@ -513,39 +509,18 @@ const MedicalPaperModal = ({ loadData }) => {
 
               {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
               <Row>
-                {/* <div> */}
-                {/* <h6
-                  style={{
-                    margin: "0px",
-                    padding: "5px",
-                    fontFamily: "Times New Roman",
-                    display: "inline-block",
-                  }}
-                >
-                  Tiền khách trả:
-                </h6> */}
-                {/* <h6
-                style={{
-                  // marginLeft:"110px",
-                  float: "right",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                2,000
-              </h6> */}
                 <Form.Label column style={{ marginLeft: "5px" }}>
                   <b>Tiền khách trả</b>
                 </Form.Label>
                 <Col>
                   <Form.Control
-                    style={{ backgroundColor: "#ecf0f1" }}
+                    // style={{ backgroundColor: "#ecf0f1" }}
                     plaintext
+                    readOnly
                     // id="phone"
                     type="number"
                     // value = {payment.toLocaleString("en-US")}
-                    placeholder="Nhập số tiền"
+                    placeholder="0"
                     onChange={(e) => {
                       calPayment(e.target.value);
                       // setPayment(e.target.value)
@@ -553,32 +528,8 @@ const MedicalPaperModal = ({ loadData }) => {
                     }}
                   />
                 </Col>
-                {/* </div> */}
               </Row>
-              {/* <hr style={{ marginTop: "8px", marginBottom: "4px" }} /> */}
-              {/* <div>
-              <h6
-                style={{
-                  margin: "0px",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                Tiền thừa:
-              </h6>
-              <h6
-                style={{
-                  // marginLeft:"110px",
-                  float: "right",
-                  padding: "5px",
-                  fontFamily: "Times New Roman",
-                  display: "inline-block",
-                }}
-              >
-                2,000
-              </h6>
-            </div> */}
+
               <Row>
                 <Form.Label column style={{ marginLeft: "5px" }}>
                   <b>Tiền thừa</b>
@@ -616,7 +567,7 @@ const MedicalPaperModal = ({ loadData }) => {
                   Lưu lại
                 </Button>
               </div>
-              <div
+              {/* <div
                 style={{
                   textAlign: "center",
                 }}
@@ -633,8 +584,8 @@ const MedicalPaperModal = ({ loadData }) => {
                 >
                   In Phiếu thu
                 </Button>
-              </div>
-              <div
+              </div> */}
+              {/* <div
                 style={{
                   textAlign: "center",
                 }}
@@ -643,7 +594,7 @@ const MedicalPaperModal = ({ loadData }) => {
                   closeMedPaper={closeMedpaper}
                   openMedPaper={openMedPaper}
                 />
-              </div>
+              </div> */}
             </div>
 
             <div id="serviceMiddle">

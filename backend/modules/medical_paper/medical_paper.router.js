@@ -28,6 +28,14 @@ router.post(
   medicalPaperController.createMedicalPaper
 );
 
+router.put(
+  "/:medicalPaperId",
+  needAuthenticated,
+  //isRole,
+  validateInput(medicalPaperSchema, "body"),
+  medicalPaperController.updateMedicalPaper
+);
+
 router.get(
   "/:medicalPaperId",
   needAuthenticated,

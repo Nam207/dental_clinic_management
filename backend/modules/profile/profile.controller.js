@@ -23,7 +23,7 @@ const createAdmin = async (req, res) => {
   await UserRoleModel.create({
     userId: admin[0]._id,
     roleId: adminId._id,
-  })
+  });
   try {
     if ((await ProfileModel.find({ _id: "admin" }).count()) > 0) return null;
     const profileAdmin = {
@@ -50,15 +50,22 @@ const curProfile = async (req, res) => {
   }
 
   const roleId = await UserRoleModel.find({ userId: profile.userId });
-  const role = await Promise.all(roleId.map(async (id) => await RoleModel.findById(id.roleId)));
-  const roleArray = role.map((r) => r._id)
+  const role = await Promise.all(
+    roleId.map(async (id) => await RoleModel.findById(id.roleId))
+  );
+  const roleArray = role.map((r) => r._id);
 
   const scheduleId = await UserScheduleModel.find({ userId: profile._id });
-  const schedule = await Promise.all(scheduleId.map(
-    async (id) => await ScheduleModel.findById(id.scheduleId)
-  ));
+  const schedule = await Promise.all(
+    scheduleId.map(async (id) => await ScheduleModel.findById(id.scheduleId))
+  );
   const scheduleArray = JSON.parse(JSON.stringify(schedule));
-  const fullProfile = { ...profile._doc, roleArray, scheduleArray, username: senderUser.username };
+  const fullProfile = {
+    ...profile._doc,
+    roleArray,
+    scheduleArray,
+    username: senderUser.username,
+  };
   res.send({ success: 1, data: fullProfile });
 };
 
@@ -72,11 +79,20 @@ const getDoctor = async (req, res) => {
 
 const getTechStaff = async (req, res) => {
   const role = await RoleModel.findOne({ name: "Kỹ thuật viên" });
-
   const userId = await UserRoleModel.find({ roleId: role._id });
   const userIdArray = userId.map((u) => u.userId);
   const techStaff = await ProfileModel.find({ userId: { $in: userIdArray } });
   res.send({ success: 1, data: techStaff });
+};
+
+const getReceptionist = async (req, res) => {
+  const role = await RoleModel.findOne({ name: "Lễ tân" });
+  const userId = await UserRoleModel.find({ roleId: role._id });
+  const userIdArray = userId.map((u) => u.userId);
+  const receptionist = await ProfileModel.find({
+    userId: { $in: userIdArray },
+  });
+  res.send({ success: 1, data: receptionist });
 };
 
 const checkPhone = async (req, res) => {
@@ -321,12 +337,7 @@ const updateProfile = async (req, res) => {
 const editProfileByUser = async (req, res) => {
   const senderUser = req.user;
   const { staffId } = req.params;
-  const {
-    fullname,
-    phone,
-    email,
-    address,
-  } = req.body;
+  const { fullname, phone, email, address } = req.body;
   const existUser = await ProfileModel.findOne({ _id: staffId });
   if (!existUser) {
     throw new HTTPError(400, "Not found staff");
@@ -345,17 +356,26 @@ const editProfileByUser = async (req, res) => {
   );
 
   const roleId = await UserRoleModel.find({ userId: updatedProfile.userId });
-  const role = await Promise.all(roleId.map(async (id) => await RoleModel.findById(id.roleId)));
-  const roleArray = role.map((r) => r._id)
+  const role = await Promise.all(
+    roleId.map(async (id) => await RoleModel.findById(id.roleId))
+  );
+  const roleArray = role.map((r) => r._id);
 
-  const scheduleId = await UserScheduleModel.find({ userId: updatedProfile._id });
-  const schedule = await Promise.all(scheduleId.map(
-    async (id) => await ScheduleModel.findById(id.scheduleId)
-  ));
+  const scheduleId = await UserScheduleModel.find({
+    userId: updatedProfile._id,
+  });
+  const schedule = await Promise.all(
+    scheduleId.map(async (id) => await ScheduleModel.findById(id.scheduleId))
+  );
   const scheduleArray = JSON.parse(JSON.stringify(schedule));
-  const fullProfile = { ...updatedProfile._doc, roleArray, scheduleArray, username: senderUser.username };
+  const fullProfile = {
+    ...updatedProfile._doc,
+    roleArray,
+    scheduleArray,
+    username: senderUser.username,
+  };
   res.send({ success: 1, data: fullProfile });
-}
+};
 
 const getProfileById = async (req, res) => {
   const { profileId } = req.params;
@@ -367,13 +387,15 @@ const getProfileById = async (req, res) => {
   }
 
   const roleId = await UserRoleModel.find({ userId: profile.userId });
-  const role = await Promise.all(roleId.map(async (id) => await RoleModel.findById(id.roleId)));
-  const roleArray = role.map((r) => r._id)
+  const role = await Promise.all(
+    roleId.map(async (id) => await RoleModel.findById(id.roleId))
+  );
+  const roleArray = role.map((r) => r._id);
 
   const scheduleId = await UserScheduleModel.find({ userId: profileId });
-  const schedule = await Promise.all(scheduleId.map(
-    async (id) => await ScheduleModel.findById(id.scheduleId)
-  ));
+  const schedule = await Promise.all(
+    scheduleId.map(async (id) => await ScheduleModel.findById(id.scheduleId))
+  );
 
   const scheduleArray = JSON.parse(JSON.stringify(schedule));
   const fullProfile = { ...profile._doc, roleArray, scheduleArray };
@@ -417,7 +439,7 @@ const getNext = async () => {
   const lastService = await ProfileModel.find({ _id: { $nin: ["admin"] } })
     .sort({ _id: -1 })
     .limit(1);
-    
+
   const nextId = lastService[0]._id;
   const idNumber = parseInt(nextId.split("_")[1]) + 1 + "";
   var temp = "";
@@ -460,13 +482,13 @@ const generateUsername = async (fullname) => {
 };
 
 function removeVietnameseTones(str) {
-  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
-  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
-  str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
-  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
-  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
-  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
-  str = str.replace(/đ/g,"d");
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
   str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
   str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
   str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
@@ -476,9 +498,12 @@ function removeVietnameseTones(str) {
   str = str.replace(/Đ/g, "D");
   str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
   str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
-  str = str.replace(/ + /g," ");
+  str = str.replace(/ + /g, " ");
   str = str.trim();
-  str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g," ");
+  str = str.replace(
+    /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
+    " "
+  );
   return str;
 }
 
@@ -495,4 +520,5 @@ module.exports = {
   editProfileByUser,
   getDoctor,
   getTechStaff,
+  getReceptionist,
 };

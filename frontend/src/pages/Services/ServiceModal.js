@@ -28,7 +28,7 @@ import {
 import Swal from "sweetalert2";
 
 // PHẦN này gồm typeahead trong Form.Item
-const ServiceModal = ({ userA,loadData }) => {
+const ServiceModal = ({ userA, loadData }) => {
   const [form] = FormAntd.useForm();
   const [temp, setTemp] = useState(false);
   const [consumableUiList, setConsumableUiList] = useState([]);
@@ -188,10 +188,6 @@ const ServiceModal = ({ userA,loadData }) => {
     getPermission("Quản lý dịch vụ");
   }, []);
 
-  useEffect(() => {
-    console.log(consumableUiList);
-  }, [consumableUiList]);
-
   const deleteConsumableUiList = (rowIndex) => {
     let temp = consumableUiList;
     temp.splice(rowIndex, 1);
@@ -233,6 +229,10 @@ const ServiceModal = ({ userA,loadData }) => {
   }
 
   const getPermission = async (functionName) => {
+    if (userA.role[0].name === "Admin") {
+      setTemp(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
@@ -244,25 +244,25 @@ const ServiceModal = ({ userA,loadData }) => {
           url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
           method: "get",
         });
-        
+
         if (permission.data[0].add === true) {
           setTemp(true);
         }
-       
       })
     );
-    
   };
   return (
     <>
-    {temp === true ? (<Button
-        variant="success"
-        onClick={handleShow}
-        style={{ marginRight: "20px" }}
-      >
-        <FaPlusCircle></FaPlusCircle> Thêm thủ thuật
-      </Button>) : null}
-      
+      {temp === true ? (
+        <Button
+          variant="success"
+          onClick={handleShow}
+          style={{ marginRight: "20px" }}
+        >
+          <FaPlusCircle></FaPlusCircle> Thêm thủ thuật
+        </Button>
+      ) : null}
+
       <Modal
         id="serviceModal"
         // class="modal-dialog modal-xl"
@@ -310,9 +310,9 @@ const ServiceModal = ({ userA,loadData }) => {
                   Hình Ảnh
                 </Form.Label>
                 <UploadAndDisplayImage
+                  permission={temp}
                   value={formik.values.imageUrl ? formik.values.imageUrl : []}
                   onChange={(value) => {
-                    // console.log(value);
                     if (value && value.length > 0) {
                       formik.values.imageUrl = value;
                     }
@@ -438,19 +438,11 @@ const ServiceModal = ({ userA,loadData }) => {
                                 let temp = consumableUiList;
                                 temp[rowIndex][1] = e;
                                 setConsumableUiList([...temp]);
-
-                                // let tempSelect = singleSelections;
-                                // tempSelect[rowIndex] = e;
-                                // setSingleSelections([...tempSelect]);
                               }}
                               options={suggestionList}
-                              // selected={singleSelections[rowIndex]}
                               selected={row[1]}
                               placeholder="Chọn tên thuốc..."
                               // inputProps={{ required: false }}
-                              // {...register(`Type${rowIndex}`, {
-                              //   required: "Bắt buộc",
-                              // })}
                             />
                           </FormAntd.Item>
                         </td>
@@ -460,42 +452,26 @@ const ServiceModal = ({ userA,loadData }) => {
                         </td>
                         <td>
                           {/* Đơn vị */}
-                          <Form.Control
-                            disabled
-                            value={row[3]}
-                            // onChange={formik.handleChange}
-                          />
+                          <Form.Control disabled value={row[3]} />
                         </td>
                         <td>
                           {/* Số lần dùng */}
-                          {/* <FormAntd.Item
-                            name={`useCon${rowIndex}`}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Nhập số lần dùng",
-                              },
-                            ]}
-                            
-                          > */}
-                          {/* <Form.Control
-                                type="number"
-                                min="1"
-                                // required
-                                onChange={(e) => {
-                                  let temp = consumableUiList;
-                                  temp[rowIndex][4] = e.target.value;
-                                  setConsumableUiList([...temp]);
-                                  // consumableUiList[rowIndex][4] =
-                                  //   e.target.value;
-                                }}
-                                value={row[4]}
-                              /> */}
-                          <InputNumber
+
+                          <Form.Control
+                            required
+                            type="number"
+                            min="1"
+                            onChange={(e) => {
+                              let temp = consumableUiList;
+                              temp[rowIndex][4] = e.target.value;
+                              setConsumableUiList([...temp]);
+                            }}
+                            value={row[4]}
+                          />
+                          {/* <InputNumber
                             required
                             // name={`numberIn${rowIndex}`}
                             min={1}
-                            max={10}
                             value={row[4]}
                             // defaultValue={row[4]}
                             onChange={(e) => {
@@ -503,8 +479,7 @@ const ServiceModal = ({ userA,loadData }) => {
                               temp[rowIndex][4] = e;
                               setConsumableUiList([...temp]);
                             }}
-                          />
-                          {/* </FormAntd.Item> */}
+                          /> */}
                         </td>
 
                         <td
@@ -597,18 +572,16 @@ const ServiceModal = ({ userA,loadData }) => {
                               id="basic-typeahead-single"
                               onChange={(e) => {
                                 fillDataPre(e, rowIndex);
-                                let tempSelect = singleSelectionsPre;
-                                tempSelect[rowIndex] = e;
-                                setSingleSelectionsPre([...tempSelect]);
+
+                                let temp = prescriptionList;
+                                temp[rowIndex][1] = e;
+                                setPrescriptionList([...temp]);
+                                // let tempSelect = singleSelectionsPre;
+                                // tempSelect[rowIndex] = e;
+                                // setSingleSelectionsPre([...tempSelect]);
                               }}
                               options={suggestionList}
-                              // onInputChange={(e) => {
-                              //   fillDataPre(e, rowIndex);
-                              //   let tempSelect = singleSelectionsPre;
-                              //   tempSelect[rowIndex] = e;
-                              //   setSingleSelectionsPre([...tempSelect]);
-                              // }}
-                              selected={singleSelectionsPre[rowIndex]}
+                              selected={row[1]}
                               placeholder="Chọn tên thuốc..."
                             />
                           </FormAntd.Item>
@@ -628,47 +601,33 @@ const ServiceModal = ({ userA,loadData }) => {
                         </td>
                         <td>
                           {/* Số Lượng/SP */}
-                          <FormAntd.Item
-                            name={`usePre${rowIndex}`}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Nhập số lần dùng",
-                              },
-                            ]}
-                          >
-                            <Form.Control
-                              type="number"
-                              // required
-                              min={1}
-                              onChange={(e) => {
-                                prescriptionList[rowIndex][4] = e.target.value;
-                              }}
-                            />
-                          </FormAntd.Item>
+                          <Form.Control
+                            type="number"
+                            required
+                            min={1}
+                            onChange={(e) => {
+                              // prescriptionList[rowIndex][4] = e.target.value;
+                              let temp = prescriptionList;
+                              temp[rowIndex][4] = e.target.value;
+                              setPrescriptionList([...temp]);
+                            }}
+                            value={row[4]}
+                          />
                         </td>
 
                         <td>
                           {/* Cachs dung*/}
-                          <FormAntd.Item
-                            name={`usagePre${rowIndex}`}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Nhập cách dùng",
-                              },
-                            ]}
-                          >
-                            <Form.Control
-                              type="text"
-                              onChange={(e) => {
-                                prescriptionList[rowIndex][5] = e.target.value;
-                              }}
-                              // {...register(`Prescriptusage${rowIndex}`, {
-                              //   required: "Bắt buộc",
-                              // })}
-                            />
-                          </FormAntd.Item>
+
+                          <Form.Control
+                            type="text"
+                            required
+                            onChange={(e) => {
+                              let temp = prescriptionList;
+                              temp[rowIndex][5] = e.target.value;
+                              setPrescriptionList([...temp]);
+                            }}
+                            value={row[5]}
+                          />
                         </td>
                         <td onClick={() => deleteprescriptionList(rowIndex)}>
                           <FaTrashAlt

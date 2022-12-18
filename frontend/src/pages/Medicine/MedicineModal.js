@@ -14,8 +14,8 @@ import * as Yup from "yup";
 import UploadAndDisplayImage from "../../components/uploadImage";
 import axios from "../../apis/api";
 
-const MedicineModal = ({userA},prop) => {
-   const { loadData } = prop;
+const MedicineModal = ({ userA }, prop) => {
+  const { loadData } = prop;
   const [show, setShow] = useState(false);
   const [temp, setTemp] = useState(false);
   const handleClose = () => setShow(false);
@@ -113,6 +113,10 @@ const MedicineModal = ({userA},prop) => {
   }, []);
 
   const getPermission = async (functionName) => {
+    if (userA.role[0].name === "Admin") {
+      setTemp(true);
+      return;
+    }
     const functionArray = await axios({
       url: `/api/function`,
       method: "get",
@@ -124,8 +128,8 @@ const MedicineModal = ({userA},prop) => {
         url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
         method: "get",
       })
-      if(permission.success === 0 || !permission.data) return;
-      if(permission.data[0].add === true) {
+      if (permission.success === 0 || !permission.data) return;
+      if (permission.data[0].add === true) {
         setTemp(true);
         return;
       }
@@ -134,16 +138,16 @@ const MedicineModal = ({userA},prop) => {
   }
   return (
     <>
-     {temp === true ? (
+      {temp === true ? (
         <Button
-        variant="success"
-        onClick={handleShow}
-        style={{ marginRight: "20px" }}
-      >
-        <FaPlusCircle></FaPlusCircle> Thêm thuốc
-      </Button>
+          variant="success"
+          onClick={handleShow}
+          style={{ marginRight: "20px" }}
+        >
+          <FaPlusCircle></FaPlusCircle> Thêm thuốc
+        </Button>
       ) : null}
-    
+
 
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -202,11 +206,9 @@ const MedicineModal = ({userA},prop) => {
                     </span>
                   </Form.Label>
                   <UploadAndDisplayImage
-                  userI={userA}
+                    permission = {temp}
                     value={formik.values.imageUrl ? formik.values.imageUrl : []}
                     onChange={(value) => {
-                      // formik.setFieldValue("imageUrl", value);
-
                       if (value && value.length > 0) {
                         formik.values.imageUrl = value;
                       }
