@@ -282,7 +282,7 @@ const DocMedicalPaperModal = ({
         const pdfWindow = window.open();
         pdfWindow.location.href = url;
       });
-  }
+  };
   const loadServiceTable = async () => {
     await axios
       .get(
@@ -662,6 +662,7 @@ const DocMedicalPaperModal = ({
                   totalPrice={totalPrice}
                   closeMedPaper={closeMedpaper}
                   openMedPaper={openMedPaper}
+                  loadDataFilterByDate={loadData}
                 />
               </div>
 

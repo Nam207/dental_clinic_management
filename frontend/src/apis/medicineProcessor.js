@@ -15,12 +15,16 @@ import Swal from "sweetalert2";
 
 const medProcessor = {};
 
-export const addMed = async (medicine, navigate) => {
+export const addMed = async (medicine, loadData) => {
   try {
     await axios
       .post("/api/medicine/", medicine)
       .then((response) => {
         store.dispatch(addMedicine(response.data.data));
+        if (response.success === 1) {
+          Swal.fire("Thành công", `Thêm thành công`, "success");
+          loadData();
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -95,12 +99,17 @@ medProcessor.updateMedcine = async (med, id) => {
   // delete med.createdAt;
   // delete med.updatedAt;
   // delete med.__v;
-  await axios
+  const response = await axios
     .put(`api/medicine/${id}`, med)
     // .then(navigate("/medicine"))
+
     .catch((err) => {
       console.log("Err: ", err);
     });
+
+  if (response.success === 1) {
+    Swal.fire("Thành công", `Cập nhật thành công`, "success");
+  }
 };
 
 medProcessor.changeStatus = async (id, state, navigate) => {

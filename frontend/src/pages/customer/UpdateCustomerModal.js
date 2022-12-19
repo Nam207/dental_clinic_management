@@ -9,7 +9,7 @@ import DatePicker from "react-datepicker";
 import Button from "react-bootstrap/Button";
 import axios from "../../apis/api";
 import customerProcessor from "../../apis/customerProcessor";
-
+import moment from "moment";
 const UpdateCustomerModal = ({
   closeModal,
   isVisible,
@@ -74,7 +74,7 @@ const UpdateCustomerModal = ({
       gender: curCustomer.gender,
       bloodGroup: curCustomer.bloodGroup,
       email: curCustomer.email,
-      dateOfBirth: birthDay,
+      dateOfBirth: curCustomer.dateOfBirth,
       note: curCustomer.note,
       systemicMedicalHistory: curCustomer.systemicMedicalHistory,
       dentalMedicalHistory: curCustomer.dentalMedicalHistory,
@@ -334,7 +334,9 @@ const UpdateCustomerModal = ({
                   <Form.Control
                     type="date"
                     disabled={!temp}
-                    value={formik.values.dateOfBirth}
+                    value={moment(formik.values.dateOfBirth).format(
+                      "YYYY-MM-DD"
+                    )}
                     max={new Date().toISOString().split("T")[0]}
                     id="dateOfBirth"
                     onChange={formik.handleChange}
@@ -550,56 +552,64 @@ const UpdateCustomerModal = ({
                 {dentalMed.map((den) => {
                   return (
                     <Col>
-                    {temp == true ? (
-                       <Form.Check
-                       inline
-                       name="dentalMedicalHistory"
-                       label={den.name}
-                       value={den._id}
-                       type="checkbox"
-                       checked={
-                         !formik.values.dentalMedicalHistory ||
-                         !formik.values.dentalMedicalHistory.includes(den._id)
-                           ? false
-                           : true
-                       }
-                       id={den._id}
-                       onChange={(e) => {
-                         const targetState = e.target.checked;
-                         let tempCus = { ...formik.values };
-                         if (targetState) {
-                           tempCus = {
-                             ...tempCus,
-                             dentalMedicalHistory: [
-                               ...tempCus.dentalMedicalHistory,
-                               den._id,
-                             ],
-                           };
-                         } else {
-                           const deletePos =
-                             tempCus.dentalMedicalHistory.indexOf(den._id);
-                           deletePos !== -1 &&
-                             tempCus.dentalMedicalHistory.splice(deletePos, 1);
-                         }
-                         setCurCustomer({ ...tempCus });
-                       }}
-                     />
-                    ) :  <Form.Check
-                    inline
-                    name="dentalMedicalHistory"
-                    label={den.name}
-                    value={den._id}
-                    type="checkbox"
-                    checked={
-                      !formik.values.dentalMedicalHistory ||
-                      !formik.values.dentalMedicalHistory.includes(den._id)
-                        ? false
-                        : true
-                    }
-                    id={den._id}
-                    onChange = {"return false"}
-                  />}
-                     
+                      {temp == true ? (
+                        <Form.Check
+                          inline
+                          name="dentalMedicalHistory"
+                          label={den.name}
+                          value={den._id}
+                          type="checkbox"
+                          checked={
+                            !formik.values.dentalMedicalHistory ||
+                            !formik.values.dentalMedicalHistory.includes(
+                              den._id
+                            )
+                              ? false
+                              : true
+                          }
+                          id={den._id}
+                          onChange={(e) => {
+                            const targetState = e.target.checked;
+                            let tempCus = { ...formik.values };
+                            if (targetState) {
+                              tempCus = {
+                                ...tempCus,
+                                dentalMedicalHistory: [
+                                  ...tempCus.dentalMedicalHistory,
+                                  den._id,
+                                ],
+                              };
+                            } else {
+                              const deletePos =
+                                tempCus.dentalMedicalHistory.indexOf(den._id);
+                              deletePos !== -1 &&
+                                tempCus.dentalMedicalHistory.splice(
+                                  deletePos,
+                                  1
+                                );
+                            }
+                            setCurCustomer({ ...tempCus });
+                          }}
+                        />
+                      ) : (
+                        <Form.Check
+                          inline
+                          name="dentalMedicalHistory"
+                          label={den.name}
+                          value={den._id}
+                          type="checkbox"
+                          checked={
+                            !formik.values.dentalMedicalHistory ||
+                            !formik.values.dentalMedicalHistory.includes(
+                              den._id
+                            )
+                              ? false
+                              : true
+                          }
+                          id={den._id}
+                          onChange={"return false"}
+                        />
+                      )}
                     </Col>
                   );
                 })}

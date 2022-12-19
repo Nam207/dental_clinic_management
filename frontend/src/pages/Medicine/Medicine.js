@@ -9,7 +9,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import { FaRedoAlt, FaEdit,FaEye } from "react-icons/fa";
+import { FaRedoAlt, FaEdit, FaEye } from "react-icons/fa";
 import MedicineModal from "./MedicineModal";
 // import Table from "react-bootstrap/Table";
 import medicineProcessor from "../../apis/medicineProcessor";
@@ -24,7 +24,6 @@ import { Pagination, Table } from "antd";
 // import "antd/dist/antd.css";
 
 const Medicine = ({ user }) => {
-
   const [medId, setMedID] = useState("");
   const [isShowUpdate, setIsShowUpdate] = useState(false);
   const [searchMeds, setSearchMeds] = useState("");
@@ -49,15 +48,12 @@ const Medicine = ({ user }) => {
         `/api/medicine?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
       )
       .then((response) => {
-
         if (response.success === 1) {
           setMeds(response.data.data);
           setTotal(response.data.total);
         }
       });
   };
-
-
 
   useEffect(() => {
     loadData();
@@ -164,16 +160,16 @@ const Medicine = ({ user }) => {
       // "false"
       action: (
         <>
-         {tempEye === true ? (
+          {tempEye === true ? (
             <FaEdit
-            className="mx-2"
-            color="#2980b9"
-            cursor={"pointer"}
-            size={25}
-            onClick={() => {
-              openUpdateModal(med._id);
-            }}
-          />
+              className="mx-2"
+              color="#2980b9"
+              cursor={"pointer"}
+              size={25}
+              onClick={() => {
+                openUpdateModal(med._id);
+              }}
+            />
           ) : (
             <FaEye
               className="mx-2"
@@ -185,37 +181,37 @@ const Medicine = ({ user }) => {
               }}
             />
           )}
-          
-           {temp === true ? (
-             <Form.Check
-            type="switch"
-            checked={med.status}
-            style={{ display: "inline", marginLeft: "10px" }}
-            onChange={async (e) => {
-              // refreshData(e, med, index);
-              let resul;
-              let temp = e.target.checked;
-              // console.log(e.target.checked);
-              await Swal.fire({
-                title: "Bạn có chắc chắn muốn đổi",
-                showDenyButton: true,
-                confirmButtonText: "Đổi",
-                denyButtonText: `Huỷ`,
-              }).then(async (result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                  console.log(temp);
-                  resul = await medicineProcessor.changeStatus(med._id, temp);
-                } else if (result.isDenied) {
-                }
-              });
 
-              if (resul.success === 1) {
-                showToast(`Cập nhật id: ${med._id} thành công`, true);
-                await loadData();
-              }
-            }}
-          />
+          {temp === true ? (
+            <Form.Check
+              type="switch"
+              checked={med.status}
+              style={{ display: "inline", marginLeft: "10px" }}
+              onChange={async (e) => {
+                // refreshData(e, med, index);
+                let resul;
+                let temp = e.target.checked;
+                // console.log(e.target.checked);
+                await Swal.fire({
+                  title: "Bạn có chắc chắn muốn đổi",
+                  showDenyButton: true,
+                  confirmButtonText: "Đổi",
+                  denyButtonText: `Huỷ`,
+                }).then(async (result) => {
+                  /* Read more about isConfirmed, isDenied below */
+                  if (result.isConfirmed) {
+                    console.log(temp);
+                    resul = await medicineProcessor.changeStatus(med._id, temp);
+                  } else if (result.isDenied) {
+                  }
+                });
+
+                if (resul.success === 1) {
+                  showToast(`Cập nhật id: ${med._id} thành công`, true);
+                  await loadData();
+                }
+              }}
+            />
           ) : null}
         </>
       ),
@@ -232,7 +228,7 @@ const Medicine = ({ user }) => {
   }
 
   const getPermission = async (functionName) => {
-    if(user.role[0].name === "Admin"){
+    if (user.role[0].name === "Admin") {
       setTemp1(true);
       setTemp(true);
       setTempeye(true);
@@ -263,7 +259,7 @@ const Medicine = ({ user }) => {
         }
       })
     );
-    if(tempView===0){
+    if (tempView === 0) {
       window.location.href = "/Page404";
     }
   };
@@ -345,6 +341,7 @@ const Medicine = ({ user }) => {
 
       <div id="pagin">
         <Pagination
+          style={{ marginTop: "10px" }}
           showSizeChanger
           current={offset + 1}
           total={total}

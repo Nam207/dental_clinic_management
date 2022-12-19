@@ -6,11 +6,14 @@ import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import axios from "../apis/api";
-import { Pagination, Table } from "antd";
+import { Pagination, Table, Typography } from "antd";
 import moment from "moment";
 import { FaRedoAlt } from "react-icons/fa";
+import CSV from "../components/ExportCSV";
 
-export const TableStaff = ({ a }) => {
+export const TableStaff = ({ customers }) => {
+  const { Text } = Typography;
+
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
@@ -35,6 +38,20 @@ export const TableStaff = ({ a }) => {
         }
       });
   };
+  const [cusExcel, setCusExcel] = useState([]);
+
+  useEffect(() => {
+    setCusExcel([
+      ...customers?.map((i, rowIndex) => {
+        return {
+          "Mã nhân viên": i.id,
+          "Tên nhân viên": i.employeeName,
+          "Doanh thu": i.customerPayment,
+          "Số phiếu": i.count,
+        };
+      }),
+    ]);
+  }, []);
 
   useEffect(() => {
     loadDataReExam();
@@ -48,7 +65,7 @@ export const TableStaff = ({ a }) => {
   const columnsReExam = [
     {
       title: "STT",
-      dataIndex: "_stt",
+      dataIndex: "stt",
       align: "center",
       sorter: (a, b) => a._id.localeCompare(b._id),
     },
@@ -60,30 +77,33 @@ export const TableStaff = ({ a }) => {
     },
     {
       title: "Tên nhân viên ",
-      dataIndex: "payment",
+      dataIndex: "employeeName",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Doanh thu",
-      dataIndex: "paper",
+      dataIndex: "customerPayment",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: "Hoa hồng",
-      dataIndex: "paper",
-      align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-    },
-    {
-      title: "Tiền Tip",
-      dataIndex: "paper",
+      title: "Số phiếu",
+      dataIndex: "count",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
   ];
 
+  const dataSource = customers?.map((i, rowIndex) => {
+    return {
+      stt: rowIndex + 1,
+      id: i.id,
+      employeeName: i.employeeName,
+      customerPayment: i.customerPayment,
+      count: i.count,
+    };
+  });
   return (
     <>
       <div
@@ -118,13 +138,7 @@ export const TableStaff = ({ a }) => {
                 style={{ float: "right", marginRight: "20px" }}
               /> */}
               <Form className="d-flex">
-                <Button
-                  variant="primary"
-                  style={{ marginRight: "20px" }}
-                  onClick={loadDataReExam}
-                >
-                  Xuất file
-                </Button>
+                <CSV csvData={cusExcel} fileName={"Staff report"} />
               </Form>
             </Navbar.Collapse>
           </Container>
@@ -143,21 +157,40 @@ export const TableStaff = ({ a }) => {
         <div
           style={{ marginLeft: "80px", marginRight: "80px", marginTop: "5px" }}
         >
-          {/* <span style={{ fontSize: "20px", fontWeight: "500" }}>
-            Tổng: {totalReExam}
-          </span> */}
+          <Table
+            columns={columnsReExam}
+            dataSource={dataSource}
+            pagination={false}
+            summary={(pageData) => {
+              let totalCustomerPayment = 0;
 
-          <Table columns={columnsReExam} pagination={false} />
-        </div>
+              let totalCount = 0;
 
-        <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>
-          <Pagination
-            showSizeChanger
-            current={offsetReExam + 1}
-            total={totalReExam}
-            onChange={onChangePageReExam}
-            defaultPageSize={5}
-            pageSizeOptions={[5, 10, 20, 50]}
+              pageData.forEach(({ customerPayment, count }) => {
+                totalCustomerPayment += customerPayment;
+
+                totalCount += count;
+              });
+
+              return (
+                <>
+                  {/* <div> */}
+                  <Table.Summary.Row style={{ textAlign: "center" }}>
+                    <Table.Summary.Cell>
+                      <b>Tổng:{pageData.length}</b>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell></Table.Summary.Cell>
+                    <Table.Summary.Cell></Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(totalCustomerPayment)}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(totalCount)}</Text>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                </>
+              );
+            }}
           />
         </div>
       </div>

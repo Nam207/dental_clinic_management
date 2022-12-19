@@ -7,11 +7,12 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { useFormik, Field } from "formik";
 import * as Yup from "yup";
-import DatePicker from "react-datepicker";
+// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import customerProcessor from "../../apis/customerProcessor";
 import axios from "../../apis/api";
-
+import moment from "moment";
+import { DatePicker } from "antd";
 const CustomerModal = ({
   loadData,
   lbl,
@@ -76,7 +77,7 @@ const CustomerModal = ({
       gender: 0,
       bloodGroup: "unknown",
       email: "",
-      dateOfBirth: new Date().toISOString().split("T")[0],
+      dateOfBirth: null,
       note: "",
       systemicMedicalHistory: [],
       dentalMedicalHistory: [],
@@ -139,7 +140,7 @@ const CustomerModal = ({
       values.gender = 0;
       values.bloodGroup = "unknown";
       values.email = "";
-      values.dateOfBirth = new Date().toISOString().split("T")[0];
+      values.dateOfBirth = null;
       values.note = "";
       values.systemicMedicalHistory = [];
       values.dentalMedicalHistory = [];
@@ -171,34 +172,35 @@ const CustomerModal = ({
       url: `/api/function`,
       method: "get",
     });
-    const index = findIndexByProperty(functionArray.data, "name", functionName)
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
 
-    await Promise.all(userA.role.map(async (element) => {
-      const permission = await axios({
-        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
-        method: "get",
+    await Promise.all(
+      userA.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        console.log(permission);
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].add === true) {
+          setTemp(true);
+          return;
+        }
       })
-      console.log(permission)
-      if(permission.success === 0 || !permission.data) return;
-      if(permission.data[0].add === true) {
-        setTemp(true)
-        return;
-      }
-    }))
+    );
     return;
-  }
+  };
   return (
     <>
-    {temp === true ? (
-       <Button
-       variant="success"
-       onClick={handleShow}
-       style={{ marginRight: "20px", width: `${widthh}` }}
-     >
-       <FaPlusCircle></FaPlusCircle> {lbl}
-     </Button>
-    ): null}
-    
+      {temp === true ? (
+        <Button
+          variant="success"
+          onClick={handleShow}
+          style={{ marginRight: "20px", width: `${widthh}` }}
+        >
+          <FaPlusCircle></FaPlusCircle> {lbl}
+        </Button>
+      ) : null}
 
       <Modal id="customerModal" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -323,13 +325,7 @@ const CustomerModal = ({
                 <Form.Label column sm={2}>
                   Ngày sinh
                 </Form.Label>
-                {/* <DatePicker
-                    selected={new Date(birthDay)}
-                    dateFormat="MM/dd/yyyy"
-                    onChange={(e) => {
-                      setBirthDay(e);
-                    }}
-                  ></DatePicker> */}
+
                 <Col sm={4}>
                   <Form.Control
                     type="date"
@@ -339,6 +335,10 @@ const CustomerModal = ({
                     id="dateOfBirth"
                     onChange={formik.handleChange}
                   />
+                  {/* <DatePicker
+                    name="dateOfBirth"
+                    onChange={formik.handleChange}
+                  /> */}
                 </Col>
                 <Form.Label column sm={2}>
                   Ghi chú

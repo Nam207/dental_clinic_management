@@ -150,16 +150,95 @@ function Statistical() {
       }
     }
     if (selectTK === "2") {
-      console.log(2);
+      try {
+        const ress = await axios({
+          url: "/api/staticstial/byDate",
+          method: "post",
+          data: tempData,
+        });
+        console.log(ress.data);
+
+        setTableData([
+          ...ress.data.map((i) => ({
+            id: i._id,
+            totalAmount: i.totalAmount.$numberDecimal,
+            customerPayment: i.customerPayment.$numberDecimal,
+            debt:
+              Number(i.totalAmount.$numberDecimal) -
+              Number(i.customerPayment.$numberDecimal),
+            count: i.count,
+          })),
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
     }
     if (selectTK === "3") {
-      console.log(3);
+      try {
+        const ress = await axios({
+          url: "/api/staticstial/byPayment",
+          method: "post",
+          data: tempData,
+        });
+        console.log(ress.data);
+        setTableData([
+          ...ress.data.map((i) => ({
+            id: i._id.serviceId,
+            serviceName: i.serviceName,
+            price: Number(i.price.$numberDecimal),
+            count: i.count,
+          })),
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (selectTK === "4") {
+      try {
+        const ress = await axios({
+          url: "/api/staticstial/byService",
+          method: "post",
+          data: tempData,
+        });
+        console.log(ress.data);
+        setTableData([
+          ...ress.data.map((i) => ({
+            id: i._id.serviceId,
+            serviceName: i.serviceName,
+            price: Number(i.price.$numberDecimal),
+            count: i.count,
+          })),
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    if (selectTK === "5") {
+      console.log(5);
+      try {
+        const ress = await axios({
+          url: "/api/staticstial/byEmployee",
+          method: "post",
+          data: tempData,
+        });
+        console.log(ress.data);
+        setTableData([
+          ...ress.data.map((i) => ({
+            id: i._id.createBy,
+            employeeName: i.employeeName,
+            customerPayment: Number(i.customerPayment.$numberDecimal),
+            count: i.count,
+          })),
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     setShowTable(true);
   };
 
-  const fillEndEmployee = () => {};
   return (
     <>
       <div
@@ -480,13 +559,13 @@ function Statistical() {
       {/* <TableCustomer /> */}
       {showTable &&
         (selectTK === "2" ? (
-          <TableDate />
+          <TableDate customers={tableData} />
         ) : selectTK === "3" ? (
-          <TablePayment />
+          <TablePayment customers={tableData} />
         ) : selectTK === "4" ? (
-          <TableTechnical />
+          <TableTechnical customers={tableData} />
         ) : selectTK === "5" ? (
-          <TableStaff />
+          <TableStaff customers={tableData} />
         ) : (
           <TableCustomer customers={tableData} />
         ))}

@@ -6,8 +6,8 @@ const CustomerSchema = Joi.object({
     .length(10)
     .pattern(/^[0-9]+$/)
     .required(),
-  email: Joi.string().email(),
-  dateOfBirth: Joi.date(),
+  email: Joi.string().email().allow(null, ""),
+  dateOfBirth: Joi.date().allow(null, ""),
   gender: Joi.number().integer().valid(0, 1, 2),
   job: Joi.string().allow(null, ""),
   bloodGroup: Joi.string(),

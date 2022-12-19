@@ -23,24 +23,25 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import { useFetcher } from "react-router-dom";
 import axios from "../../apis/api";
 import Swal from "sweetalert2";
-const Payment = ({
-  PKID,
-  changeMoney,
-  setChangeMoney,
-  setCusPayment,
-  cusPayment,
-  totalPrice,
-  closeMedPaper,
-  openMedPaper,
-  loadDataFilterByDate,
-}) => {
+const PaymentY = ({ PKID, show, handleClose, loadDataFilterByDate }) => {
   // const [cusMon, setCusMon] = useState(customerPayment);
   const [tempL, setTempL] = useState(0);
-  const [show, setShow] = useState(false);
+  //   const [show, setShow] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [cusPayment, setCusPayment] = useState(0);
+  const [changeMoney, setChangeMoney] = useState(0);
 
   const [paymentList, setPaymentList] = useState([]);
 
   const getPaymentData = async () => {
+    const res = await axios({
+      url: `/api/medicalPaper/${PKID}`,
+      method: "get",
+    });
+
+    setTotalPrice(Number(res.data.totalAmount.$numberDecimal));
+    setCusPayment(Number(res.data.customerPayment.$numberDecimal));
+
     await axios
       .get(`/api/bill?medicalPaperId=${PKID}`)
       .then((response) => {
@@ -56,22 +57,14 @@ const Payment = ({
         ]);
 
         setTempL(response.data.length);
+        if (response.success === 1) {
+          loadDataFilterByDate();
+        }
       })
 
       .catch((error) => {
         console.error(error);
       });
-  };
-
-  const handleShow = () => {
-    closeMedPaper();
-    setShow(true);
-    getPaymentData();
-  };
-
-  const handleClose = () => {
-    openMedPaper();
-    setShow(false);
   };
 
   const [op, setOP] = useState([]);
@@ -106,8 +99,13 @@ const Payment = ({
   useEffect(() => {
     loadTT();
     loadReceptionist();
+    getPaymentData();
   }, []);
 
+  useEffect(() => {
+    getPaymentData();
+    // loadDataFilterByDate();
+  }, [show]);
   const columns = [
     {
       title: "Ngày trả",
@@ -209,17 +207,6 @@ const Payment = ({
         </FormAntd.Item>
       ),
       money: (
-        // <Form.Control
-        //   required
-        //   type="number"
-        //   min="1"
-        //   onChange={(e) => {
-        //     // let temp = medListA;
-        //     // temp[rowIndex][1] = Number(e.target.value);
-        //     // setMedListA([...temp]);
-        //   }}
-        //   // value={row[1]}
-        // />
         <>
           <InputNumber
             disabled={rowIndex < tempL ? true : false}
@@ -227,7 +214,7 @@ const Payment = ({
             min={1}
             value={row[2]}
             onChange={(e) => {
-              // console.log(e);
+              console.log(e);
 
               // if (e != null) {
               //   // setCusMon(cusMon + e);
@@ -237,7 +224,7 @@ const Payment = ({
               // }
 
               let temp = paymentList;
-              // console.log(temp);
+              console.log(temp);
               temp[rowIndex][2] = e;
               setPaymentList([...temp]);
 
@@ -341,9 +328,7 @@ const Payment = ({
     await axios
       .post("/api/bill", { billMedical: paymentListTemp })
       .then((response) => {
-        if (response.success === 1) {
-          loadDataFilterByDate();
-        }
+        console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -354,19 +339,6 @@ const Payment = ({
 
   return (
     <>
-      <Button
-        variant="primary"
-        style={{
-          backgroundColor: "#e67e22",
-          width: "52%",
-          marginBottom: "8px",
-          display: "inline",
-        }}
-        onClick={handleShow}
-      >
-        Thanh toán
-      </Button>
-
       <Modal
         id="PaymentModal"
         size="lg"
@@ -381,7 +353,7 @@ const Payment = ({
           onFinish={onSubmit}
         >
           <Modal.Header>
-            <Modal.Title>Thanh toán</Modal.Title>
+            <Modal.Title>Thanh toán - {PKID}</Modal.Title>
 
             <div style={{ float: "right", display: "inline-block" }}>
               <Button
@@ -491,4 +463,4 @@ const Payment = ({
   );
 };
 
-export default Payment;
+export default PaymentY;

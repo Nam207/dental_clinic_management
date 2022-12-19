@@ -123,12 +123,12 @@ const ServiceModal = ({ userA, loadData }) => {
     // console.log(consumableUiList);
     console.log("chay vao fiil");
     const searchResult = meds.find((item) => item.name === e[0]);
-
+    console.log(searchResult);
     if (searchResult) {
       consumableUiList[rowIndex][0] = searchResult._id;
       // consumableUiList[rowIndex][1] = e[0];
       consumableUiList[rowIndex][2] = searchResult.quantity;
-      consumableUiList[rowIndex][3] = searchResult.unit;
+      consumableUiList[rowIndex][3] = searchResult.effect;
       // consumableUiList[rowIndex][4] = numberOfUses;
 
       setConsumableUiList(consumableUiList);
@@ -148,7 +148,7 @@ const ServiceModal = ({ userA, loadData }) => {
     if (searchResult) {
       prescriptionList[rowIndex][0] = searchResult._id;
       prescriptionList[rowIndex][2] = searchResult.quantity;
-      prescriptionList[rowIndex][3] = searchResult.unit;
+      prescriptionList[rowIndex][3] = searchResult.effect;
       setPrescriptionList(prescriptionList);
     } else {
       prescriptionList[rowIndex][0] = "";

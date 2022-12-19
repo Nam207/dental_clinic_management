@@ -30,7 +30,10 @@ serviceProcessor.getServiceDetail = async (id) => {
 
 serviceProcessor.addService = async (service) => {
   try {
-    await axios.post("/api/service/", service);
+    const res = await axios.post("/api/service/", service);
+    if (res.success) {
+      Swal.fire("Thành Công", `Thêm thành công`, "success");
+    }
   } catch (error) {
     console.log("Err: ", error);
   }
@@ -38,7 +41,10 @@ serviceProcessor.addService = async (service) => {
 
 serviceProcessor.updateService = async (service, id) => {
   try {
-    await axios.put(`api/service/${id}`, service);
+    const res = await axios.put(`api/service/${id}`, service);
+    if (res.success) {
+      Swal.fire("Thành Công", `Cập nhật thành công`, "success");
+    }
   } catch (error) {
     console.log("Err: ", error);
   }

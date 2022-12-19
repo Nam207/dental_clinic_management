@@ -42,9 +42,9 @@ const medicinePrescribeRouter = require("./modules/medicine_prescribe/medicine_p
 const paymentController = require("./modules/payment/payment.controller");
 const paymentRouter = require("./modules/payment/payment.router");
 
-const billRouter = require("./modules/bill/bill.router");
-
 const medicalServiceRouter = require("./modules/medical_service/medical_service.router");
+
+const billRouter = require("./modules/bill/bill.router");
 
 const staticsticalRouter = require("./common/static/statistical.router");
 

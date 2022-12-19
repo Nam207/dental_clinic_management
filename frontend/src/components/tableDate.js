@@ -6,11 +6,12 @@ import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import axios from "../apis/api";
-import { Pagination, Table } from "antd";
+import { Pagination, Table, Typography } from "antd";
 import moment from "moment";
 import { FaRedoAlt } from "react-icons/fa";
-
-export const TableDate = ({ a }) => {
+import CSV from "../components/ExportCSV";
+export const TableDate = ({ customers }) => {
+  const { Text } = Typography;
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
@@ -23,72 +24,95 @@ export const TableDate = ({ a }) => {
   );
   const [endDate, setEndDate] = useState(moment(today).format("YYYY-MM-DD"));
 
-  const loadDataReExam = async () => {
-    const response = await axios
-      .get(
-        `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
-      )
-      .then((response) => {
-        if (response.success === 1) {
-          setReExamination(response.data.data);
-          setTotalReExam(response.data.total);
-        }
-      });
-  };
+  // const loadDataReExam = async () => {
+  //   const response = await axios
+  //     .get(
+  //       `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
+  //     )
+  //     .then((response) => {
+  //       if (response.success === 1) {
+  //         setReExamination(response.data.data);
+  //         setTotalReExam(response.data.total);
+  //       }
+  //     });
+  // };
 
-  useEffect(() => {
-    loadDataReExam();
-  }, [offsetReExam, limitReExam, startDate, endDate]);
+  // useEffect(() => {
+  //   loadDataReExam();
+  // }, [offsetReExam, limitReExam, startDate, endDate]);
 
   const onChangePageReExam = (current, pageSize) => {
     setOffsetReExam(current - 1);
     setLimitReExam(pageSize);
   };
 
+  const [cusExcel, setCusExcel] = useState([]);
+
+  useEffect(() => {
+    setCusExcel([
+      ...customers?.map((i, rowIndex) => {
+        return {
+          "Ngày ": i.id,
+          "Tổng Doanh thu": i.totalAmount,
+          "Doanh thu thực": i.customerPayment,
+          "Còn nợ": i.debt,
+          "Số lượng phiếu": i.count,
+        };
+      }),
+    ]);
+  }, []);
+
   const columnsReExam = [
     {
       title: "STT",
-      dataIndex: "_stt",
+      dataIndex: "stt",
       align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
+      sorter: (a, b) => a.stt.localeCompare(b.stt),
     },
     {
       title: "Ngày",
       dataIndex: "id",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-    },
-    {
-      title: "Doanh thu thủ thuật",
-      dataIndex: "date",
-      align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-    },
-    {
-      title: "Số thủ thuật",
-      dataIndex: "date",
-      align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.id.localeCompare(b.naidme),
     },
     {
       title: "Tổng doanh thu",
-      dataIndex: "date",
+      dataIndex: "totalAmount",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.totalAmount.localeCompare(b.totalAmount),
     },
     {
       title: "Doanh thu thực",
-      dataIndex: "date",
+      dataIndex: "customerPayment",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.customerPayment.localeCompare(b.customerPayment),
     },
     {
       title: "Tiền nợ",
-      dataIndex: "date",
+      dataIndex: "debt",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.debt.localeCompare(b.debt),
+    },
+    {
+      title: "Số lượng phiếu",
+      dataIndex: "count",
+      align: "center",
+      sorter: (a, b) => a.count.localeCompare(b.count),
     },
   ];
+
+  const dataSource = customers?.map((i, rowIndex) => {
+    return {
+      stt: rowIndex + 1,
+      id: i.id,
+      name: i.name,
+      totalAmount: i.totalAmount,
+      customerPayment: i.customerPayment,
+      //check khi debt < 0?
+      debt: i.debt,
+      count: i.count,
+    };
+  });
 
   return (
     <>
@@ -124,13 +148,15 @@ export const TableDate = ({ a }) => {
                 style={{ float: "right", marginRight: "20px" }}
               /> */}
               <Form className="d-flex">
-                <Button
+                {/* <Button
                   variant="primary"
                   style={{ marginRight: "20px" }}
                   onClick={loadDataReExam}
                 >
                   Xuất file
-                </Button>
+                </Button> */}
+
+                <CSV csvData={cusExcel} fileName={"Date report"} />
               </Form>
             </Navbar.Collapse>
           </Container>
@@ -153,17 +179,48 @@ export const TableDate = ({ a }) => {
             Tổng: {totalReExam}
           </span> */}
 
-          <Table columns={columnsReExam} pagination={false} />
-        </div>
+          <Table
+            columns={columnsReExam}
+            dataSource={dataSource}
+            pagination={false}
+            summary={(pageData) => {
+              let tempTotalAmount = 0;
+              let totalCustomerPayment = 0;
+              let totalDebt = 0;
+              let totalCount = 0;
 
-        <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>
-          <Pagination
-            showSizeChanger
-            current={offsetReExam + 1}
-            total={totalReExam}
-            onChange={onChangePageReExam}
-            defaultPageSize={5}
-            pageSizeOptions={[5, 10, 20, 50]}
+              pageData.forEach(
+                ({ totalAmount, customerPayment, debt, count }) => {
+                  tempTotalAmount += totalAmount;
+                  totalCustomerPayment += customerPayment;
+                  totalDebt += debt;
+                  totalCount += count;
+                }
+              );
+
+              return (
+                <>
+                  <Table.Summary.Row style={{ textAlign: "center" }}>
+                    <Table.Summary.Cell>
+                      <b>Tổng:{pageData.length}</b>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell></Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(tempTotalAmount)}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(totalCustomerPayment)}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(totalDebt)}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell>
+                      <Text type="danger">{Number(totalCount)}</Text>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                </>
+              );
+            }}
           />
         </div>
       </div>

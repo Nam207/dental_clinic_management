@@ -87,7 +87,9 @@ const MedicineModal = ({ userA }, prop) => {
       formData.append("effect", values.effect);
       formData.append("usage", values.usage);
       formData.append("contraindication", values.contraindication);
-      handleClose();
+      setTimeout(() => {
+        handleClose();
+      }, 100);
       values.name = "";
       values.imageUrl = "";
       values.quantity = 0;
@@ -96,8 +98,7 @@ const MedicineModal = ({ userA }, prop) => {
       values.effect = "";
       values.usage = "";
       values.contraindication = "";
-      await addMed(formData, navigate);
-      loadData();
+      await addMed(formData, loadData);
     },
   });
   function findIndexByProperty(data, key, value) {
@@ -121,21 +122,23 @@ const MedicineModal = ({ userA }, prop) => {
       url: `/api/function`,
       method: "get",
     });
-    const index = findIndexByProperty(functionArray.data, "name", functionName)
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
 
-    await Promise.all(userA.role.map(async (element) => {
-      const permission = await axios({
-        url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
-        method: "get",
+    await Promise.all(
+      userA.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].add === true) {
+          setTemp(true);
+          return;
+        }
       })
-      if (permission.success === 0 || !permission.data) return;
-      if (permission.data[0].add === true) {
-        setTemp(true);
-        return;
-      }
-    }))
+    );
     return;
-  }
+  };
   return (
     <>
       {temp === true ? (
@@ -147,7 +150,6 @@ const MedicineModal = ({ userA }, prop) => {
           <FaPlusCircle></FaPlusCircle> Thêm thuốc
         </Button>
       ) : null}
-
 
       <Modal size="lg" show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -206,7 +208,7 @@ const MedicineModal = ({ userA }, prop) => {
                     </span>
                   </Form.Label>
                   <UploadAndDisplayImage
-                    permission = {temp}
+                    permission={temp}
                     value={formik.values.imageUrl ? formik.values.imageUrl : []}
                     onChange={(value) => {
                       if (value && value.length > 0) {

@@ -131,19 +131,6 @@ export const Customers123 = ({ customers }) => {
     };
   });
 
-  const dataFooter = customers?.map((i, rowIndex) => {
-    return {
-      stt: rowIndex + 1,
-      id: "demo",
-      name: i.name,
-      totalAmount: Number(i.totalAmount),
-      customerPayment: Number(i.customerPayment),
-      //check khi debt < 0?
-      debt: Number(i.debt),
-      count: Number(i.count),
-    };
-  });
-
   return (
     <>
       <div
@@ -249,29 +236,11 @@ export const Customers123 = ({ customers }) => {
                       <Text type="danger">{Number(totalCount)}</Text>
                     </Table.Summary.Cell>
                   </Table.Summary.Row>
-                  {/* <Table.Summary.Row>
-                    <Table.Summary.Cell>Balance</Table.Summary.Cell>
-                    <Table.Summary.Cell colSpan={2}>
-                      <Text type="danger">{totalBorrow - totalRepayment}</Text>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row> */}
-                  {/* </div> */}
                 </>
               );
             }}
           />
         </div>
-
-        {/* <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>
-          <Pagination
-            showSizeChanger
-            current={offsetReExam + 1}
-            total={totalReExam}
-            onChange={onChangePageReExam}
-            defaultPageSize={5}
-            pageSizeOptions={[5, 10, 20, 50]}
-          />
-        </div> */}
       </div>
     </>
   );

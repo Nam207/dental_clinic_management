@@ -25,6 +25,7 @@ import {
 import dayjs from "dayjs";
 import moment from "moment";
 import DocMedicalPaperModal from "./DocMedicalPaperModal";
+import PaymentY from "./PaymentY";
 
 const ListMedicalPaper = () => {
   const { RangePicker } = DatePicker;
@@ -47,7 +48,19 @@ const ListMedicalPaper = () => {
   };
 
   const [isShowUpdate, setIsShowUpdate] = useState(false);
+  const [isShowUpdateY, setIsShowUpdateY] = useState(false);
+
   const [pkID, setPKID] = useState();
+
+  const openUpdateModalY = async (id) => {
+    setPKID(id);
+    setIsShowUpdateY(true);
+    // openMedPaper();
+  };
+
+  const closeUpdateModalY = () => {
+    setIsShowUpdateY(false);
+  };
 
   const openUpdateModal = (id) => {
     setPKID(id);
@@ -182,13 +195,26 @@ const ListMedicalPaper = () => {
             variant="danger"
             style={{ width: "60%" }}
             onClick={() => {
-              console.log("con no!!!");
+              openUpdateModalY(p._id);
             }}
           >
-            Con no
+            Chưa thanh toán
+          </Button>
+        ) : p.status.$numberDecimal === "1" ? (
+          <Button
+            variant="warning"
+            style={{ width: "60%" }}
+            onClick={() => {
+              //mo thanh toan
+              openUpdateModalY(p._id);
+            }}
+          >
+            Còn nợ
           </Button>
         ) : (
-          <Button variant="success">Thanh toan</Button>
+          <Button variant="success" style={{ width: "60%" }}>
+            Thanh toan
+          </Button>
         ),
 
       action: (
@@ -207,6 +233,13 @@ const ListMedicalPaper = () => {
   return (
     <div>
       {" "}
+      {/* Direct Payment */}
+      <PaymentY
+        show={isShowUpdateY}
+        PKID={pkID}
+        handleClose={closeUpdateModalY}
+        loadDataFilterByDate={loadDataFilterByDate}
+      />
       {/* Update Modal */}
       <DocMedicalPaperModal
         opac={opac}

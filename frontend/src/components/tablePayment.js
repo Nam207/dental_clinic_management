@@ -23,23 +23,6 @@ export const TablePayment = ({ a }) => {
   );
   const [endDate, setEndDate] = useState(moment(today).format("YYYY-MM-DD"));
 
-  const loadDataReExam = async () => {
-    const response = await axios
-      .get(
-        `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
-      )
-      .then((response) => {
-        if (response.success === 1) {
-          setReExamination(response.data.data);
-          setTotalReExam(response.data.total);
-        }
-      });
-  };
-
-  useEffect(() => {
-    loadDataReExam();
-  }, [offsetReExam, limitReExam, startDate, endDate]);
-
   const onChangePageReExam = (current, pageSize) => {
     setOffsetReExam(current - 1);
     setLimitReExam(pageSize);
@@ -105,15 +88,7 @@ export const TablePayment = ({ a }) => {
                 format={dateFormat}
                 style={{ float: "right", marginRight: "20px" }}
               /> */}
-              <Form className="d-flex">
-                <Button
-                  variant="primary"
-                  style={{ marginRight: "20px" }}
-                  onClick={loadDataReExam}
-                >
-                  Xuất file
-                </Button>
-              </Form>
+              <Form className="d-flex"></Form>
             </Navbar.Collapse>
           </Container>
         </Navbar>

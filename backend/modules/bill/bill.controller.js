@@ -40,7 +40,7 @@ const inputBill = async (req, res) => {
   let paymentMoney = 0;
   await Promise.all(
     billArray.map(async (element) => {
-      paymentMoney+=Number(element.amount);
+      paymentMoney += Number(element.amount);
       if (
         element._id === "null" ||
         !element ||
@@ -59,12 +59,23 @@ const inputBill = async (req, res) => {
     })
   );
 
-  const medicalPaper = await MedicalPaperModel.findById(billArray[0].medicalPaperId);
+  const medicalPaper = await MedicalPaperModel.findById(
+    billArray[0].medicalPaperId
+  );
+  console.log(medicalPaper);
+  console.log(billArray[0].medicalPaperId);
   let status = 0;
-  if(paymentMoney>0){
-    (medicalPaper.totalAmount.$numberDecimal - paymentMoney <= 0 ? status = 2 : status = 1)
+  if (paymentMoney > 0) {
+    Number(medicalPaper.totalAmount) - paymentMoney <= 0
+      ? (status = 2)
+      : (status = 1);
   }
-  await MedicalPaperModel.findByIdAndUpdate(billArray[0].medicalPaperId,{ customerPayment: paymentMoney, status: status}, {new: true});
+  console.log(medicalPaper.totalAmount);
+  await MedicalPaperModel.findByIdAndUpdate(
+    billArray[0].medicalPaperId,
+    { customerPayment: paymentMoney, status: status },
+    { new: true }
+  );
 
   const bill = await BillModel.find({
     medicalPaperId: billArray[0].medicalPaperId,
