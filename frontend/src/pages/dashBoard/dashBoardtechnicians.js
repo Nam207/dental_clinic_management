@@ -8,7 +8,7 @@ import Navbar from "react-bootstrap/Navbar";
 import axios from "../../apis/api";
 import { Pagination, Table, DatePicker } from "antd";
 import moment from "moment";
-import {  FaEye } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
 import ModaleTech from "./modalTech";
 
@@ -38,56 +38,65 @@ function DashBoardTech() {
           setTable(response.data.data);
           setTotalReExam(response.data.total);
         }
-
-        console.log(response.data.data[0].status);
       });
   };
 
   useEffect(() => {
     loadDataReExam();
-  }, [offsetReExam, limitReExam, startDate, endDate]);
+  }, [offsetReExam, limitReExam, startDate, endDate, keyWord]);
 
   const onChangePageReExam = (current, pageSize) => {
     setOffsetReExam(current - 1);
     setLimitReExam(pageSize);
   };
 
+  const hangleChangeDate = (e) => {
+    setStartDate(moment(e[0]).format("YYYY-MM-DD"));
+    setEndDate(moment(e[1]).format("YYYY-MM-DD"))
+  }
+
+  const handleSearch = (e) => {
+    setkeyWord(e.target.value)
+  }
+
   const columnsReExam = [
     {
       title: "Mã phiếu khám",
       dataIndex: "_idPH",
       align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
+      defaultSortOrder: 'ascend',
+      sorter: (a, b) => a._idPH.localeCompare(b._idPH),
     },
     {
       title: "Mã khách hàng",
       dataIndex: "_idKH",
       align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
+      sorter: (a, b) => a._idKH.localeCompare(b._idKH),
     },
     {
       title: "Khách hàng",
       dataIndex: "nameKH",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.nameKH.localeCompare(b.nameKH),
     },
     {
       title: "Mã thủ thuật",
       dataIndex: "_idTT",
       align: "center",
-      sorter: (a, b) => a._id.localeCompare(b._id),
+      sorter: (a, b) => a._idTT.localeCompare(b._idTT),
     },
     {
       title: "Thủ thuật",
       dataIndex: "nameTT",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.nameTT.localeCompare(b.nameTT),
     },
     {
       title: "Ngày tạo",
       dataIndex: "dateT",
       align: "center",
-      sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
+      sorter: (a, b) => moment(a.dateT).unix() - moment(b.dateT).unix(),
+      
     },
     {
       title: "Trạng thái",
@@ -95,7 +104,7 @@ function DashBoardTech() {
       align: "center",
       filters: [
         {
-          text: "Thực hiện",
+          text: "Hoàn thành",
           value: `2`,
         },
         {
@@ -127,8 +136,8 @@ function DashBoardTech() {
         element.status.$numberDecimal === "0"
           ? "Chưa thực hiện"
           : element.status.$numberDecimal === "1"
-          ? "Đang thực hiện"
-          : "Thực hiện",
+            ? "Đang thực hiện"
+            : "Thực hiện",
       view: (
         <FaEye
           className="mx-2"
@@ -136,7 +145,7 @@ function DashBoardTech() {
           cursor={"pointer"}
           size={25}
           onClick={() => {
-            openUpdateModal(element._id);
+            openUpdateModal(element.customerId._id);
           }}
         />
       ),
@@ -156,13 +165,13 @@ function DashBoardTech() {
 
   return (
     <>
-    <ModaleTech
-    closeModal={closeUpdateModal}
-    isVisible={isShowUpdate}
-    empId={empId}
-    >
+      <ModaleTech
+        closeModal={closeUpdateModal}
+        isVisible={isShowUpdate}
+        cusId={empId}
+      >
 
-    </ModaleTech>
+      </ModaleTech>
       <div
         style={{
           margin: "auto",
@@ -193,6 +202,7 @@ function DashBoardTech() {
                 ]}
                 format={dateFormat}
                 style={{ float: "right", marginRight: "20px" }}
+                onChange={hangleChangeDate}
               />
               <Form className="d-flex">
                 <Button
@@ -206,13 +216,14 @@ function DashBoardTech() {
             </Navbar.Collapse>
           </Container>
         </Navbar>
-        <div style={{ marginLeft: "80px", marginRight: "80px"}}>
+        <div style={{ marginLeft: "80px", marginRight: "80px" }}>
           <Form>
             <Form.Group className="mb-3">
               <Form.Control
                 style={{ marginTop: "20px" }}
                 placeholder="Tìm kiếm"
                 autoFocus
+                onChange={handleSearch}
               />
             </Form.Group>
           </Form>

@@ -303,7 +303,6 @@ function Editstaff({ userAB ,empId, isVisible, closeModal, loadData }) {
           }, 3000);
         }
       } catch (err) {}
-      console.log(values);
     },
   });
   const disPlay = () => {

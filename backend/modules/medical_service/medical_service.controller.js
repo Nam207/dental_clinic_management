@@ -14,7 +14,7 @@ const getMedicalPaperWithService = async (req, res) => {
   let filter = {};
 
   if (startDate && endDate) {
-    filter.createAt = { $gte: new Date(startDate), $lt: new Date(endDate) };
+    filter.createdAt = { $gte: new Date(startDate), $lt: new Date(endDate) };
   }
 
   if (role[0].name !== "Admin") {

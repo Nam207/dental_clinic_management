@@ -79,6 +79,13 @@ function App() {
 
   if (userInfo.status === "error") return <div>Error</div>;
 
+  const findRole = (data, name) => {
+    data.role.map((element) => {
+      if(element.name === name) return true;
+    })
+    return false;
+  }
+
   return (
     <>
       <AuthContext.Provider value={{ user: userInfo.data, login, logout }}>
@@ -92,6 +99,17 @@ function App() {
             </Route>
 
             <Route element={<PrivateRoute user={userInfo.data} />}>
+
+              if(userInfo.data.role[0].name === "Admin"){
+                <Route path="/" element={<DashBoard />} />
+              } else if(findRole(userInfo.data, "Lễ Tân")){
+                <Route path="/" element={<Receptionist />} />
+              } else if(findRole(userInfo.data, "Bác sĩ")){
+                <Route path="/" element={<DashBoardDoctor />} />
+              } else{
+                <Route path="/" element={<DashBoardTech />} />
+              }
+
               <Route path="/DashBoard" element={<DashBoard />} />
               <Route path="/Decentralization" element={<Decentralization />} />
               <Route path="/clinic" element={<Clinic user={userInfo.data} />} />

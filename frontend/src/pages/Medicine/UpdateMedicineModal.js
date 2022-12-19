@@ -25,12 +25,12 @@ import { useFormik } from "formik";
 
 const UpdateMedicineModal = ({ userU,medID, isVisible, closeModal, loadData }) => {
   const dispatch = useDispatch();
-  console.log(userU)
   const [temp, setTemp] = useState(false);
   const newMedicine = useSelector((state) => state.med.medDetail);
   // const [newMedicine, setNewMedicine] = useState({});
 
   useEffect(() => {
+    getPermission("Quản lý thuốc");
     medID && medicineProcessor.getMedicineDetailObj(medID);
     if (medID) {
       getNewMedicine();
@@ -113,6 +113,7 @@ const UpdateMedicineModal = ({ userU,medID, isVisible, closeModal, loadData }) =
   }
 
   const getPermission = async (functionName) => {
+    console.log(userU)
     if (userU.role[0].name === "Admin") {
       setTemp(true);
       return;

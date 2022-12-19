@@ -8,20 +8,26 @@ import Navbar from "react-bootstrap/Navbar";
 import axios from "../../apis/api";
 import { Pagination, Table, DatePicker } from "antd";
 import moment from "moment";
+import { FaEdit } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
+import DocMedicalPaperModal from "../MedicalPaper/DocMedicalPaperModal";
+
 function DashBoardDoctor() {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
-  const [reExamination, setReExamination] = useState([]);
-
-  const [offsetBirthday, setOffsetBirthday] = useState(0);
-  const [limitBirthday, setLimitBirthday] = useState(5);
-  const [totalBirthday, setTotalBirthday] = useState(0);
-  const [birthday, setBirthday] = useState([]);
-
+  const [keyWord, setkeyWord] = useState([]);
+  const [medicalPaper, setMedicalPaper] = useState([]);
   const today = new Date();
   const dateFormat = "DD/MM/YYYY";
+  const [pkID, setPKID] = useState();
+  const [opac, setOpac] = useState(1);
+  const openMedPaper = () => {
+    setOpac(1);
+  };
+  const closeMedpaper = () => {
+    setOpac(0);
+  };
 
   const [startDate, setStartDate] = useState(
     moment(today).format("YYYY-MM-DD")
@@ -31,11 +37,11 @@ function DashBoardDoctor() {
   const loadDataReExam = async () => {
     const response = await axios
       .get(
-        `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
+        `/api/medicalPaper/getMedicalForDoctor?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}&keyword=${keyWord}`
       )
       .then((response) => {
         if (response.success === 1) {
-          setReExamination(response.data.data);
+          setMedicalPaper(response.data.data);
           setTotalReExam(response.data.total);
         }
       });
@@ -43,19 +49,40 @@ function DashBoardDoctor() {
 
   useEffect(() => {
     loadDataReExam();
-  }, [offsetReExam, limitReExam, startDate, endDate]);
+  }, [offsetReExam, limitReExam, startDate, endDate, keyWord]);
 
   const onChangePageReExam = (current, pageSize) => {
     setOffsetReExam(current - 1);
     setLimitReExam(pageSize);
   };
 
+  const hangleChangeDate = (e) => {
+    setStartDate(moment(e[0]).format("YYYY-MM-DD"));
+    setEndDate(moment(e[1]).format("YYYY-MM-DD"))
+  }
+
+  const handleSearch = (e) => {
+    setkeyWord(e.target.value)
+  }
   const columnsReExam = [
     {
       title: "Mã phiếu khám",
       dataIndex: "_id",
       align: "center",
+      defaultSortOrder: 'ascend',
       sorter: (a, b) => a._id.localeCompare(b._id),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "date",
+      align: "center",
+      sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
+    },
+    {
+      title: "Mã khách hàng",
+      dataIndex: "customerId",
+      align: "center",
+      sorter: (a, b) => a.customerId.localeCompare(b.customerId),
     },
     {
       title: "Khách hàng",
@@ -64,27 +91,55 @@ function DashBoardDoctor() {
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "date",
+      title: "",
+      dataIndex: "action",
       align: "center",
-      sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
     },
-  
   ];
 
-  // const dataReExam = reExamination.map((element) => {
-  //     return {
-  //         key: element._id,
-  //         _id: element.customerId,
-  //         name: element.fullname,
-  //         date: element.reExamination,
-  //         medicalPaper: element._id,
-  //         phone: element.phone
-  //     };
-  // });
+  const [empId, setEmpId] = useState("");
+  const [isShowUpdate, setIsShowUpdate] = useState(false);
+  const openUpdateModal = (id) => {
+    setPKID(id);
+    setIsShowUpdate(true);
+    openMedPaper();
+  };
+
+  const closeUpdateModal = () => {
+    setIsShowUpdate(false);
+  };
+
+  const dataReExam = medicalPaper.map((element) => {
+    return {
+      key: element._id,
+      _id: element._id,
+      date: moment(element.createdAt).format("DD/MM/YYYY"),
+      customerId: element.customerId._id,
+      name: element.customerId.fullname,
+      action:
+        <FaEdit
+          className="mx-2"
+          color="#2980b9"
+          cursor={"pointer"}
+          size={25}
+          onClick={() => {
+            openUpdateModal(element._id);
+          }}
+        />
+    };
+  });
 
   return (
     <>
+      <DocMedicalPaperModal
+        opac={opac}
+        closeMedpaper={closeMedpaper}
+        PKID={pkID}
+        closeModal={closeUpdateModal}
+        isVisible={isShowUpdate}
+        loadData={loadDataReExam}
+        openMedPaper={openMedPaper}
+      />
       <div
         style={{
           margin: "auto",
@@ -105,17 +160,18 @@ function DashBoardDoctor() {
                 navbarScroll
               >
                 <h4 style={{ display: "inline-block", margin: "10px" }}>
-                  Phiếu Khám
+                  Danh sách khách hàng chờ khám
                 </h4>
               </Nav>
-              {/* <DatePicker.RangePicker
+              <DatePicker.RangePicker
                 defaultValue={[
                   moment(today, dateFormat),
                   moment(today, dateFormat),
                 ]}
                 format={dateFormat}
                 style={{ float: "right", marginRight: "20px" }}
-              /> */}
+                onChange={hangleChangeDate}
+              />
               <Form className="d-flex">
                 <Button
                   variant="primary"
@@ -135,6 +191,7 @@ function DashBoardDoctor() {
                 style={{ marginTop: "20px" }}
                 placeholder="Tìm kiếm"
                 autoFocus
+                onChange={handleSearch}
               />
             </Form.Group>
           </Form>
@@ -142,11 +199,11 @@ function DashBoardDoctor() {
         <div
           style={{ marginLeft: "80px", marginRight: "80px", marginTop: "5px" }}
         >
-          {/* <span style={{ fontSize: "20px", fontWeight: "500" }}>
+          <span style={{ fontSize: "20px", fontWeight: "500" }}>
             Tổng: {totalReExam}
-          </span> */}
+          </span>
 
-          <Table columns={columnsReExam} pagination={false} />
+          <Table columns={columnsReExam} dataSource={dataReExam} pagination={false} />
         </div>
 
         <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>

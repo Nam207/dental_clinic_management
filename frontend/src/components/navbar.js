@@ -79,9 +79,6 @@ const Navbarr = ({ user }) => {
     getRole();
   }, [user]);
 
-  useEffect(() => {
-    console.log(linkURL);
-  }, [linkURL]);
   const getPermissionRoom = async (functionName) => {
     if (user.role[0].name === "Admin") {
       setTempRoom(true);

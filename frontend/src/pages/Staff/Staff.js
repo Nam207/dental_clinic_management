@@ -15,7 +15,6 @@ import Swal from "sweetalert2";
 import CustomToast from "../../components/CustomToast";
 
 function Staff({ user }) {
-  console.log(user)
   const [meds, setMeds] = useState([]);
   const [searchEmployee, setsearchEmployee] = useState("");
   const [offset, setOffset] = useState(0);
