@@ -26,6 +26,7 @@ const Receptionist = () => {
 
     const [startDate, setStartDate] = useState(moment(today).format("YYYY-MM-DD"));
     const [endDate, setEndDate] = useState(moment(today).format("YYYY-MM-DD"));
+    
 
     const loadDataReExam = async () => {
         const response = await axios

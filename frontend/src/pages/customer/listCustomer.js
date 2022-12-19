@@ -20,7 +20,6 @@ import Swal from "sweetalert2";
 import { Pagination, Table } from "antd";
 
 const Customer = ({user}) => {
-  console.log(user)
   const [customers, setCustomers] = useState([]);
 
   const [offset, setOffset] = useState(0);

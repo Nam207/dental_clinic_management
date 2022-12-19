@@ -9,16 +9,16 @@ import axios from "../../apis/api";
 import { Pagination, Table, DatePicker } from "antd";
 import moment from "moment";
 import { FaRedoAlt } from "react-icons/fa";
+import {  FaEye } from "react-icons/fa";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Line } from 'react-chartjs-2';
 function DashBoardDoctor() {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
-  const [reExamination, setReExamination] = useState([]);
+  const [keyWord, setkeyWord] = useState([]);
 
-  const [offsetBirthday, setOffsetBirthday] = useState(0);
-  const [limitBirthday, setLimitBirthday] = useState(5);
-  const [totalBirthday, setTotalBirthday] = useState(0);
-  const [birthday, setBirthday] = useState([]);
+  const [table, setTable] = useState([]);
 
   const today = new Date();
   const dateFormat = "DD/MM/YYYY";
@@ -31,13 +31,15 @@ function DashBoardDoctor() {
   const loadDataReExam = async () => {
     const response = await axios
       .get(
-        `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
+        `/api/medicalService?limit=${limitReExam}&offset=${offsetReExam}&keyword=${keyWord}&startDate=${startDate}&endDate=${endDate}`
       )
       .then((response) => {
         if (response.success === 1) {
-          setReExamination(response.data.data);
+          setTable(response.data.data);
           setTotalReExam(response.data.total);
         }
+
+        console.log(response.data.data[0].status);
       });
   };
 
@@ -53,38 +55,74 @@ function DashBoardDoctor() {
   const columnsReExam = [
     {
       title: "Mã phiếu khám",
-      dataIndex: "_id",
+      dataIndex: "_idPH",
       align: "center",
       sorter: (a, b) => a._id.localeCompare(b._id),
     },
+    
     {
       title: "Khách hàng",
-      dataIndex: "name",
+      dataIndex: "nameKH",
       align: "center",
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
+    
     {
       title: "Ngày tạo",
-      dataIndex: "date",
+      dataIndex: "dateT",
       align: "center",
       sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
     },
-  
+    
+    {
+      title: "",
+      dataIndex: "action",
+      align: "center",
+    },
   ];
 
-  // const dataReExam = reExamination.map((element) => {
-  //     return {
-  //         key: element._id,
-  //         _id: element.customerId,
-  //         name: element.fullname,
-  //         date: element.reExamination,
-  //         medicalPaper: element._id,
-  //         phone: element.phone
-  //     };
-  // });
+  const dataReExam = table.map((element) => {
+    return {
+      _idPH: element.medicalPaperId,
+      _idKH: element.customerId._id,
+      nameKH: element.customerId.fullname,
+      _idTT: element.serviceId._id,
+      nameTT: element.serviceId.name,
+      dateT: moment(element.createdAt).format("DD/MM/YYYY"),
+      status:
+        element.status.$numberDecimal === "0"
+          ? "Chưa thực hiện"
+          : element.status.$numberDecimal === "1"
+          ? "Đang thực hiện"
+          : "Thực hiện",
+      view: (
+        <FaEye
+          className="mx-2"
+          color="#2980b9"
+          cursor={"pointer"}
+          size={25}
+          onClick={() => {
+            openUpdateModal(element._id);
+          }}
+        />
+      ),
+    };
+  });
+  const [empId, setEmpId] = useState("");
+  const [isShowUpdate, setIsShowUpdate] = useState(false);
+  const openUpdateModal = (id) => {
+    setIsShowUpdate(true);
+    setEmpId(id);
+  };
 
+  const closeUpdateModal = () => {
+    setEmpId("");
+    setIsShowUpdate(false);
+  };
+  
   return (
     <>
+    
       <div
         style={{
           margin: "auto",
@@ -96,6 +134,24 @@ function DashBoardDoctor() {
         }}
       >
         <Navbar>
+        <Line
+                    datasetIdKey="id"
+                    data={{
+                      labels: ["Jun", "Jul", "Aug"],
+                      datasets: [
+                        {
+                          id: 1,
+                          label: "",
+                          data: [5, 6, 7],
+                        },
+                        {
+                          id: 2,
+                          label: "",
+                          data: [3, 2, 1],
+                        },
+                      ],
+                    }}
+                  />
           <Container fluid>
             <Navbar.Toggle aria-controls="navbarScroll" />
             <Navbar.Collapse id="navbarScroll">
@@ -105,17 +161,17 @@ function DashBoardDoctor() {
                 navbarScroll
               >
                 <h4 style={{ display: "inline-block", margin: "10px" }}>
-                  Phiếu Khám
+                  Khách hàng chờ làm thủ thuật
                 </h4>
               </Nav>
-              {/* <DatePicker.RangePicker
+              <DatePicker.RangePicker
                 defaultValue={[
                   moment(today, dateFormat),
                   moment(today, dateFormat),
                 ]}
                 format={dateFormat}
                 style={{ float: "right", marginRight: "20px" }}
-              /> */}
+              />
               <Form className="d-flex">
                 <Button
                   variant="primary"
@@ -142,11 +198,15 @@ function DashBoardDoctor() {
         <div
           style={{ marginLeft: "80px", marginRight: "80px", marginTop: "5px" }}
         >
-          {/* <span style={{ fontSize: "20px", fontWeight: "500" }}>
+          <span style={{ fontSize: "20px", fontWeight: "500" }}>
             Tổng: {totalReExam}
-          </span> */}
+          </span>
 
-          <Table columns={columnsReExam} pagination={false} />
+          <Table
+            columns={columnsReExam}
+            dataSource={dataReExam}
+            pagination={false}
+          />
         </div>
 
         <div id="pagin" style={{ marginTop: "10px", marginBottom: "10px" }}>
