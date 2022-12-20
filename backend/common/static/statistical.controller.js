@@ -140,7 +140,7 @@ const statisticalForCustomer = async (req, res) => {
     const toDate = new Date(endDate);
     toDate.setDate(toDate.getDate() + 1);
     toDate.setHours(23, 59, 59, 999);
-    filter.createdAt = { $gte: fromDate, $lt: toDate };
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   let filterService = {};
@@ -224,7 +224,7 @@ const statisticalForService = async (req, res) => {
     const toDate = new Date(endDate);
     toDate.setDate(toDate.getDate() + 1);
     toDate.setHours(23, 59, 59, 999);
-    filter.createdAt = { $gte: fromDate, $lt: toDate };
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   let filterService = {};
@@ -293,13 +293,15 @@ const statisticalForEmployee = async (req, res) => {
     endDate !== "undefined"
   ) {
     const fromDate = new Date(startDate);
-    fromDate.setDate(fromDate.getDate() + 1);
+    fromDate.setDate(fromDate.getDate());
     fromDate.setHours(0, 0, 0, 0);
 
     const toDate = new Date(endDate);
-    toDate.setDate(toDate.getDate() + 1);
+    toDate.setDate(toDate.getDate());
     toDate.setHours(23, 59, 59, 999);
-    filter.createdAt = { $gte: fromDate, $lt: toDate };
+    console.log(fromDate);
+    console.log(toDate);
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   let filterService = {};
@@ -374,7 +376,7 @@ const statisticalForPayment = async (req, res) => {
     const toDate = new Date(endDate);
     toDate.setDate(toDate.getDate() + 1);
     toDate.setHours(23, 59, 59, 999);
-    filter.createdAt = { $gte: fromDate, $lt: toDate };
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   let filterService = {};
@@ -484,7 +486,7 @@ const statisticalForDate = async (req, res) => {
     const toDate = new Date(endDate);
     toDate.setDate(toDate.getDate() + 1);
     toDate.setHours(23, 59, 59, 999);
-    filter.createdAt = { $gte: fromDate, $lt: toDate };
+    filter.createdAt = { $gte: fromDate, $lte: toDate };
   }
 
   let filterService = {};

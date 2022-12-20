@@ -224,7 +224,7 @@ const MedicineModal = ({ userA }, prop) => {
               <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col}>
                   <Form.Label column sm={12}>
-                    Lượng/SP{" "}
+                    Lượng(viên/vỉ - ml,mg/lọ){" "}
                     <span
                       style={{
                         display: "inline",

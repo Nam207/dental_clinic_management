@@ -27,7 +27,7 @@ import moment from "moment";
 import DocMedicalPaperModal from "./DocMedicalPaperModal";
 import PaymentY from "./PaymentY";
 
-const ListMedicalPaper = () => {
+const ListMedicalPaper = (user) => {
   const { RangePicker } = DatePicker;
   const dateFormat = "DD/MM/YYYY";
   const [pkList, setPkList] = useState([]);
@@ -38,6 +38,10 @@ const ListMedicalPaper = () => {
   const [searchMeds, setSearchMeds] = useState("");
   const [fromDate, setFromDate] = useState();
   const [toDate, setToDate] = useState();
+
+  const [temp, setTemp] = useState(false);
+  const [tempEye, setTempeye] = useState(false);
+  const [temp1, setTemp1] = useState(false);
 
   const [opac, setOpac] = useState(1);
   const openMedPaper = () => {
@@ -91,8 +95,53 @@ const ListMedicalPaper = () => {
     });
   };
 
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTemp1(true);
+      setTemp(true);
+      setTempeye(true);
+      return;
+    }
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+    let tempView = 0;
+    await Promise.all(
+      user.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].view === true) {
+          tempView++;
+          setTemp1(true);
+        }
+        if (permission.data[0].delete === true) {
+          setTemp(true);
+        }
+        if (permission.data[0].edit === true) {
+          setTempeye(true);
+        }
+      })
+    );
+    if (tempView === 0) {
+      window.location.href = "/Page404";
+    }
+  };
+
   const onChangePage = (current, pageSize) => {
-    // console.log(current, pageSize);
     setOffset(current - 1);
     setLimit(pageSize);
   };
@@ -111,24 +160,10 @@ const ListMedicalPaper = () => {
       });
   };
 
-  //load Data of all MedicalPaper
-  // const loadData = () => {
-  //   axios
-  //     .get(
-  //       `/api/medicalPaper?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
-  //     )
-  //     .then((response) => {
-  //       setPkList(response.data.data);
-  //       setTotal(response.data.total);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
-
   useEffect(() => {
     // loadData();
     loadDataFilterByDate();
+    getPermission("Quản lý phiếu khám");
   }, [offset, searchMeds, limit, fromDate]);
 
   const columns = [
@@ -218,14 +253,26 @@ const ListMedicalPaper = () => {
         ),
 
       action: (
-        //de update/view trong nay
-        <FaRegEye
-          onClick={() => {
-            openUpdateModal(p._id);
-          }}
-          cursor={"pointer"}
-          size={25}
-        ></FaRegEye>
+        <>
+        
+          {tempEye === true ? (
+            <FaEdit
+            onClick={() => {
+              openUpdateModal(p._id);
+            }}
+            cursor={"pointer"}
+            size={25}
+            />
+          ) : (
+            <FaRegEye
+              onClick={() => {
+                openUpdateModal(p._id);
+              }}
+              cursor={"pointer"}
+              size={25}
+            ></FaRegEye>
+          )}
+        </>
       ),
     };
   });
@@ -249,6 +296,7 @@ const ListMedicalPaper = () => {
         isVisible={isShowUpdate}
         loadData={loadDataFilterByDate}
         openMedPaper={openMedPaper}
+        user={user}
       />
       <Navbar>
         <Container fluid>
@@ -280,7 +328,7 @@ const ListMedicalPaper = () => {
               />
               {/* </Space> */}
               {/* Add Modal */}
-              <MedicalPaperModal loadData={loadDataFilterByDate} />
+              <MedicalPaperModal loadData={loadDataFilterByDate} user={user} />
               <Button
                 variant="primary"
                 style={{ marginRight: "20px" }}

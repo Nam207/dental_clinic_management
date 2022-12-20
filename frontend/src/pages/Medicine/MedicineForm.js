@@ -66,7 +66,7 @@ const MedicineForm = () => {
         </Row>
         <Row className="mb-3">
           <Form.Group className="mb-3" as={Col}>
-            <Form.Label>Lượng/SP</Form.Label>
+            <Form.Label>Lượng(viên/vỉ - ml,mg/lọ)</Form.Label>
             <Form.Control
               onChange={(e) => {
                 setNewMedicine({ ...newMedicine, quantity: e.target.value });

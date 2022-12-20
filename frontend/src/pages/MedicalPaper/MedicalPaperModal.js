@@ -37,7 +37,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
   });
 
   const [selectedCus, setSelectedCus] = useState({});
-
+  const [temp, setTemp] = useState(false);
   const [note, setNote] = useState();
 
   //Tái khám - default k de gi: null || empty string
@@ -65,6 +65,42 @@ const MedicalPaperModal = ({ loadData, user }) => {
   const [systemMed, setSystemMed] = useState([]);
   const [dentalMed, setDentalMed] = useState([]);
   const [opac, setOpac] = useState(1);
+
+  function findIndexByProperty(data, key, value) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][key] === value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const getPermission = async (functionName) => {
+    if (user.role[0].name === "Admin") {
+      setTemp(false);
+      return;
+    }
+    const functionArray = await axios({
+      url: `/api/function`,
+      method: "get",
+    });
+    const index = findIndexByProperty(functionArray.data, "name", functionName);
+
+    await Promise.all(
+      user.role.map(async (element) => {
+        const permission = await axios({
+          url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
+          method: "get",
+        });
+        if (permission.success === 0 || !permission.data) return;
+        if (permission.data[0].add === true) {
+          setTemp(true);
+          return;
+        }
+      })
+    );
+    return;
+  };
 
   const addPk = async () => {
     try {
@@ -191,10 +227,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    console.log(singleSelections);
-  }, [singleSelections]);
-
-  useEffect(() => {
+    getPermission("Quản lý phiếu khám")
     loadServiceTable();
     loadSystemMed();
     loadDentalMed();
@@ -391,13 +424,15 @@ const MedicalPaperModal = ({ loadData, user }) => {
 
   return (
     <>
-      <Button
-        variant="success"
-        onClick={handleShow}
-        style={{ marginRight: "20px" }}
-      >
-        <FaPlusCircle></FaPlusCircle> Thêm Phiếu khám
-      </Button>
+      {/* {temp === true ? ( */}
+        <Button
+          variant="success"
+          onClick={handleShow}
+          style={{ marginRight: "20px" }}
+        >
+          <FaPlusCircle></FaPlusCircle> Thêm Phiếu khám
+        </Button>
+      {/* ) : null} */}
 
       <Modal
         id="medPaperModal"
@@ -474,7 +509,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                   total={total}
                   onChange={onChangePage}
                   defaultPageSize={5}
-                  // pageSizeOptions={[5, 10, 20, 50]}
+                // pageSizeOptions={[5, 10, 20, 50]}
                 />
               </div>
             </div>
@@ -506,7 +541,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     type="number"
                     placeholder={totalPrice.toLocaleString("en-US")}
 
-                    // onChange={formik.handleChange}
+                  // onChange={formik.handleChange}
                   />
                 </Col>
               </Row>
@@ -676,7 +711,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     placeholder="Tên - Mã nhân viên"
                     disabled
                     value={`${curUser.fullname} - ${curUser._id}`}
-                    // onChange={formik.handleChange}
+                  // onChange={formik.handleChange}
                   />
                   {/* {formik.errors.phone && (
                     <p className="errorMsg"> {formik.errors.phone} </p>
@@ -995,7 +1030,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                         style={{ width: "160px" }}
                         checked={
                           selectedCus.systemicMedicalHistory &&
-                          selectedCus.systemicMedicalHistory.includes(sys._id)
+                            selectedCus.systemicMedicalHistory.includes(sys._id)
                             ? true
                             : false
                         }
@@ -1053,7 +1088,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                           id={den._id}
                           checked={
                             selectedCus.dentalMedicalHistory &&
-                            selectedCus.dentalMedicalHistory.includes(den._id)
+                              selectedCus.dentalMedicalHistory.includes(den._id)
                               ? true
                               : false
                           }
@@ -1086,7 +1121,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                           }}
                           // onChange={formik.handleChange}
                           style={{ width: "162px" }}
-                          // style={{ width: "200%" }}
+                        // style={{ width: "200%" }}
                         />
                       </Col>
                     </>

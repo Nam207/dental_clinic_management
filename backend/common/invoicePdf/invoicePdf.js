@@ -111,19 +111,18 @@ function buildTable(data, data2) {
                 alignment: 'center',
             },
             {
-                text: element.price,
+                text: element.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}),
                 border: [false, false, false, true],
                 margin: [0, 5, 0, 5],
                 alignment: 'center',
             },
             {
-                text: element.price * element.quantity,
+                text: (element.price * element.quantity).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}),
                 border: [false, false, false, true],
                 margin: [0, 5, 0, 5],
                 alignment: 'right',
             },
         ])
-
         temp++;
     });
     body.push([
@@ -147,15 +146,15 @@ function buildTable(data, data2) {
         },
         {
             text: 'Tổng cộng',
-            fontSize: 18,
+            fontSize: 15,
             bold: true,
             border: [false, false, false, true],
             margin: [0, 5, 0, 5],
             alignment: 'right',
         },
         {
-            text: Number(data2.totalAmount),
-            fontSize: 18,
+            text: Number(data2.totalAmount).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}),
+            fontSize: 15,
             bold: true,
             border: [false, false, false, true],
             fillColor: '#f5f5f5',
@@ -193,7 +192,7 @@ const exportPdf = async (req, res) => {
                 id: service._id,
                 name: service.name,
                 quantity: 1,
-                price: service.price.$numberDecimal,
+                price: Number(service.price),
             })
         } else {
             const tempCount = Number(medicalServiceArray[index].quantity);
@@ -202,7 +201,6 @@ const exportPdf = async (req, res) => {
     }));
 
     const debt = (Number(medicalPaper.totalAmount) - Number(medicalPaper.customerPayment) > 0) ? (Number(medicalPaper.totalAmount) - Number(medicalPaper.customerPayment)) : 0;
-    const change = (Number(medicalPaper.customerPayment) - Number(medicalPaper.totalAmount) > 0) ? (Number(medicalPaper.customerPayment) - Number(medicalPaper.totalAmount)) : 0;
 
     var docDefinition = {
         content: [
@@ -498,7 +496,7 @@ const exportPdf = async (req, res) => {
                             },
                             {
                                 border: [false, true, false, true],
-                                text: Number(medicalPaper.customerPayment),
+                                text: Number(medicalPaper.customerPayment).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}),
                                 alignment: 'right',
                                 fillColor: '#f5f5f5',
                                 margin: [0, 5, 0, 5],
@@ -512,25 +510,10 @@ const exportPdf = async (req, res) => {
                                 margin: [0, 5, 0, 5],
                             },
                             {
-                                text: debt,
+                                text: debt.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}),
                                 border: [false, false, false, true],
                                 fillColor: '#f5f5f5',
                                 alignment: 'right',
-                                margin: [0, 5, 0, 5],
-                            },
-                        ],
-                        [
-                            {
-                                text: 'Tiền thừa',
-                                border: [false, true, false, true],
-                                alignment: 'right',
-                                margin: [0, 5, 0, 5],
-                            },
-                            {
-                                border: [false, true, false, true],
-                                text: change,
-                                alignment: 'right',
-                                fillColor: '#f5f5f5',
                                 margin: [0, 5, 0, 5],
                             },
                         ],
@@ -548,7 +531,7 @@ const exportPdf = async (req, res) => {
             {
                 columns: [
                     {
-                        text: 'Bệnh nhân',
+                        text: 'Người thanh toán',
                         style: 'notesTitle',
                         fontSize: 13,
                         bold: true,

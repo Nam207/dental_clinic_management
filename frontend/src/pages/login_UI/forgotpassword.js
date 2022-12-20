@@ -52,6 +52,9 @@ function Forgotpassword() {
       }
     },
   });
+  const onBack = () =>{
+      window.location.href = "/login"
+  }
 
   return (
     <section className="vh-100">
@@ -100,6 +103,13 @@ function Forgotpassword() {
                   style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
                 >
                   Xác Nhận
+                </button>
+                <button
+                  onClick={onBack}
+                  className="btn btn-secondary btn-lg"
+                  style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem",float:"right" }}
+                >
+                  Hủy
                 </button>
               </div>
             </form>

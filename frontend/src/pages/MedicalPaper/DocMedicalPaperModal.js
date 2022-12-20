@@ -33,6 +33,7 @@ const DocMedicalPaperModal = ({
   loadData,
   opac,
   openMedPaper,
+  role,
 }) => {
   const [tempDate, setTempDate] = useState([]);
   const [pk, setPK] = useState({});
@@ -77,6 +78,7 @@ const DocMedicalPaperModal = ({
         url: `/api/medicalPaper/${PKID}`,
         method: "get",
       });
+
       setPK(res.data);
       //chuyen danh sach thu thuat
       setTempDate([
@@ -100,7 +102,9 @@ const DocMedicalPaperModal = ({
         { id: res.data.doctorId, name: res.data.doctor },
       ]);
 
-      setBirthDay(new Date(res.data.reExamination));
+      if (res.data.reExamination !== null) {
+        setBirthDay(new Date(res.data.reExamination));
+      }else setBirthDay(null);
     } catch (error) {
       console.log(error);
     }
@@ -647,44 +651,46 @@ const DocMedicalPaperModal = ({
                   Lưu lại
                 </Button>
               </div>
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                {/* thay doi bang Payment modal */}
-                <Payment
-                  PKID={pk._id}
-                  changeMoney={changeMoney}
-                  setChangeMoney={setChangeMoney}
-                  setCusPayment={setCusPayment}
-                  cusPayment={cusPayment}
-                  totalPrice={totalPrice}
-                  closeMedPaper={closeMedpaper}
-                  openMedPaper={openMedPaper}
-                  loadDataFilterByDate={loadData}
-                />
-              </div>
 
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
-                <Button
-                  // type="submit"
-                  // variant="primary"
-                  style={{
-                    backgroundColor: "#2ecc71",
-                    width: "50%",
-                    marginBottom: "8px",
-                    display: "inline",
-                  }}
-                  onClick={onPrintInvoice}
-                >
-                  In Phiếu thu
-                </Button>
-              </div>
+              {!role && (
+                <>
+                  <div
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {/* thay doi bang Payment modal */}
+                    <Payment
+                      PKID={pk._id}
+                      changeMoney={changeMoney}
+                      setChangeMoney={setChangeMoney}
+                      setCusPayment={setCusPayment}
+                      cusPayment={cusPayment}
+                      totalPrice={totalPrice}
+                      closeMedPaper={closeMedpaper}
+                      openMedPaper={openMedPaper}
+                      loadDataFilterByDate={loadData}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    <Button
+                      style={{
+                        backgroundColor: "#2ecc71",
+                        width: "50%",
+                        marginBottom: "8px",
+                        display: "inline",
+                      }}
+                      onClick={onPrintInvoice}
+                    >
+                      In Phiếu thu
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
 
             <div id="serviceMiddle">

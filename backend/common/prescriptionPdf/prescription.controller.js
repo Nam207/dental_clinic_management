@@ -151,8 +151,13 @@ const exportPdf = async (req, res) => {
     const medicalPaper = await MedicalPaperModel.findOne({ _id: medicalPaperId });
     const customer = await CustomerModel.findOne({ _id: medicalPaper.customerId });
     let reExamination = '';
-    if(medicalPaper.reExamination && medicalPaper.reExamination !== 'null'){
+    if(medicalPaper.reExamination && medicalPaper.reExamination !== 'null' && medicalPaper.reExamination !== null){
         reExamination = formatDate(medicalPaper.reExamination);
+    }
+
+    let dateOfBirth = "";
+    if(customer.dateOfBirth && medicalPaper.dateOfBirth !== 'null' && medicalPaper.dateOfBirth !== null){
+        dateOfBirth = formatDate(customer.dateOfBirth);
     }
     var docDefinition = {
         content: [
@@ -340,7 +345,7 @@ const exportPdf = async (req, res) => {
                         margin: [0, 0, 0, 10]
                     },
                     {
-                        text: formatDate(customer.dateOfBirth),
+                        text: dateOfBirth,
                         color: '#333333',
                         bold: true,
                         fontSize: 13,
@@ -481,7 +486,6 @@ const exportPdf = async (req, res) => {
 
 const uploadToCloud = async (req, res) => {
     const { file } = req.body;
-    console.log(file)
     const streamUpload = (req) => {
         return new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
