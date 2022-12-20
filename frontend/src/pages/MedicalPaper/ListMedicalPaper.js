@@ -275,7 +275,6 @@ const ListMedicalPaper = ({ user }) => {
       ),
       action: (
         <>
-
           {tempEye === true ? (
             <FaEdit
               onClick={() => {

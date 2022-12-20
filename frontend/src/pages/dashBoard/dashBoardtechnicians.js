@@ -12,7 +12,7 @@ import { FaEye } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
 import ModaleTech from "./modalTech";
 
-function DashBoardTech({user}) {
+function DashBoardTech({ user }) {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
@@ -43,7 +43,7 @@ function DashBoardTech({user}) {
 
   useEffect(() => {
     let temp = 0;
-    user.role.forEach(element => {
+    user.role.forEach((element) => {
       if (element.name === "Kỹ thuật viên" || element.name === "Admin") temp++;
     });
     if (temp === 0) window.location.href = "/Page404";
@@ -57,19 +57,19 @@ function DashBoardTech({user}) {
 
   const hangleChangeDate = (e) => {
     setStartDate(moment(e[0]).format("YYYY-MM-DD"));
-    setEndDate(moment(e[1]).format("YYYY-MM-DD"))
-  }
+    setEndDate(moment(e[1]).format("YYYY-MM-DD"));
+  };
 
   const handleSearch = (e) => {
-    setkeyWord(e.target.value)
-  }
+    setkeyWord(e.target.value);
+  };
 
   const columnsReExam = [
     {
       title: "Mã phiếu khám",
       dataIndex: "_idPH",
       align: "center",
-      defaultSortOrder: 'ascend',
+      defaultSortOrder: "ascend",
       sorter: (a, b) => a._idPH.localeCompare(b._idPH),
     },
     {
@@ -101,7 +101,6 @@ function DashBoardTech({user}) {
       dataIndex: "dateT",
       align: "center",
       sorter: (a, b) => moment(a.dateT).unix() - moment(b.dateT).unix(),
-
     },
     {
       title: "Trạng thái",
@@ -141,8 +140,8 @@ function DashBoardTech({user}) {
         element.status.$numberDecimal === "0"
           ? "Chưa thực hiện"
           : element.status.$numberDecimal === "1"
-            ? "Đang thực hiện"
-            : "Thực hiện",
+          ? "Đang thực hiện"
+          : "Thực hiện",
       view: (
         <FaEye
           className="mx-2"
@@ -174,9 +173,7 @@ function DashBoardTech({user}) {
         closeModal={closeUpdateModal}
         isVisible={isShowUpdate}
         cusId={empId}
-      >
-
-      </ModaleTech>
+      ></ModaleTech>
       <div
         style={{
           margin: "auto",

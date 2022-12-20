@@ -50,12 +50,15 @@ function Statistical({user}) {
     axios
       .get("/api/customer/allCustomer")
       .then((response) => {
-        setCustomerList([
+        let temp = [];
+        temp.push({ name: "Chọn tất cả", id: "Chọn tất cả" });
+        temp.push(
           ...response.data.map((item) => ({
             name: `${item.fullname}`,
             id: item._id,
-          })),
-        ]);
+          }))
+        );
+        setCustomerList([...temp]);
       })
       .catch((error) => {
         console.error(error);
@@ -66,12 +69,24 @@ function Statistical({user}) {
     axios
       .get("/api/profile/allEmployee")
       .then((response) => {
-        setEmployeeList([
+        let temp = [];
+
+        temp.push({ name: "Chọn tất cả", id: "Chọn tất cả" });
+        temp.push(
           ...response.data.map((item) => ({
             name: `${item.fullname}`,
             id: item._id,
-          })),
-        ]);
+          }))
+        );
+
+        // setEmployeeList([
+        //   ...response.data.map((item) => ({
+        //     name: `${item.fullname}`,
+        //     id: item._id,
+        //   })),
+        // ]);
+
+        setEmployeeList([...temp]);
       })
       .catch((error) => {
         console.error(error);
@@ -82,12 +97,16 @@ function Statistical({user}) {
     axios
       .get("/api/service/allService")
       .then((response) => {
-        setServiceList([
+        let temp = [];
+        temp.push({ name: "Chọn tất cả", id: "Chọn tất cả" });
+        temp.push(
           ...response.data.map((item) => ({
             name: item.name,
             id: item._id,
-          })),
-        ]);
+          }))
+        );
+
+        setServiceList([...temp]);
       })
       .catch((error) => {
         console.error(error);
@@ -104,9 +123,9 @@ function Statistical({user}) {
 
   const [tableData, setTableData] = useState();
 
-  useEffect(() => {
-    console.log(tableData);
-  }, [tableData]);
+  // useEffect(() => {
+  //   console.log(tableData);
+  // }, [tableData]);
 
   useEffect(() => {
     setShowTable(false);
@@ -299,14 +318,15 @@ function Statistical({user}) {
             border: "1px solid #E9ECEF",
           }}
         >
-          <div className="row">
-            <div className="col-md-6 col-sm-12">
+          <div className="row ">
+            {/* col-sm-6 */}
+            <div className="col-md">
               <div className="form-group row">
-                <label className="col-2 col-form-label form-control-label">
+                <label className="col-4 col-form-label form-control-label">
                   {" "}
                   Loại thống kê{" "}
                 </label>
-                <div className="col-10">
+                <div className="col-6">
                   <select
                     className="form-control"
                     onChange={(e) => {
@@ -326,12 +346,12 @@ function Statistical({user}) {
               </div>
 
               <div className="form-group row" style={{ marginTop: "24px" }}>
-                <label class="col-2 col-form-label form-control-label">
+                <label class="col-4 col-form-label form-control-label">
                   {" "}
                   Nhân viên{" "}
                 </label>
 
-                <div class="col-5">
+                <div class="col-6">
                   <FormAntd.Item
                     name="BS"
                     rules={[
@@ -354,55 +374,50 @@ function Statistical({user}) {
                         setStartEmployee(e);
                       }}
                       selected={startEmployee}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
-                    />
-                  </FormAntd.Item>
-                </div>
-                <div class="col-5">
-                  <FormAntd.Item
-                    name="BS"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nhập tên nhân viên",
-                      },
-                    ]}
-                  >
-                    <Typeahead
-                      id="basic-typeahead-single"
-                      labelKey="id"
-                      placeholder="Đến nhân viên"
-                      options={employeeList}
-                      onChange={(e) => {
-                        setEndEmployee(e);
+                      renderMenuItemChildren={(option) => {
+                        if (option.id === "Chọn tất cả") {
+                          return <div>{option.name}</div>;
+                        } else {
+                          return (
+                            <div>
+                              {option.id}
+                              <div>
+                                <small>Name: {option.name}</small>
+                              </div>
+                            </div>
+                          );
+                        }
                       }}
-                      selected={endEmployee}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
                     />
                   </FormAntd.Item>
                 </div>
+                {/* <div class="col-4">
+                  <div
+                    class="form-check"
+                    style={{
+                      transform: "translateY(7px)",
+                      // textAlign: "center",
+                    }}
+                  >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="flexCheckDefault"
+                    />
+                    <label class="form-check-label" for="flexCheckDefault">
+                      Chọn tất cả nhân viên
+                    </label>
+                  </div>
+                </div> */}
               </div>
               <div className="form-group row">
-                <label class="col-2 col-form-label form-control-label">
+                <label class="col-4 col-form-label form-control-label">
                   {" "}
                   Khách hàng{" "}
                 </label>
 
-                <div class="col-5">
+                <div class="col-6">
                   <FormAntd.Item
                     name="BS"
                     rules={[
@@ -421,58 +436,60 @@ function Statistical({user}) {
                         setStartCustomer(e);
                       }}
                       selected={startCustomer}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
-                    />
-                  </FormAntd.Item>
-                </div>
-                <div class="col-5">
-                  <FormAntd.Item
-                    name="BS"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nhập tên khách hàng",
-                      },
-                    ]}
-                  >
-                    <Typeahead
-                      id="basic-typeahead-single"
-                      labelKey="id"
-                      placeholder="Từ khách hàng"
-                      onChange={(e) => {
-                        setEndCustomer(e);
+                      renderMenuItemChildren={(option) => {
+                        if (option.id === "Chọn tất cả") {
+                          return <div>{option.name}</div>;
+                        } else {
+                          return (
+                            <div>
+                              {option.id}
+                              <div>
+                                <small>Name: {option.name}</small>
+                              </div>
+                            </div>
+                          );
+                        }
                       }}
-                      selected={endCustomer}
-                      options={customerList}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
                     />
                   </FormAntd.Item>
                 </div>
+                {/* <div class="col-4">
+                  <div
+                    class="form-check"
+                    style={{
+                      transform: "translateY(7px)",
+                      // textAlign: "center",
+                    }}
+                  >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="flexCheckDefault"
+                    />
+                    <label class="form-check-label" for="flexCheckDefault">
+                      Chọn tất cả khách hàng
+                    </label>
+                  </div>
+                </div> */}
               </div>
             </div>
-
-            <div className="col-md-6 col-sm-12">
+            <div className="col-md-6">
               <div className="form-group row">
-                <label class="col-2 col-form-label form-control-label">
+                <label
+                  class="col-4 col-form-label form-control-label"
+                  style={
+                    {
+                      // width: "18%",
+                      // display: "inline",
+                    }
+                  }
+                >
                   {" "}
                   Ngày thống kê{" "}
                 </label>
 
-                <div class="col-10" style={{ display: "flex" }}>
+                <div class="col-6" style={{ display: "flex" }}>
                   <DatePicker.RangePicker
                     style={{ textAlign: "center" }}
                     defaultValue={[
@@ -489,12 +506,20 @@ function Statistical({user}) {
               </div>
 
               <div className="form-group row" style={{ marginTop: "24px" }}>
-                <label class="col-2 col-form-label form-control-label">
+                <label
+                  class="col-4 col-form-label form-control-label"
+                  style={
+                    {
+                      // width: "18%",
+                      // display: "inline",
+                    }
+                  }
+                >
                   {" "}
                   Thủ thuật{" "}
                 </label>
 
-                <div class="col-5">
+                <div class="col-6">
                   <FormAntd.Item
                     name="BS"
                     rules={[
@@ -513,47 +538,42 @@ function Statistical({user}) {
                       }}
                       selected={startService}
                       options={serviceList}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
-                    />
-                  </FormAntd.Item>
-                </div>
-                <div class="col-5">
-                  <FormAntd.Item
-                    name="BS"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nhập tên nhân viên",
-                      },
-                    ]}
-                  >
-                    <Typeahead
-                      id="basic-typeahead-single"
-                      labelKey="id"
-                      placeholder="Đến thủ thuật"
-                      onChange={(e) => {
-                        setEndService(e);
+                      renderMenuItemChildren={(option) => {
+                        if (option.id === "Chọn tất cả") {
+                          return <div>{option.name}</div>;
+                        } else {
+                          return (
+                            <div>
+                              {option.id}
+                              <div>
+                                <small>Name: {option.name}</small>
+                              </div>
+                            </div>
+                          );
+                        }
                       }}
-                      selected={endService}
-                      options={serviceList}
-                      renderMenuItemChildren={(option) => (
-                        <div>
-                          {option.id}
-                          <div>
-                            <small>Name: {option.name}</small>
-                          </div>
-                        </div>
-                      )}
                     />
                   </FormAntd.Item>
                 </div>
+                {/* <div class="col-4">
+                  <div
+                    // class="form-check"
+                    style={{
+                      transform: "translateY(7px)",
+                      // textAlign: "center",
+                    }}
+                  >
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value=""
+                      id="flexCheckDefault"
+                    />
+                    <label class="form-check-label" for="flexCheckDefault">
+                      Chọn tất cả thủ thuật
+                    </label>
+                  </div>
+                </div> */}
               </div>
             </div>
           </div>

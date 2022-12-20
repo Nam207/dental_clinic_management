@@ -227,7 +227,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    getPermission("Quản lý phiếu khám")
+    getPermission("Quản lý phiếu khám");
     loadServiceTable();
     loadSystemMed();
     loadDentalMed();
@@ -326,7 +326,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
     setTotalPrice(totalPrice + Number(price));
     setCurrentItemList([
       ...currentItemList,
-      [curDate, name, price, [], op.slice(0, 1), id],
+      [curDate, name, Number(price), [], op.slice(0, 1), id],
     ]);
 
     let temp = [];
@@ -425,12 +425,16 @@ const MedicalPaperModal = ({ loadData, user }) => {
                   {services.map((ser) => {
                     return (
                       <tr
-                        onClick={() => {
-                          addCurrentItems(
-                            ser._id,
-                            ser.name,
-                            ser.price.$numberDecimal
-                          );
+                        onClick={(e) => {
+                          if (user.role[0].name === "Bác sỹ") {
+                            addCurrentItems(
+                              ser._id,
+                              ser.name,
+                              ser.price.$numberDecimal
+                            );
+                          } else {
+                            // e.stopPropagation()
+                          }
                         }}
                       >
                         <td
@@ -470,7 +474,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                   total={total}
                   onChange={onChangePage}
                   defaultPageSize={5}
-                // pageSizeOptions={[5, 10, 20, 50]}
+                  // pageSizeOptions={[5, 10, 20, 50]}
                 />
               </div>
             </div>
@@ -500,9 +504,12 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     // style={{ marginLeft: "14px" }}
                     id="phone"
                     type="number"
-                    placeholder={totalPrice.toLocaleString("en-US")}
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(totalPrice)}
 
-                  // onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
                   />
                 </Col>
               </Row>
@@ -520,7 +527,10 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     // id="phone"
                     type="number"
                     // value = {payment.toLocaleString("en-US")}
-                    placeholder="0"
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(0)}
                     onChange={(e) => {
                       calPayment(e.target.value);
                       // setPayment(e.target.value)
@@ -529,7 +539,23 @@ const MedicalPaperModal = ({ loadData, user }) => {
                   />
                 </Col>
               </Row>
-
+              <Row>
+                <Form.Label column style={{ marginLeft: "5px" }}>
+                  <b>Còn nợ</b>
+                </Form.Label>
+                <Col>
+                  <Form.Control
+                    plaintext
+                    readOnly
+                    id="phone"
+                    type="number"
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(0)}
+                  />
+                </Col>
+              </Row>
               <Row>
                 <Form.Label column style={{ marginLeft: "5px" }}>
                   <b>Tiền thừa</b>
@@ -540,7 +566,10 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     readOnly
                     id="phone"
                     type="number"
-                    placeholder={changeMoney.toLocaleString("en-US")}
+                    placeholder={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(0)}
                   />
                 </Col>
               </Row>
@@ -672,7 +701,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                     placeholder="Tên - Mã nhân viên"
                     disabled
                     value={`${curUser.fullname} - ${curUser._id}`}
-                  // onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
                   />
                   {/* {formik.errors.phone && (
                     <p className="errorMsg"> {formik.errors.phone} </p>
@@ -991,7 +1020,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                         style={{ width: "160px" }}
                         checked={
                           selectedCus.systemicMedicalHistory &&
-                            selectedCus.systemicMedicalHistory.includes(sys._id)
+                          selectedCus.systemicMedicalHistory.includes(sys._id)
                             ? true
                             : false
                         }
@@ -1049,7 +1078,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                           id={den._id}
                           checked={
                             selectedCus.dentalMedicalHistory &&
-                              selectedCus.dentalMedicalHistory.includes(den._id)
+                            selectedCus.dentalMedicalHistory.includes(den._id)
                               ? true
                               : false
                           }
@@ -1082,7 +1111,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
                           }}
                           // onChange={formik.handleChange}
                           style={{ width: "162px" }}
-                        // style={{ width: "200%" }}
+                          // style={{ width: "200%" }}
                         />
                       </Col>
                     </>

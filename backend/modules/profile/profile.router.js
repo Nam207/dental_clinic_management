@@ -5,9 +5,17 @@ const validateInput = require("../../middlewares/validateInput");
 const { ProfileSchema, ProfileInforSchema } = require("./profile.validation");
 const needAuthenticated = require("../../middlewares/needAuthenticated");
 
-router.get("/getDoctorToday", needAuthenticated, profileController.getDoctorToday);
+router.get(
+  "/getDoctorToday",
+  needAuthenticated,
+  profileController.getDoctorToday
+);
 
-router.get("/getTechStaffToday", needAuthenticated, profileController.getTechStaffToday);
+router.get(
+  "/getTechStaffToday",
+  needAuthenticated,
+  profileController.getTechStaffToday
+);
 
 router.get("/curProfile", needAuthenticated, profileController.curProfile);
 

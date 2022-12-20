@@ -82,9 +82,9 @@ function App() {
   const findRole = (data, name) => {
     data.role.map((element) => {
       if (element.name === name) return true;
-    })
+    });
     return false;
-  }
+  };
 
   return (
     <>
@@ -99,7 +99,6 @@ function App() {
             </Route>
 
             <Route element={<PrivateRoute user={userInfo.data} />}>
-
               if(userInfo.data.role[0].name === "Admin"){
                 <Route path="/" element={<DashBoard />} />
               } else if(findRole(userInfo.data, "Lễ Tân")){

@@ -22,6 +22,7 @@ const UpdateCustomerModal = ({
   const [temp, setTemp] = useState(false);
   const getCustomer = async () => {
     const response = await axios.get(`api/customer/${cusId}`);
+    console.log(response.data);
     setCurCustomer(response.data);
     setBirthDay(
       new Date(response.data.dateOfBirth).toISOString().split("T")[0]
@@ -371,13 +372,16 @@ const UpdateCustomerModal = ({
                   )}
                 </Col>
                 <Form.Label column sm={2}>
-                  Tổng tiền nợ
+                  Tổng tiền dịch vụ
                 </Form.Label>
                 <Col sm={4}>
                   <Form.Control
                     disabled
                     id="usage"
-                    onChange={formik.handleChange}
+                    value={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(curCustomer.totalAmount)}
                   />
                 </Col>
               </Row>
@@ -441,13 +445,11 @@ const UpdateCustomerModal = ({
                   <Form.Control
                     disabled
                     id="usage"
-                    value={formik.values.usage}
-                    onChange={formik.handleChange}
-                    placeholder="0"
+                    value={new Intl.NumberFormat("de-DE", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(curCustomer.payment)}
                   />
-                  {formik.errors.usage && (
-                    <p className="errorMsg">{formik.errors.usage}</p>
-                  )}
                 </Col>
               </Row>
 
@@ -461,13 +463,23 @@ const UpdateCustomerModal = ({
                   <Form.Control
                     disabled
                     id="usage"
-                    value={formik.values.usage}
-                    onChange={formik.handleChange}
-                    placeholder="0"
+                    value={
+                      Number(curCustomer.totalAmount) -
+                        Number(curCustomer.payment) <=
+                      0
+                        ? new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(0)
+                        : new Intl.NumberFormat("de-DE", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(
+                            Number(curCustomer.totalAmount) -
+                              Number(curCustomer.payment)
+                          )
+                    }
                   />
-                  {formik.errors.usage && (
-                    <p className="errorMsg">{formik.errors.usage}</p>
-                  )}
                 </Col>
               </Row>
 
