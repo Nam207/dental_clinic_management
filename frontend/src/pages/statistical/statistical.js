@@ -19,7 +19,7 @@ import TableStaff from "../../components/tableStaff";
 import TableTechnical from "../../components/tableTechnical";
 import moment from "moment";
 
-function Statistical() {
+function Statistical({user}) {
   const today = new Date();
   const dateFormat = "DD/MM/YYYY";
 
@@ -95,6 +95,8 @@ function Statistical() {
   };
 
   useEffect(() => {
+    console.log(user.role[0]);
+    if(user.role[0].name !== "Admin") window.location.href = "/Page404";
     loadCustomer();
     loadEmployee();
     loadService();

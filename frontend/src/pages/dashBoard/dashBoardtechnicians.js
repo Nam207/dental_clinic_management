@@ -12,7 +12,7 @@ import { FaEye } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
 import ModaleTech from "./modalTech";
 
-function DashBoardTech() {
+function DashBoardTech({user}) {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
@@ -42,6 +42,11 @@ function DashBoardTech() {
   };
 
   useEffect(() => {
+    let temp = 0;
+    user.role.forEach(element => {
+      if (element.name === "Kỹ thuật viên" || element.name === "Admin") temp++;
+    });
+    if (temp === 0) window.location.href = "/Page404";
     loadDataReExam();
   }, [offsetReExam, limitReExam, startDate, endDate, keyWord]);
 
@@ -96,7 +101,7 @@ function DashBoardTech() {
       dataIndex: "dateT",
       align: "center",
       sorter: (a, b) => moment(a.dateT).unix() - moment(b.dateT).unix(),
-      
+
     },
     {
       title: "Trạng thái",

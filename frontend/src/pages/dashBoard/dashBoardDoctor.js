@@ -12,7 +12,7 @@ import { FaEdit } from "react-icons/fa";
 import { FaRedoAlt } from "react-icons/fa";
 import DocMedicalPaperModal from "../MedicalPaper/DocMedicalPaperModal";
 
-function DashBoardDoctor() {
+function DashBoardDoctor({user}) {
   const [offsetReExam, setOffsetReExam] = useState(0);
   const [limitReExam, setLimitReExam] = useState(5);
   const [totalReExam, setTotalReExam] = useState(0);
@@ -48,6 +48,11 @@ function DashBoardDoctor() {
   };
 
   useEffect(() => {
+    let temp = 0;
+    user.role.forEach(element => {
+      if (element.name === "Bác sĩ" || element.name === "Admin") temp++;
+    });
+    if (temp === 0) window.location.href = "/Page404";
     loadDataReExam();
   }, [offsetReExam, limitReExam, startDate, endDate, keyWord]);
 
@@ -140,7 +145,7 @@ function DashBoardDoctor() {
         isVisible={isShowUpdate}
         loadData={loadDataReExam}
         openMedPaper={openMedPaper}
-        role = {"doctor"}
+        role={"doctor"}
 
       />
       <div

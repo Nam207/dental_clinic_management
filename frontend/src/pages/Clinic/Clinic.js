@@ -12,7 +12,7 @@ import UploadAndDisplayImage from "../../components/uploadImage";
 import clinicProcessor from "../../apis/clinicProcessor";
 import axios from "../../apis/api";
 
-const Clinic = ({user}) => {
+const Clinic = ({ user }) => {
     const [clinic, setClinic] = useState({});
 
     const [tempEye, setTempeye] = useState(false);
@@ -182,6 +182,7 @@ const Clinic = ({user}) => {
                                         type="text"
                                         value={formik.values.name}
                                         onChange={formik.handleChange}
+                                        readOnly={tempEye ? "false" : "true"}
                                     />
                                     {formik.errors.name && (
                                         <p className="errorMsg"> {formik.errors.name} </p>
@@ -209,6 +210,7 @@ const Clinic = ({user}) => {
                                         type="text"
                                         value={formik.values.phone}
                                         onChange={formik.handleChange}
+                                        readOnly={tempEye ? "false" : "true"}
                                     />
                                     {formik.errors.phone && (
                                         <p className="errorMsg"> {formik.errors.phone} </p>
@@ -236,6 +238,7 @@ const Clinic = ({user}) => {
                                         type="text"
                                         value={formik.values.email}
                                         onChange={formik.handleChange}
+                                        readOnly={tempEye ? "false" : "true"}
                                     />
                                     {formik.errors.email && (
                                         <p className="errorMsg"> {formik.errors.email} </p>
@@ -263,6 +266,7 @@ const Clinic = ({user}) => {
                                         type="text"
                                         value={formik.values.address}
                                         onChange={formik.handleChange}
+                                        readOnly={tempEye ? "false" : "true"}
                                     />
                                     {formik.errors.address && (
                                         <p className="errorMsg"> {formik.errors.address} </p>
@@ -290,6 +294,7 @@ const Clinic = ({user}) => {
                                         type="text"
                                         value={formik.values.accountNumber}
                                         onChange={formik.handleChange}
+                                        readOnly={tempEye ? "false" : "true"}
                                     />
                                     {formik.errors.accountNumber && (
                                         <p className="errorMsg"> {formik.errors.accountNumber} </p>
@@ -329,7 +334,18 @@ const Clinic = ({user}) => {
                             >
                                 Đặt lại
                             </Button>
-                        </>) : (<></>)}
+                        </>) : (<Button
+                            style={{
+                                float: "right",
+                                marginRight: "10px",
+                                backgroundColor: "gray",
+                            }}
+                            onClick={(e) => {
+                                window.location.href = "/";
+                            }}
+                        >
+                            Quay lại
+                        </Button>)}
                 </Form>
             </div>
         </>

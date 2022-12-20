@@ -25,7 +25,6 @@ import AdCusSearch from "./AdCusSearch";
 import MedListPaper from "./MedListPaper";
 import Payment from "./Payment";
 const MedicalPaperModal = ({ loadData, user }) => {
-  // const options = [];
   const [pk, setPK] = useState({
     customerId: "",
     doctorId: "",
@@ -92,6 +91,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
           url: `/api/permission/${element._id}/${functionArray.data[index]._id}`,
           method: "get",
         });
+        console.log(permission)
         if (permission.success === 0 || !permission.data) return;
         if (permission.data[0].add === true) {
           setTemp(true);
@@ -238,7 +238,6 @@ const MedicalPaperModal = ({ loadData, user }) => {
   }, [offset, searchMeds]);
 
   const onChangePage = (current, pageSize) => {
-    // console.log(current, pageSize);
     setOffset(current - 1);
     setLimit(pageSize);
   };
@@ -249,10 +248,6 @@ const MedicalPaperModal = ({ loadData, user }) => {
         `/api/service/activeService?keyword=${searchMeds}&offset=${offset}&limit=${limit}`
       )
       .then((response) => {
-        // setServices(response.data);
-        //get service which status = true;
-        // var temp = response.data.data.filter((item) => item.status === true);
-        // setServices(temp);
         if (response.success === 1) {
           setServices(response.data.data);
           setTotal(response.data.total);
@@ -261,8 +256,6 @@ const MedicalPaperModal = ({ loadData, user }) => {
       .catch((err) => {
         console.log("Err: ", err);
       });
-
-    // console.log(services);
   };
 
   const loadSystemMed = async () => {
@@ -285,20 +278,6 @@ const MedicalPaperModal = ({ loadData, user }) => {
     setDentalMed(response.data);
   };
 
-  const onChangeSelect = (value) => {
-    console.log(`selected ${value}`);
-  };
-  const onSearch = (value) => {
-    console.log("search:", value);
-  };
-  const onClickSelect = () => {
-    console.log("Clickkk:");
-  };
-
-  //PAGINATION
-  // We start with an empty list of items.
-
-  //fill Data from chonsen SingleSelection - chưa xoá được
   const fillCusDataByName = async (e) => {
     // console.log("????");
     // console.log(e[0].id);
@@ -324,7 +303,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
-    console.log("xoa");
+    getPermission("Quản lý phiếu khám")
     setPK({
       ...pk,
       medicalService: [
@@ -339,16 +318,10 @@ const MedicalPaperModal = ({ loadData, user }) => {
     });
   }, [currentItemList]);
 
-  // useEffect(() => {
-  //   console.log(pk);
-  // }, [pk]);
-
   const [curDate, setCurDate] = useState(new Date());
 
   const [serListID, setSerListID] = useState([]);
   const addCurrentItems = (id, name, price) => {
-    // console.log(typeof price);
-    // console.log(new Date().toISOString().split("T")[0]);
     let curDate = new Date().toLocaleDateString("en-GB");
     setTotalPrice(totalPrice + Number(price));
     setCurrentItemList([
@@ -374,27 +347,15 @@ const MedicalPaperModal = ({ loadData, user }) => {
       });
       t.count += 1;
     }
-
-    // currentItemList.forEach((item) => {
-    //   console.log(item[3], item[4], item[5]);
-    // });
-    // setPK({ ...pk, medicalService: [...pk.medicalService, {serviceId:[], op.slice(0, 1), id}] });
-
-    // const temList = currentItemList.map((t) => ({ serviceId: t[5] ,ktvId:t[3][0].id,}));
-
-    // setPK({ ...pk, medicalService: currentItemList });
   };
 
   const deleteCurrentItems = (rowIndex, price, id) => {
-    // console.log(price);
     let temp = currentItemList;
     temp.splice(rowIndex, 1);
-    //deu render lai duoc
     setCurrentItemList([...temp]);
 
     setTotalPrice(totalPrice - price);
 
-    //xoa id khoi serListID
     let tID = [];
     serListID.map((i) => {
       tID.push(i.serID);
@@ -424,7 +385,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
 
   return (
     <>
-      {/* {temp === true ? ( */}
+      {temp === true ? (
         <Button
           variant="success"
           onClick={handleShow}
@@ -432,7 +393,7 @@ const MedicalPaperModal = ({ loadData, user }) => {
         >
           <FaPlusCircle></FaPlusCircle> Thêm Phiếu khám
         </Button>
-      {/* ) : null} */}
+      ): null}
 
       <Modal
         id="medPaperModal"

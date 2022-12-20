@@ -81,7 +81,7 @@ function App() {
 
   const findRole = (data, name) => {
     data.role.map((element) => {
-      if(element.name === name) return true;
+      if (element.name === name) return true;
     })
     return false;
   }
@@ -110,14 +110,14 @@ function App() {
                 <Route path="/" element={<DashBoardTech />} />
               }
 
-              <Route path="/DashBoard" element={<DashBoard />} />
-              <Route path="/Decentralization" element={<Decentralization />} />
+              <Route path="/DashBoard" element={<DashBoard user={userInfo.data} />} />
+              <Route path="/Decentralization" element={<Decentralization user={userInfo.data} />} />
               <Route path="/clinic" element={<Clinic user={userInfo.data} />} />
               <Route path="/Page404" element={<Page404 />} />
               <Route path="/ChangePassword" element={<Changepassword />} />
               <Route path="/Profile" element={<Profile />} />
-              <Route path="/DashBoardTech" element={<DashBoardTech />} />
-              <Route path="/DashBoardDoctor" element={<DashBoardDoctor />} />
+              <Route path="/DashBoardTech" element={<DashBoardTech user={userInfo.data} />} />
+              <Route path="/DashBoardDoctor" element={<DashBoardDoctor user={userInfo.data} />} />
               <Route
                 path="/Customer"
                 element={<Customer user={userInfo.data} />}
@@ -130,7 +130,7 @@ function App() {
                 path="/medicine"
                 element={<Medicine user={userInfo.data} />}
               ></Route>
-              <Route path="/Receptionist" element={<Receptionist />}></Route>
+              <Route path="/Receptionist" element={<Receptionist user={userInfo.data}/>}></Route>
               <Route
                 path="/Staff"
                 element={<Staff user={userInfo.data} />}

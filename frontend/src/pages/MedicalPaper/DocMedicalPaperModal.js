@@ -34,6 +34,7 @@ const DocMedicalPaperModal = ({
   opac,
   openMedPaper,
   role,
+  user
 }) => {
   const [tempDate, setTempDate] = useState([]);
   const [pk, setPK] = useState({});

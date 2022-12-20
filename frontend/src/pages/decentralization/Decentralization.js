@@ -9,7 +9,7 @@ import { FaRedoAlt, FaEdit } from "react-icons/fa";
 import SwalCard from "../../components/CardErr";
 import Swal from "sweetalert2";
 import { logDOM } from "@testing-library/react";
-const Decentralization = () => {
+const Decentralization = ({user}) => {
   const [role, setRole] = useState([]);
   const [function1, setFuction1] = useState([]);
   const [permission, setPermission] = useState([]);
@@ -168,6 +168,7 @@ const Decentralization = () => {
   const data = [];
 
   useEffect(() => {
+    if(user.role[0].name !== "Admin") window.location.href = "/Page404";
     getRole();
     getFuction();
     getPermission();

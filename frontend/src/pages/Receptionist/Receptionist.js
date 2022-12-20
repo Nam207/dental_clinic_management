@@ -10,7 +10,7 @@ import { Pagination, Table, DatePicker } from "antd";
 import moment from 'moment';
 import { FaRedoAlt } from "react-icons/fa";
 
-const Receptionist = () => {
+const Receptionist = ({user}) => {
     const [offsetReExam, setOffsetReExam] = useState(0);
     const [limitReExam, setLimitReExam] = useState(5);
     const [totalReExam, setTotalReExam] = useState(0);
@@ -28,7 +28,6 @@ const Receptionist = () => {
     const [endDate, setEndDate] = useState(moment(today).format("YYYY-MM-DD"));
 
     const loadDataReExam = async () => {
-        console.log(1);
         const response = await axios
             .get(
                 `/api/medicalPaper/reExam?offset=${offsetReExam}&limit=${limitReExam}&startDate=${startDate}&endDate=${endDate}`
@@ -55,6 +54,11 @@ const Receptionist = () => {
     };
 
     useEffect(() => {
+        let temp = 0;
+        user.role.forEach(element => {
+            if(element.name === "Lễ tân" || element.name === "Admin") temp++;
+        });
+        if(temp === 0) window.location.href = "/Page404";
         loadDataReExam();
         loadDataBirthday();
     }, [offsetReExam, limitReExam, offsetBirthday, limitBirthday, startDate, endDate]);

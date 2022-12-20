@@ -45,7 +45,6 @@ const PaymentY = ({ PKID, show, handleClose, loadDataFilterByDate }) => {
     await axios
       .get(`/api/bill?medicalPaperId=${PKID}`)
       .then((response) => {
-        console.log(response.data);
         setPaymentList([
           ...response.data.map((i) => [
             i.createdAt,
@@ -87,7 +86,6 @@ const PaymentY = ({ PKID, show, handleClose, loadDataFilterByDate }) => {
         url: `/api/profile/getReceptionist/`,
         method: "get",
       });
-      console.log(res.data);
       setReceptionList([
         ...res.data.map((i) => ({ id: i._id, name: i.fullname })),
       ]);

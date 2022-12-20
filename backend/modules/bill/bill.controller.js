@@ -62,12 +62,11 @@ const inputBill = async (req, res) => {
   const medicalPaper = await MedicalPaperModel.findById(
     billArray[0].medicalPaperId
   );
-  console.log(medicalPaper);
-  console.log(billArray[0].medicalPaperId);
+
   let status = 0;
   if (paymentMoney > 0) {
     Number(medicalPaper.totalAmount) - paymentMoney <= 0
-      ? (status = 2)
+      ? (status = 2, paymentMoney = Number(medicalPaper.totalAmount))
       : (status = 1);
   }
   console.log(medicalPaper.totalAmount);
