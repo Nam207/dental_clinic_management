@@ -4,3 +4,9 @@
 .tdTD{
     font-size: 15px;
 }
+.ant-table-column-title{
+    font-size: 20px;
+}
+.ant-table-cell{
+    font-size: 20px;
+}

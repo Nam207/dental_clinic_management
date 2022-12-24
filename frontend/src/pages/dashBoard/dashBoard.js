@@ -291,7 +291,7 @@ const DashBoard = () => {
               </span>
             </div>
             <div class="card-body">
-              <div class="count">
+              <div class="count" style={{alignItems:"center"}}>
                 {" "}
                 {bestSer} - {bestSerNumber}
               </div>
@@ -352,7 +352,7 @@ const DashBoard = () => {
                     className="d-block text-white rounded text-center py-3 py-md-5 bg-gradient4 text-shadow relative"
                     href="/customer"
                   >
-                    <i className="h3 fa fa-book text-shadow">
+                    <i className="h3 fa fa-book ">
                       <UserOutlined />
                     </i>
                     <div className="text font-weight-bold text-shadow">
@@ -396,7 +396,7 @@ const DashBoard = () => {
                   className=""
                   style={{ textAlign: "-webkit-center", height: "400px" }}
                 >
-                  <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "24px" }}>
                     Số lượng khách hàng trong tuần
                   </span>
 
@@ -407,10 +407,10 @@ const DashBoard = () => {
                   style={{
                     textAlign: "-webkit-center",
                     height: "400px",
-                    marginTop: "40px",
+                    marginTop: "100px",
                   }}
                 >
-                  <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "24px" }}>
                     Số lượng khách hàng trong tháng
                   </span>
                   <Line

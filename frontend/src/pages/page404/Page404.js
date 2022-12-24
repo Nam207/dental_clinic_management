@@ -17,12 +17,12 @@ function Page404() {
 		
 		<div className="contant_box_404">
 		<h3 className="h2">
-		Look like you're lost
+		Không tìm thấy
 		</h3>
 		
-		<p>the page you are looking for not avaible!</p>
+		<p>Thật không may trang bạn.Bạn không có quyền vào trang này.Hãy quay lại trang chính!! </p>
 		
-		<a href="/DashBoard" className="link_404">Go to Home</a>
+		<a href="/DashBoard" className="link_404">Trang chính</a>
 	</div>
 		</div>
 		</div>
