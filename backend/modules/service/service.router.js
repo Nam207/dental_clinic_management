@@ -29,13 +29,6 @@ router.get(
 );
 
 router.get(
-  "/prescription",
-  needAuthenticated,
-  // isRole,
-  serviceController.getMedicineByService
-);
-
-router.get(
   "/activeService",
   needAuthenticated,
   // isRole,

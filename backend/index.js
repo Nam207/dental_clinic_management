@@ -48,7 +48,14 @@ const billRouter = require("./modules/bill/bill.router");
 
 const staticsticalRouter = require("./common/static/statistical.router");
 
-mongoose.connect(process.env.MONGODB_URL, (err) => {
+let database = "";
+if (process.env.NODE_ENV === "test") {
+  database = process.env.MONGODB_URI_TEST;
+} else {
+  database = process.env.MONGODB_URL;
+}
+
+mongoose.connect(database, (err) => {
   if (err) {
     return console.log("Err connnect mongodb", err);
   }
@@ -70,10 +77,13 @@ mongoose.connect(process.env.MONGODB_URL, (err) => {
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use((req, res, next) => {
-  console.log("time", Date.now(), req.method, req.originalUrl);
-  next();
-});
+
+if (process.env.NODE_ENV !== "test") {
+  app.use((req, res, next) => {
+    console.log("time", Date.now(), req.method, req.originalUrl);
+    next();
+  });
+}
 
 app.use("/api/auth", authRouter);
 app.use("/api/medicine", medicineRouter);
@@ -88,10 +98,10 @@ app.use("/api/medicalPaper", medicalPaperRouter);
 app.use("/api/function", functionRouter);
 app.use("/api/permission", permissionRouter);
 app.use("/api/medicinePrescribe", medicinePrescribeRouter);
-app.use('/api/invoice', invoicePdfRouter);
-app.use('/api/prescriptionPdf', prescriptionPdfRouter);
-app.use('/api/payment', paymentRouter);
-app.use("/api/medicalService", medicalServiceRouter);;
+app.use("/api/invoice", invoicePdfRouter);
+app.use("/api/prescriptionPdf", prescriptionPdfRouter);
+app.use("/api/payment", paymentRouter);
+app.use("/api/medicalService", medicalServiceRouter);
 app.use("/api/bill", billRouter);
 app.use("/api/staticstial", staticsticalRouter);
 
@@ -99,12 +109,14 @@ app.use("*", (req, res, next) => {
   res.status(404).send({ message: "404 not found" });
 });
 
-app.use(function (err, req, res, next) {
-  console.log(err);
-  res.status(err.status || 500).send({ success: 0, message: err.message });
-});
+if (process.env.NODE_ENV !== "test") {
+  app.use(function (err, req, res, next) {
+    console.log(err);
+    res.status(err.status || 500).send({ success: 0, message: err.message });
+  });
+}
 
-app.listen(process.env.PORT || 8080, (err) => {
+module.exports = app.listen(process.env.PORT || 8080, (err) => {
   if (err) {
     return console.log("Server Error", err);
   }

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index",
     "start": "node index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --timeout 10000"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +33,9 @@
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.2.0"
   }
 }
